@@ -1,4 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { songRouter } from "~/server/api/routers/song";
+import { leaderboardRouter } from "~/server/api/routers/leaderboard";
 
 /**
  * This is the primary router for your server.
@@ -6,7 +8,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  // add our routers
+  song: songRouter,
+  leaderboard: leaderboardRouter,
 });
 
 // export type definition of API
