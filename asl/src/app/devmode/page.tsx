@@ -20,10 +20,12 @@ export default function DevModePage() {
 
     // YouTube
     const [youtubeUrl, setYoutubeUrl] = useState("");
+    const [videoId, setVideoId] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [downloadError, setDownloadError] = useState("");
     const [videoTitle, setVideoTitle] = useState("");
+    const [isTranscribing, setIsTranscribing] = useState(false);
 
     // File upload
     const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -114,6 +116,7 @@ export default function DevModePage() {
 
                 setAudioUrl(audioBlobUrl);
                 setVideoTitle(data.title || "YouTube Audio");
+                setVideoId(data.videoId);
                 setIsPlaying(false);
                 setIsRecording(false);
                 setKeyPresses([]);
@@ -197,6 +200,7 @@ export default function DevModePage() {
         setIsRecording(false);
         setKeyPresses([]);
         setYoutubeUrl("");
+        setVideoId("");
         setVideoTitle("");
         setDownloadProgress(0);
         setDownloadError("");
@@ -239,6 +243,40 @@ export default function DevModePage() {
         setEditingIndex(null);
         setEditKey("");
         setEditTime("");
+    };
+
+    const handleAutoGenerate = async () => {
+        if (!audioFile && !videoId) return;
+
+        setIsTranscribing(true);
+        try {
+            const formData = new FormData();
+            if (activeTab === "upload" && audioFile) {
+                formData.append("file", audioFile);
+            } else if (activeTab === "youtube" && videoId) {
+                formData.append("videoId", videoId);
+            }
+
+            const response = await fetch("/api/transcribe", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.interactions) {
+                setKeyPresses(data.interactions);
+                // Switch to timeline view if not already visible by virtue of having key presses
+            } else {
+                console.error("Transcription failed:", data.error);
+                alert(`Transcription failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Transcription error:", error);
+            alert("Failed to auto-generate timestamps");
+        } finally {
+            setIsTranscribing(false);
+        }
     };
 
     const handleSave = async () => {
@@ -563,8 +601,8 @@ export default function DevModePage() {
                     className="flex flex-col items-center gap-4 rounded-2xl border-2 p-8"
                     style={{
                         backgroundColor: "rgba(13, 13, 26, 0.8)",
-                                            borderColor: "#d8b4fe",
-                                            boxShadow: "0 0 40px rgba(216, 180, 254, 0.5)",                        transition: "all 0.3s ease",
+                        borderColor: "#d8b4fe",
+                        boxShadow: "0 0 40px rgba(216, 180, 254, 0.5)", transition: "all 0.3s ease",
                     }}
                 >
                     <audio
@@ -605,6 +643,19 @@ export default function DevModePage() {
                                 Stop Recording
                             </button>
                         )}
+
+                        <button
+                            onClick={handleAutoGenerate}
+                            disabled={isTranscribing}
+                            className="rounded-lg px-6 py-3 text-lg font-bold transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                            style={{
+                                backgroundColor: "#d8b4fe",
+                                color: "#ffffff",
+                                boxShadow: "0 0 30px rgba(216, 180, 254, 0.6)",
+                            }}
+                        >
+                            {isTranscribing ? "Generating..." : "Auto-Generate AI"}
+                        </button>
 
                         <button
                             onClick={handleRemoveAudio}
@@ -661,6 +712,13 @@ export default function DevModePage() {
                                 const position = audioDuration > 0
                                     ? (kp.timeElapsed / audioDuration) * 100
                                     : 0;
+
+                                const formatTime = (seconds: number) => {
+                                    const mins = Math.floor(seconds / 60);
+                                    const secs = Math.floor(seconds % 60);
+                                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                                };
+
                                 return (
                                     <div
                                         key={index}
@@ -684,7 +742,7 @@ export default function DevModePage() {
                                                 color: "#fff",
                                             }}
                                         >
-                                            {kp.key} @ {kp.timeElapsed.toFixed(2)}s
+                                            {kp.key} @ {formatTime(kp.timeElapsed)}
                                         </div>
                                     </div>
                                 );
@@ -782,7 +840,7 @@ export default function DevModePage() {
                                                     className="text-xs"
                                                     style={{ color: "rgba(255,255,255,0.6)" }}
                                                 >
-                                                    {kp.timeElapsed.toFixed(2)}s
+                                                    {Math.floor(kp.timeElapsed / 60)}:{Math.floor(kp.timeElapsed % 60).toString().padStart(2, '0')}
                                                 </span>
                                             </div>
                                             <div className="flex gap-1">

@@ -1,17 +1,5 @@
 import { NextResponse } from "next/server";
-import { Innertube, UniversalCache } from "youtubei.js";
-
-let innertube: Innertube | null = null;
-
-async function getInnertube() {
-    if (!innertube) {
-        innertube = await Innertube.create({
-            cache: new UniversalCache(false),
-            generate_session_locally: true,
-        });
-    }
-    return innertube;
-}
+import { extractVideoId, getYtDlpMetadata, getAudioStream } from "~/lib/youtube";
 
 // POST - Get video info and return videoId for streaming
 export async function POST(request: Request) {
@@ -35,19 +23,16 @@ export async function POST(request: Request) {
 
         console.log("Processing video:", videoId);
 
-        const yt = await getInnertube();
-        const info = await yt.getBasicInfo(videoId);
-        const title = info.basic_info.title || videoId;
-        const duration = info.basic_info.duration || 0;
+        // Get video metadata using yt-dlp
+        const metadata = await getYtDlpMetadata(videoId);
+        
+        console.log("Video title:", metadata.title);
 
-        console.log("Video title:", title);
-
-        // Always use stream endpoint - it's more reliable
         return NextResponse.json({
             success: true,
             videoId,
-            title,
-            duration,
+            title: metadata.title,
+            duration: metadata.duration,
         });
 
     } catch (error) {
@@ -75,28 +60,46 @@ export async function GET(request: Request) {
 
         console.log("Streaming video:", videoId);
 
-        const yt = await getInnertube();
-        const info = await yt.getInfo(videoId);
+        // Create a ReadableStream from yt-dlp stdout
+        const stream = new ReadableStream({
+            start(controller) {
+                const { process: ytDlp, stream: stdOut } = getAudioStream(videoId);
 
-        // Get audio stream using the built-in download method
-        const stream = await info.download({
-            type: "audio",
-            quality: "best",
+                stdOut.on("data", (chunk) => {
+                    controller.enqueue(chunk);
+                });
+
+                stdOut.on("end", () => {
+                    controller.close();
+                });
+
+                ytDlp.stderr.on("data", (data: any) => {
+                    // Log stderr but don't fail immediately unless process exits with error
+                    // yt-dlp prints progress to stderr
+                    const msg = data.toString();
+                    if (!msg.includes("[download]") && !msg.includes("[youtube]")) {
+                        console.error("yt-dlp stderr:", msg);
+                    }
+                });
+
+                ytDlp.on("error", (err: any) => {
+                    controller.error(err);
+                });
+
+                ytDlp.on("close", (code: number) => {
+                    if (code !== 0) {
+                        console.error(`yt-dlp exited with code ${code}`);
+                        // If we haven't closed yet, we could error, but stream might be partially sent.
+                        // Controller close is handled in stdout.end
+                    }
+                });
+            }
         });
 
-        // Collect stream chunks
-        const chunks: Uint8Array[] = [];
-        for await (const chunk of stream) {
-            chunks.push(chunk);
-        }
-
-        const buffer = Buffer.concat(chunks);
-        console.log("Stream complete, size:", buffer.length);
-
-        return new NextResponse(buffer, {
+        return new NextResponse(stream, {
             headers: {
                 "Content-Type": "audio/webm",
-                "Content-Length": buffer.length.toString(),
+                "Cache-Control": "no-cache",
             },
         });
 
@@ -110,17 +113,3 @@ export async function GET(request: Request) {
     }
 }
 
-function extractVideoId(url: string): string | null {
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-        /youtube\.com\/shorts\/([^&\n?#]+)/,
-    ];
-
-    for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match && match[1]) {
-            return match[1];
-        }
-    }
-    return null;
-}

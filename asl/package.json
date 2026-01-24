@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@elevenlabs/elevenlabs-js": "^2.32.0",
+        "@google/generative-ai": "^0.24.1",
         "@prisma/client": "^6.19.2",
         "@radix-ui/react-slot": "^1.2.4",
         "@t3-oss/env-nextjs": "^0.12.0",
