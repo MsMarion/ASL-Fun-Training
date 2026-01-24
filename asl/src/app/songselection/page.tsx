@@ -5,11 +5,10 @@ import { trpc } from "@/trpc/client";
 import { SongCarousel } from "@/app/_components/song-carousel";
 
 export default function SongSelection() {
-  // Fetch all songs using tRPC
   const { data: songs, isLoading, error } = trpc.song.getAll.useQuery();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 via-pink-800 to-purple-900">
+    <div className="min-h-screen bg-[#0f0a1e]">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">

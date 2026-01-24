@@ -14,15 +14,12 @@ const routes: readonly Route[] = [
   { title: "Generate", href: "/generate" },
 ] as const;
 
-/* ---------- Helpers ---------- */
 
 const getRoute = (index: number): Route => {
   const route = routes[(index + routes.length) % routes.length];
   if (!route) throw new Error("Invalid route index");
   return route;
 };
-
-/* ---------- Component ---------- */
 
 const Navbar: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(() => {
@@ -33,14 +30,12 @@ const Navbar: React.FC = () => {
     return 0;
   });
 
-  // Calculate all routes once using useMemo
   const { currentRoute, prevRoute, nextRoute } = useMemo(() => ({
     currentRoute: getRoute(activeIndex),
     prevRoute: getRoute(activeIndex - 1),
     nextRoute: getRoute(activeIndex + 1),
   }), [activeIndex]);
 
-  /* ---------- Handlers ---------- */
 
   const handlePrevious = (): void => {
     setActiveIndex((i) => {
@@ -62,8 +57,6 @@ const Navbar: React.FC = () => {
     });
   };
 
-  /* ---------- Styles ---------- */
-
   const glowButton =
     "z-100 w-30 h-30 rounded-t-4xl flex items-center justify-center mb-2 transition-all duration-150 " +
     "bg-[var(--purple)] hover:scale-110 " +
@@ -72,7 +65,6 @@ const Navbar: React.FC = () => {
 
   return (
     <div className="flex items-end justify-center gap-4 p-8">
-      {/* LEFT BUTTON */}
       <Link href={prevRoute.href} onClick={handlePrevious}>
         <button
           type="button"
@@ -92,7 +84,6 @@ const Navbar: React.FC = () => {
         </button>
       </Link>
 
-      {/* PREVIOUS TAB */}
       <div
         className="-translate-x-15 transition-all duration-200"
         style={{
@@ -111,7 +102,6 @@ const Navbar: React.FC = () => {
         {prevRoute.title}
       </div>
 
-      {/* ACTIVE TAB */}
       <div
         className="cursor-pointer -translate-y-2"
         style={{
@@ -130,7 +120,6 @@ const Navbar: React.FC = () => {
         {currentRoute.title}
       </div>
 
-      {/* NEXT TAB */}
       <div
         className="translate-x-15 transition-all duration-200"
         style={{
@@ -149,7 +138,6 @@ const Navbar: React.FC = () => {
         {nextRoute.title}
       </div>
 
-      {/* RIGHT BUTTON */}
       <Link href={nextRoute.href} onClick={handleNext}>
         <button
           type="button"
