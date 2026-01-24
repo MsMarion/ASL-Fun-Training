@@ -1,24 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-
-interface LeaderboardEntry {
-    rank: number;
-    player: string;
-    score: number | string;
-    nameColor: string;
-}
-
-const leaderboardData: LeaderboardEntry[] = [
-    { rank: 1, player: 'VAPOR_WAVE', score: 999999, nameColor: 'text-cyan-400' },
-    { rank: 2, player: 'NEON_DEMON', score: 875000, nameColor: 'text-orange-400' },
-    { rank: 3, player: 'NEON_DEMON', score: 725000, nameColor: 'text-orange-400' },
-    { rank: 4, player: 'CHROME_CAT', score: 650000, nameColor: 'text-yellow-400' },
-    { rank: 5, player: 'SYNTH_BOT', score: 590000, nameColor: 'text-pink-400' },
-    { rank: 6, player: 'SYNTH_BOT', score: 540110, nameColor: 'text-pink-400' },
-    { rank: 7, player: '5AZER_KID', score: 420699, nameColor: 'text-purple-400' },
-    { rank: 8, player: 'RETRO_BLAST', score: 385000, nameColor: 'text-pink-400' },
-];
+import { useSearchParams } from 'next/navigation';
+import { api } from '~/trpc/react';
 
 const RankBadge = ({ rank }: { rank: number }) => {
     if (rank === 1) {
@@ -33,12 +17,47 @@ const RankBadge = ({ rank }: { rank: number }) => {
     return <span className="text-cyan-300 font-mono">{String(rank).padStart(2, '0')}</span>;
 };
 
+const getNameColor = (index: number) => {
+    const colors = [
+        'text-cyan-400',
+        'text-orange-400',
+        'text-yellow-400',
+        'text-pink-400',
+        'text-purple-400',
+        'text-green-400',
+        'text-red-400',
+        'text-blue-400',
+    ];
+    return colors[index % colors.length];
+};
+
 const LeaderboardPage = () => {
+    const searchParams = useSearchParams();
+    const scoreFromGame = searchParams.get('score');
+
     const [smoothPos, setSmoothPos] = useState({ x: 0, y: 0 });
     const [currentTime, setCurrentTime] = useState('');
+    const [showNameModal, setShowNameModal] = useState(false);
+    const [playerName, setPlayerName] = useState('');
+    const [submittedScore, setSubmittedScore] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const targetPos = useRef({ x: 0, y: 0 });
     const animationRef = useRef<number>();
+
+    // Fetch leaderboard data
+    const { data: leaderboardData, refetch } = api.leaderboard.getTop.useQuery(
+        { limit: 10 },
+        { refetchOnWindowFocus: false }
+    );
+
+    // Mutation to create new entry
+    const createEntry = api.leaderboard.create.useMutation({
+        onSuccess: () => {
+            setShowNameModal(false);
+            setSubmittedScore(true);
+            refetch();
+        },
+    });
 
     // Generate stable star positions once
     const stars = useMemo(() => {
@@ -63,6 +82,13 @@ const LeaderboardPage = () => {
         }));
         animationRef.current = requestAnimationFrame(animate);
     }, []);
+
+    useEffect(() => {
+        // Show name modal if there's a score from the game
+        if (scoreFromGame && !submittedScore) {
+            setShowNameModal(true);
+        }
+    }, [scoreFromGame, submittedScore]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -101,6 +127,21 @@ const LeaderboardPage = () => {
             }
         };
     }, [animate]);
+
+    const handleSubmitScore = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (playerName.trim() && scoreFromGame) {
+            createEntry.mutate({
+                name: playerName.trim(),
+                score: parseInt(scoreFromGame, 10),
+            });
+        }
+    };
+
+    const handleSkip = () => {
+        setShowNameModal(false);
+        setSubmittedScore(true);
+    };
 
     return (
         <div
@@ -232,6 +273,62 @@ const LeaderboardPage = () => {
                 />
             </div>
 
+            {/* Name Entry Modal */}
+            {showNameModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div className="relative rounded-2xl p-1 bg-gradient-to-b from-cyan-500/50 via-fuchsia-500/30 to-purple-500/50">
+                        <div className="rounded-xl bg-[#1a0a2e] p-6 md:p-8 max-w-md w-full mx-4">
+                            <h2
+                                className="text-xl md:text-2xl font-bold text-fuchsia-400 mb-2 text-center"
+                                style={{
+                                    textShadow: '0 0 10px #d946ef, 0 0 20px #d946ef',
+                                    fontFamily: 'var(--font-monoton), monospace',
+                                }}
+                            >
+                                NEW HIGH SCORE!
+                            </h2>
+                            <p
+                                className="text-3xl md:text-4xl font-bold text-cyan-400 mb-6 text-center"
+                                style={{ textShadow: '0 0 15px #2de2e6' }}
+                            >
+                                {parseInt(scoreFromGame || '0', 10).toLocaleString()}
+                            </p>
+                            <form onSubmit={handleSubmitScore}>
+                                <label className="block text-fuchsia-300 text-sm mb-2 font-mono">
+                                    ENTER YOUR NAME:
+                                </label>
+                                <input
+                                    type="text"
+                                    value={playerName}
+                                    onChange={(e) => setPlayerName(e.target.value.toUpperCase())}
+                                    maxLength={20}
+                                    className="w-full px-4 py-3 bg-[#0d0221] border-2 border-fuchsia-500/50 rounded-lg text-cyan-400 font-mono text-lg focus:outline-none focus:border-cyan-400 uppercase"
+                                    style={{ textShadow: '0 0 8px #2de2e6' }}
+                                    placeholder="YOUR NAME"
+                                    autoFocus
+                                />
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        type="button"
+                                        onClick={handleSkip}
+                                        className="flex-1 px-4 py-3 rounded-lg font-mono text-fuchsia-300 border-2 border-fuchsia-500/30 hover:bg-fuchsia-500/10 transition-colors"
+                                    >
+                                        SKIP
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={!playerName.trim() || createEntry.isPending}
+                                        className="flex-1 px-4 py-3 rounded-lg font-mono text-[#0d0221] bg-gradient-to-r from-cyan-400 to-fuchsia-500 hover:from-cyan-300 hover:to-fuchsia-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {createEntry.isPending ? 'SAVING...' : 'SUBMIT'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* CRT Monitor Frame with Leaderboard */}
             <div
                 className="absolute inset-0 z-30 flex justify-center items-center p-4"
@@ -278,31 +375,37 @@ const LeaderboardPage = () => {
 
                                     {/* Table Rows */}
                                     <div className="space-y-2">
-                                        {leaderboardData.map((entry, index) => (
-                                            <div
-                                                key={index}
-                                                className="grid grid-cols-3 gap-4 items-center text-xs md:text-sm font-mono py-1 hover:bg-fuchsia-500/10 transition-colors rounded"
-                                                style={{
-                                                    animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both`,
-                                                }}
-                                            >
-                                                <div className="flex items-center">
-                                                    <RankBadge rank={entry.rank} />
-                                                </div>
+                                        {leaderboardData && leaderboardData.length > 0 ? (
+                                            leaderboardData.map((entry, index) => (
                                                 <div
-                                                    className={`${entry.nameColor} font-bold tracking-wide truncate`}
-                                                    style={{ textShadow: '0 0 8px currentColor' }}
+                                                    key={entry.id}
+                                                    className="grid grid-cols-3 gap-4 items-center text-xs md:text-sm font-mono py-1 hover:bg-fuchsia-500/10 transition-colors rounded"
+                                                    style={{
+                                                        animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both`,
+                                                    }}
                                                 >
-                                                    {entry.player}
+                                                    <div className="flex items-center">
+                                                        <RankBadge rank={entry.rank} />
+                                                    </div>
+                                                    <div
+                                                        className={`${getNameColor(index)} font-bold tracking-wide truncate`}
+                                                        style={{ textShadow: '0 0 8px currentColor' }}
+                                                    >
+                                                        {entry.name}
+                                                    </div>
+                                                    <div
+                                                        className="text-right text-cyan-300"
+                                                        style={{ textShadow: '0 0 8px #2de2e6' }}
+                                                    >
+                                                        {entry.score.toLocaleString()}
+                                                    </div>
                                                 </div>
-                                                <div
-                                                    className="text-right text-cyan-300"
-                                                    style={{ textShadow: '0 0 8px #2de2e6' }}
-                                                >
-                                                    {typeof entry.score === 'number' ? entry.score.toLocaleString() : entry.score}
-                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-fuchsia-300/50 font-mono py-8">
+                                                {leaderboardData === undefined ? 'LOADING...' : 'NO SCORES YET'}
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
 
                                     {/* Current Time */}

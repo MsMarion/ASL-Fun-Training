@@ -124,6 +124,15 @@ exports.Prisma.SongScalarFieldEnum = {
   v: 'v'
 };
 
+exports.Prisma.LeaderboardEntryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  score: 'score',
+  rank: 'rank',
+  createdAt: 'createdAt',
+  v: 'v'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -136,7 +145,8 @@ exports.Prisma.QueryMode = {
 
 
 exports.Prisma.ModelName = {
-  Song: 'Song'
+  Song: 'Song',
+  LeaderboardEntry: 'LeaderboardEntry'
 };
 
 /**
