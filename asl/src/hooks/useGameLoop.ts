@@ -23,6 +23,9 @@ export interface GameState {
   handDetected: boolean;
   isConnected: boolean;
   activeNoteIndex: number;
+  lastHitQuality: "PERFECT" | "GREAT" | "OK" | null;
+  streakMilestone: number | null;
+  comboMultiplier: number;
 }
 
 const INITIAL_LIVES = 5;
@@ -62,6 +65,9 @@ export function useGameLoop(beatmap: Beatmap): {
     handDetected: false,
     isConnected: false,
     activeNoteIndex: 0,
+    lastHitQuality: null,
+    streakMilestone: null,
+    comboMultiplier: 1,
   });
 
   const animFrameRef = useRef<number>(0);
@@ -87,6 +93,9 @@ export function useGameLoop(beatmap: Beatmap): {
       noteState: "idle",
       feedbackText: null,
       activeNoteIndex: 0,
+      lastHitQuality: null,
+      streakMilestone: null,
+      comboMultiplier: 1,
     }));
   }, []);
 
@@ -157,6 +166,7 @@ export function useGameLoop(beatmap: Beatmap): {
           // Success!
           const newStreak = prev.streak + 1;
           const newScore = prev.score + judgement.points;
+          const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
 
           let feedbackText: string;
           if (judgement.quality === "PERFECT") {
@@ -165,6 +175,16 @@ export function useGameLoop(beatmap: Beatmap): {
             feedbackText = "GREAT!";
           } else {
             feedbackText = "OK!";
+          }
+
+          // Check for streak milestones
+          let streakMilestone: number | null = null;
+          if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
+            streakMilestone = newStreak;
+            // Clear milestone after 1s
+            setTimeout(() => {
+              setState((s) => ({ ...s, streakMilestone: null }));
+            }, 1000);
           }
 
           // Clear previous feedback timeout
@@ -190,6 +210,9 @@ export function useGameLoop(beatmap: Beatmap): {
             score: newScore,
             streak: newStreak,
             activeNoteIndex: activeIndex + 1,
+            lastHitQuality: judgement.quality,
+            streakMilestone,
+            comboMultiplier: newMultiplier,
           };
         } else if (judgement.type === "miss") {
           // Missed deadline
@@ -218,6 +241,8 @@ export function useGameLoop(beatmap: Beatmap): {
             lives: newLives,
             streak: 0,
             activeNoteIndex: activeIndex + 1,
+            lastHitQuality: null,
+            comboMultiplier: 1,
           };
         }
 

@@ -23,6 +23,11 @@ export type Interaction = $Result.DefaultSelection<Prisma.$InteractionPayload>
  * 
  */
 export type Song = $Result.DefaultSelection<Prisma.$SongPayload>
+/**
+ * Model LeaderboardEntry
+ * 
+ */
+export type LeaderboardEntry = $Result.DefaultSelection<Prisma.$LeaderboardEntryPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -118,6 +123,16 @@ export class PrismaClient<
     * ```
     */
   get song(): Prisma.SongDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.leaderboardEntry`: Exposes CRUD operations for the **LeaderboardEntry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LeaderboardEntries
+    * const leaderboardEntries = await prisma.leaderboardEntry.findMany()
+    * ```
+    */
+  get leaderboardEntry(): Prisma.LeaderboardEntryDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -559,7 +574,8 @@ export namespace Prisma {
 
 
   export const ModelName: {
-    Song: 'Song'
+    Song: 'Song',
+    LeaderboardEntry: 'LeaderboardEntry'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -578,7 +594,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "song"
+      modelProps: "song" | "leaderboardEntry"
       txIsolationLevel: never
     }
     model: {
@@ -653,6 +669,80 @@ export namespace Prisma {
           count: {
             args: Prisma.SongCountArgs<ExtArgs>
             result: $Utils.Optional<SongCountAggregateOutputType> | number
+          }
+        }
+      }
+      LeaderboardEntry: {
+        payload: Prisma.$LeaderboardEntryPayload<ExtArgs>
+        fields: Prisma.LeaderboardEntryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LeaderboardEntryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LeaderboardEntryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          findFirst: {
+            args: Prisma.LeaderboardEntryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LeaderboardEntryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          findMany: {
+            args: Prisma.LeaderboardEntryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>[]
+          }
+          create: {
+            args: Prisma.LeaderboardEntryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          createMany: {
+            args: Prisma.LeaderboardEntryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.LeaderboardEntryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          update: {
+            args: Prisma.LeaderboardEntryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          deleteMany: {
+            args: Prisma.LeaderboardEntryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LeaderboardEntryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.LeaderboardEntryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LeaderboardEntryPayload>
+          }
+          aggregate: {
+            args: Prisma.LeaderboardEntryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLeaderboardEntry>
+          }
+          groupBy: {
+            args: Prisma.LeaderboardEntryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LeaderboardEntryGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.LeaderboardEntryFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.LeaderboardEntryAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          count: {
+            args: Prisma.LeaderboardEntryCountArgs<ExtArgs>
+            result: $Utils.Optional<LeaderboardEntryCountAggregateOutputType> | number
           }
         }
       }
@@ -736,6 +826,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     song?: SongOmit
+    leaderboardEntry?: LeaderboardEntryOmit
   }
 
   /* Types for Logging */
@@ -1912,6 +2003,991 @@ export namespace Prisma {
 
 
   /**
+   * Model LeaderboardEntry
+   */
+
+  export type AggregateLeaderboardEntry = {
+    _count: LeaderboardEntryCountAggregateOutputType | null
+    _avg: LeaderboardEntryAvgAggregateOutputType | null
+    _sum: LeaderboardEntrySumAggregateOutputType | null
+    _min: LeaderboardEntryMinAggregateOutputType | null
+    _max: LeaderboardEntryMaxAggregateOutputType | null
+  }
+
+  export type LeaderboardEntryAvgAggregateOutputType = {
+    score: number | null
+    rank: number | null
+    v: number | null
+  }
+
+  export type LeaderboardEntrySumAggregateOutputType = {
+    score: number | null
+    rank: number | null
+    v: number | null
+  }
+
+  export type LeaderboardEntryMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    score: number | null
+    rank: number | null
+    createdAt: Date | null
+    v: number | null
+  }
+
+  export type LeaderboardEntryMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    score: number | null
+    rank: number | null
+    createdAt: Date | null
+    v: number | null
+  }
+
+  export type LeaderboardEntryCountAggregateOutputType = {
+    id: number
+    name: number
+    score: number
+    rank: number
+    createdAt: number
+    v: number
+    _all: number
+  }
+
+
+  export type LeaderboardEntryAvgAggregateInputType = {
+    score?: true
+    rank?: true
+    v?: true
+  }
+
+  export type LeaderboardEntrySumAggregateInputType = {
+    score?: true
+    rank?: true
+    v?: true
+  }
+
+  export type LeaderboardEntryMinAggregateInputType = {
+    id?: true
+    name?: true
+    score?: true
+    rank?: true
+    createdAt?: true
+    v?: true
+  }
+
+  export type LeaderboardEntryMaxAggregateInputType = {
+    id?: true
+    name?: true
+    score?: true
+    rank?: true
+    createdAt?: true
+    v?: true
+  }
+
+  export type LeaderboardEntryCountAggregateInputType = {
+    id?: true
+    name?: true
+    score?: true
+    rank?: true
+    createdAt?: true
+    v?: true
+    _all?: true
+  }
+
+  export type LeaderboardEntryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LeaderboardEntry to aggregate.
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LeaderboardEntries to fetch.
+     */
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LeaderboardEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LeaderboardEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LeaderboardEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LeaderboardEntries
+    **/
+    _count?: true | LeaderboardEntryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LeaderboardEntryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LeaderboardEntrySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LeaderboardEntryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LeaderboardEntryMaxAggregateInputType
+  }
+
+  export type GetLeaderboardEntryAggregateType<T extends LeaderboardEntryAggregateArgs> = {
+        [P in keyof T & keyof AggregateLeaderboardEntry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLeaderboardEntry[P]>
+      : GetScalarType<T[P], AggregateLeaderboardEntry[P]>
+  }
+
+
+
+
+  export type LeaderboardEntryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LeaderboardEntryWhereInput
+    orderBy?: LeaderboardEntryOrderByWithAggregationInput | LeaderboardEntryOrderByWithAggregationInput[]
+    by: LeaderboardEntryScalarFieldEnum[] | LeaderboardEntryScalarFieldEnum
+    having?: LeaderboardEntryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LeaderboardEntryCountAggregateInputType | true
+    _avg?: LeaderboardEntryAvgAggregateInputType
+    _sum?: LeaderboardEntrySumAggregateInputType
+    _min?: LeaderboardEntryMinAggregateInputType
+    _max?: LeaderboardEntryMaxAggregateInputType
+  }
+
+  export type LeaderboardEntryGroupByOutputType = {
+    id: string
+    name: string
+    score: number
+    rank: number
+    createdAt: Date
+    v: number
+    _count: LeaderboardEntryCountAggregateOutputType | null
+    _avg: LeaderboardEntryAvgAggregateOutputType | null
+    _sum: LeaderboardEntrySumAggregateOutputType | null
+    _min: LeaderboardEntryMinAggregateOutputType | null
+    _max: LeaderboardEntryMaxAggregateOutputType | null
+  }
+
+  type GetLeaderboardEntryGroupByPayload<T extends LeaderboardEntryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LeaderboardEntryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LeaderboardEntryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LeaderboardEntryGroupByOutputType[P]>
+            : GetScalarType<T[P], LeaderboardEntryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LeaderboardEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    score?: boolean
+    rank?: boolean
+    createdAt?: boolean
+    v?: boolean
+  }, ExtArgs["result"]["leaderboardEntry"]>
+
+
+
+  export type LeaderboardEntrySelectScalar = {
+    id?: boolean
+    name?: boolean
+    score?: boolean
+    rank?: boolean
+    createdAt?: boolean
+    v?: boolean
+  }
+
+  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "rank" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
+
+  export type $LeaderboardEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LeaderboardEntry"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      score: number
+      rank: number
+      createdAt: Date
+      v: number
+    }, ExtArgs["result"]["leaderboardEntry"]>
+    composites: {}
+  }
+
+  type LeaderboardEntryGetPayload<S extends boolean | null | undefined | LeaderboardEntryDefaultArgs> = $Result.GetResult<Prisma.$LeaderboardEntryPayload, S>
+
+  type LeaderboardEntryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LeaderboardEntryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LeaderboardEntryCountAggregateInputType | true
+    }
+
+  export interface LeaderboardEntryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LeaderboardEntry'], meta: { name: 'LeaderboardEntry' } }
+    /**
+     * Find zero or one LeaderboardEntry that matches the filter.
+     * @param {LeaderboardEntryFindUniqueArgs} args - Arguments to find a LeaderboardEntry
+     * @example
+     * // Get one LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LeaderboardEntryFindUniqueArgs>(args: SelectSubset<T, LeaderboardEntryFindUniqueArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LeaderboardEntry that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LeaderboardEntryFindUniqueOrThrowArgs} args - Arguments to find a LeaderboardEntry
+     * @example
+     * // Get one LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LeaderboardEntryFindUniqueOrThrowArgs>(args: SelectSubset<T, LeaderboardEntryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LeaderboardEntry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryFindFirstArgs} args - Arguments to find a LeaderboardEntry
+     * @example
+     * // Get one LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LeaderboardEntryFindFirstArgs>(args?: SelectSubset<T, LeaderboardEntryFindFirstArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LeaderboardEntry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryFindFirstOrThrowArgs} args - Arguments to find a LeaderboardEntry
+     * @example
+     * // Get one LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LeaderboardEntryFindFirstOrThrowArgs>(args?: SelectSubset<T, LeaderboardEntryFindFirstOrThrowArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LeaderboardEntries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LeaderboardEntries
+     * const leaderboardEntries = await prisma.leaderboardEntry.findMany()
+     * 
+     * // Get first 10 LeaderboardEntries
+     * const leaderboardEntries = await prisma.leaderboardEntry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const leaderboardEntryWithIdOnly = await prisma.leaderboardEntry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LeaderboardEntryFindManyArgs>(args?: SelectSubset<T, LeaderboardEntryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LeaderboardEntry.
+     * @param {LeaderboardEntryCreateArgs} args - Arguments to create a LeaderboardEntry.
+     * @example
+     * // Create one LeaderboardEntry
+     * const LeaderboardEntry = await prisma.leaderboardEntry.create({
+     *   data: {
+     *     // ... data to create a LeaderboardEntry
+     *   }
+     * })
+     * 
+     */
+    create<T extends LeaderboardEntryCreateArgs>(args: SelectSubset<T, LeaderboardEntryCreateArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LeaderboardEntries.
+     * @param {LeaderboardEntryCreateManyArgs} args - Arguments to create many LeaderboardEntries.
+     * @example
+     * // Create many LeaderboardEntries
+     * const leaderboardEntry = await prisma.leaderboardEntry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LeaderboardEntryCreateManyArgs>(args?: SelectSubset<T, LeaderboardEntryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a LeaderboardEntry.
+     * @param {LeaderboardEntryDeleteArgs} args - Arguments to delete one LeaderboardEntry.
+     * @example
+     * // Delete one LeaderboardEntry
+     * const LeaderboardEntry = await prisma.leaderboardEntry.delete({
+     *   where: {
+     *     // ... filter to delete one LeaderboardEntry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LeaderboardEntryDeleteArgs>(args: SelectSubset<T, LeaderboardEntryDeleteArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LeaderboardEntry.
+     * @param {LeaderboardEntryUpdateArgs} args - Arguments to update one LeaderboardEntry.
+     * @example
+     * // Update one LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LeaderboardEntryUpdateArgs>(args: SelectSubset<T, LeaderboardEntryUpdateArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LeaderboardEntries.
+     * @param {LeaderboardEntryDeleteManyArgs} args - Arguments to filter LeaderboardEntries to delete.
+     * @example
+     * // Delete a few LeaderboardEntries
+     * const { count } = await prisma.leaderboardEntry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LeaderboardEntryDeleteManyArgs>(args?: SelectSubset<T, LeaderboardEntryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LeaderboardEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LeaderboardEntries
+     * const leaderboardEntry = await prisma.leaderboardEntry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LeaderboardEntryUpdateManyArgs>(args: SelectSubset<T, LeaderboardEntryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one LeaderboardEntry.
+     * @param {LeaderboardEntryUpsertArgs} args - Arguments to update or create a LeaderboardEntry.
+     * @example
+     * // Update or create a LeaderboardEntry
+     * const leaderboardEntry = await prisma.leaderboardEntry.upsert({
+     *   create: {
+     *     // ... data to create a LeaderboardEntry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LeaderboardEntry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LeaderboardEntryUpsertArgs>(args: SelectSubset<T, LeaderboardEntryUpsertArgs<ExtArgs>>): Prisma__LeaderboardEntryClient<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LeaderboardEntries that matches the filter.
+     * @param {LeaderboardEntryFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const leaderboardEntry = await prisma.leaderboardEntry.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: LeaderboardEntryFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a LeaderboardEntry.
+     * @param {LeaderboardEntryAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const leaderboardEntry = await prisma.leaderboardEntry.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: LeaderboardEntryAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
+
+
+    /**
+     * Count the number of LeaderboardEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryCountArgs} args - Arguments to filter LeaderboardEntries to count.
+     * @example
+     * // Count the number of LeaderboardEntries
+     * const count = await prisma.leaderboardEntry.count({
+     *   where: {
+     *     // ... the filter for the LeaderboardEntries we want to count
+     *   }
+     * })
+    **/
+    count<T extends LeaderboardEntryCountArgs>(
+      args?: Subset<T, LeaderboardEntryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LeaderboardEntryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LeaderboardEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LeaderboardEntryAggregateArgs>(args: Subset<T, LeaderboardEntryAggregateArgs>): Prisma.PrismaPromise<GetLeaderboardEntryAggregateType<T>>
+
+    /**
+     * Group by LeaderboardEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LeaderboardEntryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LeaderboardEntryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LeaderboardEntryGroupByArgs['orderBy'] }
+        : { orderBy?: LeaderboardEntryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LeaderboardEntryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLeaderboardEntryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LeaderboardEntry model
+   */
+  readonly fields: LeaderboardEntryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LeaderboardEntry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LeaderboardEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LeaderboardEntry model
+   */
+  interface LeaderboardEntryFieldRefs {
+    readonly id: FieldRef<"LeaderboardEntry", 'String'>
+    readonly name: FieldRef<"LeaderboardEntry", 'String'>
+    readonly score: FieldRef<"LeaderboardEntry", 'Int'>
+    readonly rank: FieldRef<"LeaderboardEntry", 'Int'>
+    readonly createdAt: FieldRef<"LeaderboardEntry", 'DateTime'>
+    readonly v: FieldRef<"LeaderboardEntry", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LeaderboardEntry findUnique
+   */
+  export type LeaderboardEntryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter, which LeaderboardEntry to fetch.
+     */
+    where: LeaderboardEntryWhereUniqueInput
+  }
+
+  /**
+   * LeaderboardEntry findUniqueOrThrow
+   */
+  export type LeaderboardEntryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter, which LeaderboardEntry to fetch.
+     */
+    where: LeaderboardEntryWhereUniqueInput
+  }
+
+  /**
+   * LeaderboardEntry findFirst
+   */
+  export type LeaderboardEntryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter, which LeaderboardEntry to fetch.
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LeaderboardEntries to fetch.
+     */
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LeaderboardEntries.
+     */
+    cursor?: LeaderboardEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LeaderboardEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LeaderboardEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LeaderboardEntries.
+     */
+    distinct?: LeaderboardEntryScalarFieldEnum | LeaderboardEntryScalarFieldEnum[]
+  }
+
+  /**
+   * LeaderboardEntry findFirstOrThrow
+   */
+  export type LeaderboardEntryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter, which LeaderboardEntry to fetch.
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LeaderboardEntries to fetch.
+     */
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LeaderboardEntries.
+     */
+    cursor?: LeaderboardEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LeaderboardEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LeaderboardEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LeaderboardEntries.
+     */
+    distinct?: LeaderboardEntryScalarFieldEnum | LeaderboardEntryScalarFieldEnum[]
+  }
+
+  /**
+   * LeaderboardEntry findMany
+   */
+  export type LeaderboardEntryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter, which LeaderboardEntries to fetch.
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LeaderboardEntries to fetch.
+     */
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LeaderboardEntries.
+     */
+    cursor?: LeaderboardEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LeaderboardEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LeaderboardEntries.
+     */
+    skip?: number
+    distinct?: LeaderboardEntryScalarFieldEnum | LeaderboardEntryScalarFieldEnum[]
+  }
+
+  /**
+   * LeaderboardEntry create
+   */
+  export type LeaderboardEntryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * The data needed to create a LeaderboardEntry.
+     */
+    data: XOR<LeaderboardEntryCreateInput, LeaderboardEntryUncheckedCreateInput>
+  }
+
+  /**
+   * LeaderboardEntry createMany
+   */
+  export type LeaderboardEntryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LeaderboardEntries.
+     */
+    data: LeaderboardEntryCreateManyInput | LeaderboardEntryCreateManyInput[]
+  }
+
+  /**
+   * LeaderboardEntry update
+   */
+  export type LeaderboardEntryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * The data needed to update a LeaderboardEntry.
+     */
+    data: XOR<LeaderboardEntryUpdateInput, LeaderboardEntryUncheckedUpdateInput>
+    /**
+     * Choose, which LeaderboardEntry to update.
+     */
+    where: LeaderboardEntryWhereUniqueInput
+  }
+
+  /**
+   * LeaderboardEntry updateMany
+   */
+  export type LeaderboardEntryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LeaderboardEntries.
+     */
+    data: XOR<LeaderboardEntryUpdateManyMutationInput, LeaderboardEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which LeaderboardEntries to update
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * Limit how many LeaderboardEntries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LeaderboardEntry upsert
+   */
+  export type LeaderboardEntryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * The filter to search for the LeaderboardEntry to update in case it exists.
+     */
+    where: LeaderboardEntryWhereUniqueInput
+    /**
+     * In case the LeaderboardEntry found by the `where` argument doesn't exist, create a new LeaderboardEntry with this data.
+     */
+    create: XOR<LeaderboardEntryCreateInput, LeaderboardEntryUncheckedCreateInput>
+    /**
+     * In case the LeaderboardEntry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LeaderboardEntryUpdateInput, LeaderboardEntryUncheckedUpdateInput>
+  }
+
+  /**
+   * LeaderboardEntry delete
+   */
+  export type LeaderboardEntryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Filter which LeaderboardEntry to delete.
+     */
+    where: LeaderboardEntryWhereUniqueInput
+  }
+
+  /**
+   * LeaderboardEntry deleteMany
+   */
+  export type LeaderboardEntryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LeaderboardEntries to delete
+     */
+    where?: LeaderboardEntryWhereInput
+    /**
+     * Limit how many LeaderboardEntries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LeaderboardEntry findRaw
+   */
+  export type LeaderboardEntryFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * LeaderboardEntry aggregateRaw
+   */
+  export type LeaderboardEntryAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * LeaderboardEntry without action
+   */
+  export type LeaderboardEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -1926,6 +3002,18 @@ export namespace Prisma {
   };
 
   export type SongScalarFieldEnum = (typeof SongScalarFieldEnum)[keyof typeof SongScalarFieldEnum]
+
+
+  export const LeaderboardEntryScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    score: 'score',
+    rank: 'rank',
+    createdAt: 'createdAt',
+    v: 'v'
+  };
+
+  export type LeaderboardEntryScalarFieldEnum = (typeof LeaderboardEntryScalarFieldEnum)[keyof typeof LeaderboardEntryScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -2082,6 +3170,65 @@ export namespace Prisma {
     v?: IntWithAggregatesFilter<"Song"> | number
   }
 
+  export type LeaderboardEntryWhereInput = {
+    AND?: LeaderboardEntryWhereInput | LeaderboardEntryWhereInput[]
+    OR?: LeaderboardEntryWhereInput[]
+    NOT?: LeaderboardEntryWhereInput | LeaderboardEntryWhereInput[]
+    id?: StringFilter<"LeaderboardEntry"> | string
+    name?: StringFilter<"LeaderboardEntry"> | string
+    score?: IntFilter<"LeaderboardEntry"> | number
+    rank?: IntFilter<"LeaderboardEntry"> | number
+    createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
+    v?: IntFilter<"LeaderboardEntry"> | number
+  }
+
+  export type LeaderboardEntryOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    rank?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: LeaderboardEntryWhereInput | LeaderboardEntryWhereInput[]
+    OR?: LeaderboardEntryWhereInput[]
+    NOT?: LeaderboardEntryWhereInput | LeaderboardEntryWhereInput[]
+    name?: StringFilter<"LeaderboardEntry"> | string
+    score?: IntFilter<"LeaderboardEntry"> | number
+    rank?: IntFilter<"LeaderboardEntry"> | number
+    createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
+    v?: IntFilter<"LeaderboardEntry"> | number
+  }, "id">
+
+  export type LeaderboardEntryOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    rank?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+    _count?: LeaderboardEntryCountOrderByAggregateInput
+    _avg?: LeaderboardEntryAvgOrderByAggregateInput
+    _max?: LeaderboardEntryMaxOrderByAggregateInput
+    _min?: LeaderboardEntryMinOrderByAggregateInput
+    _sum?: LeaderboardEntrySumOrderByAggregateInput
+  }
+
+  export type LeaderboardEntryScalarWhereWithAggregatesInput = {
+    AND?: LeaderboardEntryScalarWhereWithAggregatesInput | LeaderboardEntryScalarWhereWithAggregatesInput[]
+    OR?: LeaderboardEntryScalarWhereWithAggregatesInput[]
+    NOT?: LeaderboardEntryScalarWhereWithAggregatesInput | LeaderboardEntryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
+    name?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
+    score?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
+    rank?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"LeaderboardEntry"> | Date | string
+    v?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
+  }
+
   export type SongCreateInput = {
     id?: string
     songName: string
@@ -2151,6 +3298,65 @@ export namespace Prisma {
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryCreateInput = {
+    id?: string
+    name: string
+    score: number
+    rank: number
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryUncheckedCreateInput = {
+    id?: string
+    name: string
+    score: number
+    rank: number
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    rank?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryUncheckedUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    rank?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryCreateManyInput = {
+    id?: string
+    name: string
+    score: number
+    rank: number
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    rank?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryUncheckedUpdateManyInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    rank?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -2342,6 +3548,45 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type LeaderboardEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    rank?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryAvgOrderByAggregateInput = {
+    score?: SortOrder
+    rank?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    rank?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    rank?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntrySumOrderByAggregateInput = {
+    score?: SortOrder
+    rank?: SortOrder
+    v?: SortOrder
   }
 
   export type InteractionListCreateEnvelopeInput = {
