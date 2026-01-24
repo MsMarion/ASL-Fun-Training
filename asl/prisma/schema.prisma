@@ -23,6 +23,16 @@ model Song {
   v             Int           @default(0) @map("__v")
 }
 
+model LeaderboardEntry {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  score     Int
+  rank      Int
+  createdAt DateTime @default(now())
+  v         Int      @default(0) @map("__v")
+}
+
+
 type Interaction {
   key         String
   timeElapsed Float  // Changed from Double to Float for consistency
