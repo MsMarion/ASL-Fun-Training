@@ -167,18 +167,21 @@ export function useGameLoop(beatmap: Beatmap): {
 
         const gameStartTimeSec = startTimeRef.current / 1000;
 
-        // Find best matching prediction for the active note
-        const bestPrediction = findBestPrediction(
-          latestPredictionsRef.current,
-          activeNote,
-          earlyStart,
-          deadline,
-          gameStartTimeSec,
-          processedPredictionsRef.current,
-        );
+        // Find the LATEST unconsumed prediction (regardless of letter)
+        // This allows evaluateNote to see what was being signed even if it's wrong
+        const latestUnconsumed = latestPredictionsRef.current
+          .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
+          .at(-1) || null;
+
+        // DEBUG: Log prediction timing
+        if (latestUnconsumed) {
+          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)}, PredTS: ${latestUnconsumed.clientTimestamp.toFixed(3)}, Letter: ${latestUnconsumed.letter}, Conf: ${(latestUnconsumed.confidence * 100).toFixed(0)}%`);
+        } else {
+          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)} - NO PREDICTIONS`);
+        }
 
         // Evaluate note
-        const judgement = evaluateNote(activeNote, bestPrediction, elapsed, prev.streak, gameStartTimeSec);
+        const judgement = evaluateNote(activeNote, latestUnconsumed, elapsed, prev.streak, startTimeRef.current / 1000);
 
         // Debug: Get latest prediction
         const latestPred = latestPredictionsRef.current.length > 0
@@ -190,8 +193,8 @@ export function useGameLoop(beatmap: Beatmap): {
 
         if (judgement.type === "hit") {
           // Consume the prediction so it can't be used for the next note
-          if (bestPrediction) {
-            processedPredictionsRef.current.add(bestPrediction.clientTimestamp);
+          if (latestUnconsumed) {
+            processedPredictionsRef.current.add(latestUnconsumed.clientTimestamp);
           }
 
           // Success!
@@ -200,12 +203,13 @@ export function useGameLoop(beatmap: Beatmap): {
           const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
 
           let feedbackText: string;
+          const letterInfo = ` (${judgement.sawLetter})`;
           if (judgement.quality === "PERFECT") {
-            feedbackText = "PERFECT!";
+            feedbackText = "PERFECT!" + letterInfo;
           } else if (judgement.quality === "GREAT") {
-            feedbackText = "GREAT!";
+            feedbackText = "GREAT!" + letterInfo;
           } else {
-            feedbackText = "OK!";
+            feedbackText = "OK!" + letterInfo;
           }
 
           // Check for streak milestones
@@ -250,15 +254,13 @@ export function useGameLoop(beatmap: Beatmap): {
           // Missed deadline
           const newLives = Math.max(prev.lives - 1, 0);
 
-          // Find if they were signing something else?
           let missedFeedback = "MISS!";
-          const recentPreds = latestPredictionsRef.current;
-          if (recentPreds.length > 0) {
-            // Check the last few predictions for high confidence
-            const latestConfident = recentPreds.slice(-5).reverse().find(p => p.confidence > 0.7 && p.handDetected);
-            if (latestConfident && latestConfident.letter.toUpperCase() !== activeNote.letter.toUpperCase()) {
-              missedFeedback = `MISS (Saw ${latestConfident.letter})`;
-            }
+          if (judgement.reason === "WRONG SIGN") {
+            missedFeedback = `MISS (Wrong Letter: ${judgement.sawLetter})`;
+          } else if (judgement.reason === "LOW CONFIDENCE") {
+            missedFeedback = `MISS (Low Confidence: ${judgement.sawLetter})`;
+          } else if (judgement.reason === "TOO LATE") {
+            missedFeedback = `MISS (Too Late: ${judgement.sawLetter})`;
           }
 
           // Clear previous feedback timeout

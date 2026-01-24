@@ -32,10 +32,10 @@ echo -e "${BLUE}Step 1: Starting ML WebSocket Server${NC}"
 echo "--------------------------------------"
 
 # Check if conda environment exists
-if conda env list | grep -q "asl-v_1"; then
-    echo "✓ Found conda environment: asl-v_1"
+if conda env list | grep -q "asl-v_3"; then
+    echo "✓ Found conda environment: asl-v_3"
     # Start HTTP server
-    conda run -n asl-v_1 python api_server_http.py &
+    conda run -n asl-v_3 python api_server_http.py &
     API_PID=$!
     echo "✓ ML API server started (PID: $API_PID)"
     echo "  Endpoint: http://localhost:8000"
