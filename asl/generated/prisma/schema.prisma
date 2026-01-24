@@ -12,3 +12,18 @@ datasource db {
 }
 
 // ADD MODELS HERE
+model Song {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  songName      String
+  isCommunity   Boolean
+  albumName     String?
+  thumbnailName String?
+  interactions  Interaction[]
+  createdAt     DateTime      @default(now())
+  v             Int           @default(0) @map("__v")
+}
+
+type Interaction {
+  key         String
+  timeElapsed Float // Changed from Double to Float for consistency
+}
