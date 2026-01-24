@@ -39,7 +39,7 @@ export default function SongSelection() {
                 textShadow: "0 0 20px rgba(45,226,230,0.5), 0 0 40px rgba(146,0,117,0.3)",
                 animationDuration: '3s'
               }}>
-            SONG SELECTION
+            CURATED SONGS
           </h1>
           <p className="text-purple-200 text-lg font-[subheading-font]">
             From the curated library, select a song to play
