@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: subheading-font;
+  src: url(/fonts/Anta-Regular.ttf); 
+
+}
+@font-face {
+  font-family: display-font;
+  src: url(/fonts/Audiowide-Regular.ttf); 
+
+}
+
+
 :root {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
