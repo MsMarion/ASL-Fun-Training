@@ -19,28 +19,35 @@ echo --------------------------------------------
 REM Check for conda
 where conda >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    echo Found conda, using asl-deployment environment
-    cd "Base test\Sign-Language-Recognition"
-    start "ML WebSocket Server" cmd /k "conda activate asl-deployment && python -m app.websocket_api"
-    cd ..\..
-) else (
-    echo Conda not found, using virtualenv
-    cd "Base test\Sign-Language-Recognition"
-
-    if not exist "venv" (
-        echo Creating virtual environment...
-        python -m venv venv
-        call venv\Scripts\activate
-        pip install -r requirements-websocket.txt
+    echo Found conda. Checking for environment...
+    
+    REM Try asl-v_1
+    call conda activate asl-v_1 >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        echo Using 'asl-v_1' environment
+        start "ML API Server" cmd /k "conda activate asl-v_1 && python api_server_http.py"
+        goto :SERVER_STARTED
     )
 
-    start "ML WebSocket Server" cmd /k "venv\Scripts\activate && python -m app.websocket_api"
-    cd ..\..
+    REM Try asl-fun
+    call conda activate asl-fun >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        echo Using 'asl-fun' environment
+        start "ML API Server" cmd /k "conda activate asl-fun && python api_server_http.py"
+        goto :SERVER_STARTED
+    )
+    
+    echo Warning: Conda environments 'asl-v_1' or 'asl-fun' not found.
+    echo Attempting to use base/current python...
+    start "ML API Server" cmd /k "python api_server_http.py"
+) else (
+    echo Conda not found. Using system python...
+    start "ML API Server" cmd /k "python api_server_http.py"
 )
 
-echo WebSocket server started in new window
-echo Endpoint: ws://localhost:8000/ws/predict
-echo.
+:SERVER_STARTED
+echo ML API server started in new window
+echo Endpoint: http://localhost:8000
 
 REM Wait a bit for the server to start
 timeout /t 5 /nobreak >nul
