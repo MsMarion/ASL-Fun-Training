@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     // Collect chunks from the async iterator
     const chunks: Uint8Array[] = [];
-    for await (const chunk of audioStream) {
+    for await (const chunk of audioStream as any) {
       chunks.push(chunk);
     }
 
