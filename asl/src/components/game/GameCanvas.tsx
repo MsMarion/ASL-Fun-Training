@@ -13,6 +13,7 @@ import { LyricsBar } from "./LyricsBar";
 import { ParticleOverlay, type ParticleOverlayRef } from "./ParticleOverlay";
 import { ScreenFlash } from "./ScreenFlash";
 import { EffectsToggle } from "./EffectsToggle";
+import { SynthwaveBackground } from "./SynthwaveBackground";
 
 interface GameCanvasProps {
   beatmap?: Beatmap;
@@ -75,24 +76,8 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
       {/* Screen flash on PERFECT */}
       <ScreenFlash trigger={shouldFlash} />
 
-      {/* Vignette overlay */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(circle at center, transparent 30%, rgba(13,8,32,0.8) 100%)",
-          opacity: vignetteOpacity,
-          transition: "opacity 0.5s ease-out",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Animated grid background */}
-      <div
-        className="game-grid-animate pointer-events-none absolute inset-0"
-        style={{
-          animation: effectsEnabled ? "grid-drift 8s linear infinite" : "none",
-        }}
-      />
+      {/* Synthwave Background */}
+      <SynthwaveBackground />
 
       {/* Top bar: Webcam + Scoreboard + Effects Toggle */}
       <div className="relative z-10 flex items-start justify-between p-4">

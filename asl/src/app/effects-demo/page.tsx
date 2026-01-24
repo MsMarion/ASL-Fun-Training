@@ -12,6 +12,7 @@ import { LyricsBar } from "~/components/game/LyricsBar";
 import { ParticleOverlay, type ParticleOverlayRef } from "~/components/game/ParticleOverlay";
 import { ScreenFlash } from "~/components/game/ScreenFlash";
 import { EffectsToggle } from "~/components/game/EffectsToggle";
+import { SynthwaveBackground } from "~/components/game/SynthwaveBackground";
 
 export default function EffectsDemoPage() {
   const state = useMockGameLoop(DEMO_BEATMAP);
@@ -88,24 +89,8 @@ export default function EffectsDemoPage() {
       {/* Screen flash */}
       <ScreenFlash trigger={shouldFlash} />
 
-      {/* Vignette */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(circle at center, transparent 30%, rgba(13,8,32,0.8) 100%)",
-          opacity: vignetteOpacity,
-          transition: "opacity 0.5s ease-out",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Animated grid */}
-      <div
-        className="game-grid-animate pointer-events-none absolute inset-0"
-        style={{
-          animation: effectsEnabled ? "grid-drift 8s linear infinite" : "none",
-        }}
-      />
+      {/* Synthwave Background */}
+      <SynthwaveBackground />
 
       {/* Control Panel */}
       <div className="relative z-20 p-4 flex flex-col gap-2">
