@@ -32,9 +32,9 @@ export default function SongSelection() {
 
       <Navbar />
       
-      <div className="relative  mx-auto px-4 py-12 bg-[var(--purple)] -translate-y-12 z-100">
+      <div className="relative border-t-1 border-b-1 border-white z-100 mx-auto px-4 py-12 bg-gradient-to-b from-[var(--purple)] via-[var(--magenta)] to-[var(--purple)] -translate-y-12 rounded-b-3xl shadow-2xl">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-[display-font] text-white mb-4 animate-pulse" 
+          <h1 className="text-6xl font-[display-font] text-white mb-4 animate-pulse" 
               style={{ 
                 textShadow: "0 0 20px rgba(45,226,230,0.5), 0 0 40px rgba(146,0,117,0.3)",
                 animationDuration: '3s'
@@ -42,7 +42,7 @@ export default function SongSelection() {
             SONG SELECTION
           </h1>
           <p className="text-purple-200 text-lg font-[subheading-font]">
-            From a curated library, select a song to play
+            From the curated library, select a song to play
           </p>
         </div>
 
