@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Monoton, Anta } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -16,12 +16,24 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+const monoton = Monoton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-monoton",
+});
+
+const anta = Anta({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anta",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
-      <body>
+    <html lang="en" className={`${geist.variable} ${monoton.variable} ${anta.variable}`}>
+      <body className="font-[family-name:var(--font-anta)]">
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
