@@ -1,0 +1,189 @@
+"use client";
+
+import Link from "next/link";
+import { useState, useMemo } from "react";
+
+type Route = {
+  readonly title: string;
+  readonly href: `/${string}`;
+};
+
+const routes: readonly Route[] = [
+  { title: "DEV MODE", href: "/devmode" },
+  { title: "SONG SELECTION", href: "/songselection" },
+  { title: "GENERATE", href: "/generate" },
+] as const;
+
+
+const getRoute = (index: number): Route => {
+  const route = routes[(index + routes.length) % routes.length];
+  if (!route) throw new Error("Invalid route index");
+  return route;
+};
+
+const Navbar: React.FC = () => {
+  const [activeIndex, setActiveIndex] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("navbarActiveIndex");
+      return stored ? Number(stored) : 0;
+    }
+    return 0;
+  });
+
+  const { currentRoute, prevRoute, nextRoute } = useMemo(() => ({
+    currentRoute: getRoute(activeIndex),
+    prevRoute: getRoute(activeIndex - 1),
+    nextRoute: getRoute(activeIndex + 1),
+  }), [activeIndex]);
+
+
+  const handlePrevious = (): void => {
+    setActiveIndex((i) => {
+      const newIndex = i - 1;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("navbarActiveIndex", String(newIndex));
+      }
+      return newIndex;
+    });
+  };
+
+  const handleNext = (): void => {
+    setActiveIndex((i) => {
+      const newIndex = i + 1;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("navbarActiveIndex", String(newIndex));
+      }
+      return newIndex;
+    });
+  };
+
+  const glowButton =
+    "z-100 w-30 h-30 cursor-pointer rounded-t-4xl flex items-center justify-center mb-2 transition-all duration-300 " +
+    "bg-[var(--purple)] hover:scale-105 " +
+    "hover:ring-1 hover:ring-[var(--cyan)] " +
+    "hover:shadow-[0_0_25px_var(--cyan)]";
+
+  return (
+    <div className="flex items-end justify-center gap-4 p-8">
+      <Link href={prevRoute.href} onClick={handlePrevious} className="z-100 ">
+        <button
+          type="button"
+          className={`${glowButton} translate-x-55 z-100 border-l-1 border-t-1 border-b-1 border-white`}
+          aria-label="Previous route"
+        >
+          <div className="bg-[var(--magenta)] rounded-t-full p-4 border-1 border-white/30 transition-all duration-300 hover:scale-107">
+            <svg
+              className="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
+        </button>
+      </Link>
+
+      <div
+        className="-translate-x-15 transition-all duration-200 border-l-1 border-t-1 border-b-1 border-white"
+        style={{
+          width: "200px",
+          height: "100px",
+          backgroundColor: "var(--magenta)",
+          borderRadius: "50px 50px 0 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--cyan)",
+          opacity: 0.7,
+          marginBottom: "8px",
+              boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
+
+        }}
+      >
+        <span className="font-[subheading-font] text-xl text-center text-white">{prevRoute.title}</span>
+      </div>
+
+         {/* Main Center Tab */}
+        <div className="relative -translate-y-2 z-1">
+          {/* Outer semicircle with white border */}
+          <div
+            className="border-1 border-white"
+            style={{
+              width: "300px",
+              height: "200px",
+              backgroundColor: "var(--purple)",
+              borderRadius: "200px 200px 0 0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontWeight: "bold",
+              boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
+            }}
+          >
+            {/* Inner semicircle with grid pattern */}
+            <div
+              className="absolute bottom-5"
+              style={{
+                width: "220px",
+                height: "140px",
+                backgroundColor: "transparent",
+                borderRadius: "180px 180px 0 0",
+                border: "1px solid white",
+                backgroundImage: `
+                  linear-gradient(0deg, white 1px, transparent 1px),
+                  linear-gradient(90deg, white 1px, transparent 1px)
+                `,
+                backgroundSize: "20px 20px",
+                backgroundPosition: "0 0",
+                opacity: 0.3,
+              }}
+            />
+            <span className="relative z-10 font-[subheading-font] text-4xl text-center text-white">{currentRoute.title}</span>
+          </div>
+        </div>
+
+      <div
+        className="translate-x-15 transition-all duration-200 border-r-1 border-t-1 border-b-1 border-white"
+        style={{
+          width: "200px",
+          height: "100px",
+          backgroundColor: "var(--magenta)",
+          borderRadius: "50px 50px 0 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--cyan)",
+          opacity: 0.7,
+          marginBottom: "8px",
+          boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
+
+        }}
+      >
+        <span className="font-[subheading-font] text-xl text-center text-white">{nextRoute.title}</span>
+      </div>
+
+      <Link href={nextRoute.href} onClick={handleNext} className="z-100">
+        <button
+          type="button"
+          className={`${glowButton} -translate-x-55 z-100 border-r-1 border-t-1 border-b-1 border-white`}
+          aria-label="Next route"
+        >
+          <div className="bg-[var(--magenta)] rounded-t-full p-4 border-1 border-white/30 transition-all duration-300 hover:scale-107">
+            <svg
+              className="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
+      </Link>
+    </div>
+  );
+};
+
+export { Navbar };
