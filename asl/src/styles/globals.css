@@ -1,0 +1,269 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Highway neon outline symbols */
+.sign-highway {
+  filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6))
+    drop-shadow(0 0 10px rgba(217, 70, 239, 0.3));
+}
+
+/* Primary symbol states */
+.sign-primary--idle {
+  animation: idle-breathe 2.5s ease-in-out infinite;
+}
+
+.sign-primary--success {
+  animation: success-pulse 0.7s ease-out forwards;
+}
+
+.sign-primary--miss {
+  animation: miss-shake 0.5s ease-out forwards;
+}
+
+@keyframes idle-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.5))
+      drop-shadow(0 0 60px rgba(192, 132, 252, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 35px rgba(192, 132, 252, 0.7))
+      drop-shadow(0 0 90px rgba(192, 132, 252, 0.4));
+  }
+}
+
+@keyframes success-pulse {
+  0% {
+    filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.8))
+      drop-shadow(0 0 60px rgba(74, 222, 128, 0.4));
+    transform: scale(1);
+  }
+  40% {
+    filter: drop-shadow(0 0 50px rgba(74, 222, 128, 1))
+      drop-shadow(0 0 120px rgba(74, 222, 128, 0.7));
+    transform: scale(1.08);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px rgba(74, 222, 128, 0.6))
+      drop-shadow(0 0 70px rgba(74, 222, 128, 0.3));
+    transform: scale(1);
+  }
+}
+
+@keyframes miss-shake {
+  0% {
+    transform: translateX(0);
+    filter: drop-shadow(0 0 30px rgba(248, 113, 113, 0.9))
+      drop-shadow(0 0 80px rgba(248, 113, 113, 0.5));
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(10px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+  100% {
+    transform: translateX(0);
+    filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.6))
+      drop-shadow(0 0 60px rgba(248, 113, 113, 0.3));
+  }
+}
+
+/* Feedback text glow */
+.sign-feedback-text {
+  text-shadow: 0 0 10px currentColor, 0 0 30px currentColor;
+}
+
+/* Game screen grid background */
+.game-grid {
+  background-image: linear-gradient(
+      rgba(139, 92, 246, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  perspective: 800px;
+}
+
+/* Animated perspective grid overlay */
+.game-grid-animate {
+  background-image: linear-gradient(
+      rgba(139, 92, 246, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: grid-drift 8s linear infinite;
+}
+
+@keyframes grid-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 60px;
+  }
+}
+
+/* Hit feedback pop-in animation */
+.animate-feedback-pop {
+  animation: feedback-pop 0.8s ease-out forwards;
+}
+
+@keyframes feedback-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8) translateY(-20px);
+  }
+}
+
+/* Combo counter pop animation */
+@keyframes combo-scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Milestone streak banner */
+@keyframes milestone-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  25% {
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+}
+
+/* Screen flash on PERFECT hit */
+@keyframes screen-flash {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Hit zone pulse when note approaching */
+@keyframes hit-zone-pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.9), 0 0 40px rgba(217, 70, 239, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+  }
+}
+
+/* Grid background reaction to hits */
+@keyframes grid-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Score number bump on increase */
+@keyframes score-bump {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Fire text shadow for high streaks */
+@keyframes streak-fire {
+  0% {
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+      0 0 30px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(251, 191, 36, 1), 0 0 30px rgba(251, 191, 36, 0.8),
+      0 0 45px rgba(251, 191, 36, 0.6);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+      0 0 30px rgba(251, 191, 36, 0.4);
+  }
+}
+
+/* Life diamond damage flash */
+@keyframes life-damage {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: scale(0.7);
+    filter: brightness(2) drop-shadow(0 0 8px rgba(248, 113, 113, 0.9));
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
