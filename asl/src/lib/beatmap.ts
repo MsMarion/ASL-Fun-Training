@@ -9,6 +9,25 @@ export interface Beatmap {
   totalDuration: number;
 }
 
+/**
+ * Generate a beatmap from a sequence of letters with fixed spacing
+ */
+export function generateBeatmap(
+  title: string,
+  letters: string,
+  spacing: number,
+  startDelay: number = 2.0
+): Beatmap {
+  const notes: BeatmapNote[] = Array.from(letters).map((letter, i) => ({
+    time: startDelay + i * spacing,
+    letter: letter.toUpperCase(),
+  }));
+
+  const totalDuration = notes[notes.length - 1]!.time + 3.0; // +3s buffer at end
+
+  return { title, notes, totalDuration };
+}
+
 // Spells "TWINKLE" with ~1.5s between notes, repeated once
 export const DEMO_BEATMAP: Beatmap = {
   title: "Twinkle Twinkle",
@@ -31,3 +50,18 @@ export const DEMO_BEATMAP: Beatmap = {
   ],
   totalDuration: 26.0,
 };
+
+// Easy mode: 8 distinct, easy-to-recognize signs with generous spacing
+// Letters: A, B, C, L, O, Y, I, V
+export const EASY_MODE = generateBeatmap("Easy Mode", "ABCLOYIV", 3.0);
+
+/**
+ * Get beatmap by ID (for dynamic route loading)
+ */
+export function getBeatmapById(id: string): Beatmap {
+  const beatmaps: Record<string, Beatmap> = {
+    'demo': DEMO_BEATMAP,
+    'easy': EASY_MODE,
+  };
+  return beatmaps[id.toLowerCase()] ?? DEMO_BEATMAP; // Fallback to demo
+}
