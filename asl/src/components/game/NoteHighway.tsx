@@ -43,27 +43,45 @@ export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighway
         }}
       />
 
-      {/* Hit zone marker */}
+      {/* Hit zone marker - center target line */}
       <div
-        className="absolute top-0 bottom-0 w-0.5"
+        className="absolute top-0 bottom-0 w-1"
         style={{
           left: `${HIT_ZONE_PERCENT}%`,
-          background: "rgba(217,70,239,0.8)",
+          background: "rgba(217,70,239,1)",
           boxShadow: isNoteApproaching
             ? "0 0 20px rgba(217,70,239,0.9), 0 0 40px rgba(217,70,239,0.5)"
             : "0 0 10px rgba(217,70,239,0.6), 0 0 20px rgba(217,70,239,0.3)",
           transition: "box-shadow 0.3s ease-out",
+          zIndex: 10,
         }}
       />
+
+      {/* VISUAL HINT: Large "valid hit zone" band showing the forgiving window */}
+      <div
+        className="absolute top-1 bottom-1 rounded-md"
+        style={{
+          left: `${HIT_ZONE_PERCENT - 8}%`,
+          width: "25%",
+          background: "linear-gradient(90deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.3) 30%, rgba(217,70,239,0.4) 80%, rgba(220,38,38,0.15) 100%)",
+          border: "1px dashed rgba(255,255,255,0.2)",
+          zIndex: 5,
+        }}
+      >
+        {/* Labels for timing zones */}
+        <div className="absolute top-0 left-1 text-[8px] text-green-400/70 font-mono">EARLY</div>
+        <div className="absolute top-0 right-1 text-[8px] text-red-400/70 font-mono">LATE</div>
+      </div>
 
       {/* Hit zone glow area with pulse */}
       <div
         className="absolute top-0 bottom-0"
         style={{
-          left: `${HIT_ZONE_PERCENT - 3}%`,
-          width: "6%",
-          background: "radial-gradient(ellipse at center, rgba(217,70,239,0.15) 0%, transparent 70%)",
+          left: `${HIT_ZONE_PERCENT - 5}%`,
+          width: "10%",
+          background: "radial-gradient(ellipse at center, rgba(217,70,239,0.2) 0%, transparent 70%)",
           animation: isNoteApproaching ? "hit-zone-pulse 0.5s ease-in-out infinite" : "none",
+          zIndex: 8,
         }}
       />
 

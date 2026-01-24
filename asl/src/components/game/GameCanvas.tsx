@@ -101,6 +101,13 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
           letter={state.currentNote?.letter ?? null}
           state={state.noteState}
           streak={state.streak}
+          isMatching={
+            state.noteState === "idle" &&
+            state.currentNote !== null &&
+            state.latestPrediction !== null &&
+            state.latestPrediction.letter === state.currentNote.letter &&
+            state.latestPrediction.confidence >= 0.5
+          }
         />
         <HitFeedback
           text={state.feedbackText}
@@ -120,27 +127,22 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
         <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
       </div>
 
-      {/* Debug Info: Detected Sign */}
+      {/* Debug Info: Detected Sign - Compact, bottom-left to be secondary */}
       {state.latestPrediction && (
-        <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
-          <div className="bg-black/80 backdrop-blur text-white px-3 py-2 rounded-lg border border-white/20 shadow-lg flex flex-col items-end">
-            <span className="text-xs text-gray-400 font-mono tracking-wider">DETECTED</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold bg-gradient-to-br from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                {state.latestPrediction.letter}
-              </span>
-              <span className="text-xs text-green-400 font-mono">
-                {Math.min(100, (state.latestPrediction.confidence * 100)).toFixed(0)}%
-              </span>
-            </div>
-            <div className="flex items-center gap-1 mt-1 border-t border-white/10 pt-1 w-full justify-end">
-              <span className="text-[10px] text-gray-400 font-mono">LATENCY</span>
-              <span className={`text-xs font-mono ${state.latency < 100 ? "text-green-400" :
-                state.latency < 200 ? "text-yellow-400" : "text-red-400"
-                }`}>
-                {state.latency}ms
-              </span>
-            </div>
+        <div className="absolute bottom-20 left-4 z-20 pointer-events-none">
+          <div className="bg-black/60 backdrop-blur text-white px-2 py-1 rounded-md border border-white/10 shadow-sm flex items-center gap-2">
+            <span className="text-[10px] text-gray-400 font-mono">AI:</span>
+            <span className="text-lg font-bold text-cyan-400">
+              {state.latestPrediction.letter}
+            </span>
+            <span className="text-[10px] text-green-400/80 font-mono">
+              {Math.min(100, (state.latestPrediction.confidence * 100)).toFixed(0)}%
+            </span>
+            <span className={`text-[10px] font-mono ${state.latency < 100 ? "text-green-400/60" :
+              state.latency < 200 ? "text-yellow-400/60" : "text-red-400/60"
+              }`}>
+              {state.latency}ms
+            </span>
           </div>
         </div>
       )}
