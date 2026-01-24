@@ -23,6 +23,11 @@ export interface GameState {
   handDetected: boolean;
   isConnected: boolean;
   activeNoteIndex: number;
+  lastHitQuality: "PERFECT" | "GREAT" | "OK" | null;
+  streakMilestone: number | null;
+  comboMultiplier: number;
+  latestPrediction: { letter: string; confidence: number } | null;
+  latency: number;
 }
 
 const INITIAL_LIVES = 5;
@@ -47,6 +52,7 @@ export function useGameLoop(beatmap: Beatmap): {
     predictions,
     isConnected,
     handDetected,
+    latency,
   } = useSignDetection(captureFrame, webcamReady, true);
 
   // Game state
@@ -62,6 +68,11 @@ export function useGameLoop(beatmap: Beatmap): {
     handDetected: false,
     isConnected: false,
     activeNoteIndex: 0,
+    lastHitQuality: null,
+    streakMilestone: null,
+    comboMultiplier: 1,
+    latestPrediction: null,
+    latency: 0,
   });
 
   const animFrameRef = useRef<number>(0);
@@ -87,6 +98,11 @@ export function useGameLoop(beatmap: Beatmap): {
       noteState: "idle",
       feedbackText: null,
       activeNoteIndex: 0,
+      lastHitQuality: null,
+      streakMilestone: null,
+      comboMultiplier: 1,
+      latestPrediction: null,
+      latency: 0,
     }));
   }, []);
 
@@ -96,8 +112,15 @@ export function useGameLoop(beatmap: Beatmap): {
       ...prev,
       handDetected,
       isConnected,
+      latency,
     }));
-  }, [handDetected, isConnected]);
+  }, [handDetected, isConnected, latency]);
+
+  // Sync predictions to ref for game loop use without triggering re-renders/resets
+  const latestPredictionsRef = useRef(predictions);
+  useEffect(() => {
+    latestPredictionsRef.current = predictions;
+  }, [predictions]);
 
   // Main game loop
   useEffect(() => {
@@ -142,29 +165,61 @@ export function useGameLoop(beatmap: Beatmap): {
         const earlyStart = activeNote.time - EARLY_WINDOW;
         const deadline = activeNote.time + LATE_GRACE;
 
-        // Find best matching prediction for the active note
-        const bestPrediction = findBestPrediction(
-          predictions,
-          activeNote,
-          earlyStart,
-          deadline,
-        );
+        const gameStartTimeSec = startTimeRef.current / 1000;
+
+        // Find the LATEST unconsumed prediction (regardless of letter)
+        // This allows evaluateNote to see what was being signed even if it's wrong
+        const latestUnconsumed = latestPredictionsRef.current
+          .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
+          .at(-1) || null;
+
+        // DEBUG: Log prediction timing
+        if (latestUnconsumed) {
+          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)}, PredTS: ${latestUnconsumed.clientTimestamp.toFixed(3)}, Letter: ${latestUnconsumed.letter}, Conf: ${(latestUnconsumed.confidence * 100).toFixed(0)}%`);
+        } else {
+          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)} - NO PREDICTIONS`);
+        }
 
         // Evaluate note
-        const judgement = evaluateNote(activeNote, bestPrediction, elapsed, prev.streak);
+        const judgement = evaluateNote(activeNote, latestUnconsumed, elapsed, prev.streak, startTimeRef.current / 1000);
+
+        // Debug: Get latest prediction
+        const latestPred = latestPredictionsRef.current.length > 0
+          ? latestPredictionsRef.current[latestPredictionsRef.current.length - 1] ?? null
+          : null;
+
+        // Helper to update state with debug info
+        const withDebug = (s: any) => ({ ...s, latestPrediction: latestPred });
 
         if (judgement.type === "hit") {
+          // Consume the prediction so it can't be used for the next note
+          if (latestUnconsumed) {
+            processedPredictionsRef.current.add(latestUnconsumed.clientTimestamp);
+          }
+
           // Success!
           const newStreak = prev.streak + 1;
           const newScore = prev.score + judgement.points;
+          const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
 
           let feedbackText: string;
+          const letterInfo = ` (${judgement.sawLetter})`;
           if (judgement.quality === "PERFECT") {
-            feedbackText = "PERFECT!";
+            feedbackText = "PERFECT!" + letterInfo;
           } else if (judgement.quality === "GREAT") {
-            feedbackText = "GREAT!";
+            feedbackText = "GREAT!" + letterInfo;
           } else {
-            feedbackText = "OK!";
+            feedbackText = "OK!" + letterInfo;
+          }
+
+          // Check for streak milestones
+          let streakMilestone: number | null = null;
+          if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
+            streakMilestone = newStreak;
+            // Clear milestone after 1s
+            setTimeout(() => {
+              setState((s) => ({ ...s, streakMilestone: null }));
+            }, 1000);
           }
 
           // Clear previous feedback timeout
@@ -190,10 +245,23 @@ export function useGameLoop(beatmap: Beatmap): {
             score: newScore,
             streak: newStreak,
             activeNoteIndex: activeIndex + 1,
+            lastHitQuality: judgement.quality,
+            streakMilestone,
+            comboMultiplier: newMultiplier,
+            latestPrediction: latestPred,
           };
         } else if (judgement.type === "miss") {
           // Missed deadline
           const newLives = Math.max(prev.lives - 1, 0);
+
+          let missedFeedback = "MISS!";
+          if (judgement.reason === "WRONG SIGN") {
+            missedFeedback = `MISS (Wrong Letter: ${judgement.sawLetter})`;
+          } else if (judgement.reason === "LOW CONFIDENCE") {
+            missedFeedback = `MISS (Low Confidence: ${judgement.sawLetter})`;
+          } else if (judgement.reason === "TOO LATE") {
+            missedFeedback = `MISS (Too Late: ${judgement.sawLetter})`;
+          }
 
           // Clear previous feedback timeout
           if (feedbackTimeoutRef.current) {
@@ -214,10 +282,13 @@ export function useGameLoop(beatmap: Beatmap): {
             currentTime: elapsed,
             currentNote: activeNote,
             noteState: "miss",
-            feedbackText: "MISS!",
+            feedbackText: missedFeedback,
             lives: newLives,
             streak: 0,
             activeNoteIndex: activeIndex + 1,
+            lastHitQuality: null,
+            comboMultiplier: 1,
+            latestPrediction: latestPred,
           };
         }
 
@@ -226,6 +297,7 @@ export function useGameLoop(beatmap: Beatmap): {
           ...prev,
           currentTime: elapsed,
           currentNote: elapsed >= earlyStart ? activeNote : null,
+          latestPrediction: latestPred,
         };
       });
 
@@ -240,7 +312,7 @@ export function useGameLoop(beatmap: Beatmap): {
         clearTimeout(feedbackTimeoutRef.current);
       }
     };
-  }, [beatmap, isConnected, predictions, resetLoop]);
+  }, [beatmap, isConnected, resetLoop]); // Removed predictions from deps
 
   return {
     state,
