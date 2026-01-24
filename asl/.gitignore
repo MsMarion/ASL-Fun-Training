@@ -44,3 +44,7 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# markdown files and claude settings
+*.md
+settings.local.json
