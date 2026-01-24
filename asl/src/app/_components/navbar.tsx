@@ -68,7 +68,7 @@ const Navbar: React.FC = () => {
       <Link href={prevRoute.href} onClick={handlePrevious} className="z-100 ">
         <button
           type="button"
-          className={`${glowButton} translate-x-55 z-100 border-l-1 border-t-1 border-b-1 border-white`}
+          className={`${glowButton} translate-x-60 z-100 border-l-1 border-t-1 border-b-1 border-white`}
           aria-label="Previous route"
         >
           <div className="bg-[var(--magenta)] rounded-t-full p-4 border-1 border-white/30 transition-all duration-300 hover:scale-107">
@@ -167,7 +167,7 @@ const Navbar: React.FC = () => {
       <Link href={nextRoute.href} onClick={handleNext} className="z-100">
         <button
           type="button"
-          className={`${glowButton} -translate-x-55 z-100 border-r-1 border-t-1 border-b-1 border-white`}
+          className={`${glowButton} -translate-x-60 z-100 border-r-1 border-t-1 border-b-1 border-white`}
           aria-label="Next route"
         >
           <div className="bg-[var(--magenta)] rounded-t-full p-4 border-1 border-white/30 transition-all duration-300 hover:scale-107">
