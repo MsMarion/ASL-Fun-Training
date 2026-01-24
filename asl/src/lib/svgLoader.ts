@@ -6,8 +6,9 @@ export interface SvgData {
 
 export async function loadSignSvg(letter: string): Promise<SvgData> {
   const response = await fetch(`/sign-symbols/Plain-svg/${letter.toUpperCase()}.svg`);
+  if (!response.ok) throw new Error(`Failed to load SVG for ${letter}`);
+  
   const text = await response.text();
-
   const parser = new DOMParser();
   const doc = parser.parseFromString(text, "image/svg+xml");
 
@@ -27,9 +28,9 @@ export async function loadSignSvg(letter: string): Promise<SvgData> {
 }
 
 export const AVAILABLE_LETTERS = [
-  "A", "B", "C", "D", "E", "F", "G", "H", "I",
-  "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-  "T", "U", "V", "X", "Y",
+  "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+  "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+  "U", "V", "W", "X", "Y", "Z",
 ] as const;
 
 export type AvailableLetter = (typeof AVAILABLE_LETTERS)[number];

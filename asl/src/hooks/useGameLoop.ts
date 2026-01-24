@@ -7,28 +7,12 @@ import {
   findBestPrediction,
   EARLY_WINDOW,
   LATE_GRACE,
+  TRACKING_WINDOW,
 } from "~/lib/gameScoring";
 import { useWebcam } from "./useWebcam";
 import { useSignDetection } from "./useSignDetection";
+import { type GameState, type DebugLogEntry, type HitQuality } from "~/types/game";
 
-export interface GameState {
-  currentTime: number;
-  score: number;
-  streak: number;
-  lives: number;
-  currentNote: BeatmapNote | null;
-  noteState: "idle" | "success" | "miss";
-  feedbackText: string | null;
-  notes: BeatmapNote[];
-  handDetected: boolean;
-  isConnected: boolean;
-  activeNoteIndex: number;
-  lastHitQuality: "PERFECT" | "GREAT" | "OK" | null;
-  streakMilestone: number | null;
-  comboMultiplier: number;
-  latestPrediction: { letter: string; confidence: number } | null;
-  latency: number;
-}
 
 const INITIAL_LIVES = 5;
 const FEEDBACK_DURATION_MS = 800;
@@ -64,6 +48,7 @@ export function useGameLoop(beatmap: Beatmap): {
     currentNote: null,
     noteState: "idle",
     feedbackText: null,
+    feedbackLetter: null,
     notes: beatmap.notes,
     handDetected: false,
     isConnected: false,
@@ -73,6 +58,7 @@ export function useGameLoop(beatmap: Beatmap): {
     comboMultiplier: 1,
     latestPrediction: null,
     latency: 0,
+    debugLog: [],
   });
 
   const animFrameRef = useRef<number>(0);
@@ -181,7 +167,7 @@ export function useGameLoop(beatmap: Beatmap): {
         }
 
         // Evaluate note
-        const judgement = evaluateNote(activeNote, latestUnconsumed, elapsed, prev.streak, startTimeRef.current / 1000);
+        const judgement = evaluateNote(activeNote, latestUnconsumed, elapsed, prev.streak);
 
         // Debug: Get latest prediction
         const latestPred = latestPredictionsRef.current.length > 0
@@ -202,15 +188,10 @@ export function useGameLoop(beatmap: Beatmap): {
           const newScore = prev.score + judgement.points;
           const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
 
-          let feedbackText: string;
-          const letterInfo = ` (${judgement.sawLetter})`;
-          if (judgement.quality === "PERFECT") {
-            feedbackText = "PERFECT!" + letterInfo;
-          } else if (judgement.quality === "GREAT") {
-            feedbackText = "GREAT!" + letterInfo;
-          } else {
-            feedbackText = "OK!" + letterInfo;
-          }
+
+          let feedbackText: string = "HIT!" + ` (${judgement.sawLetter})`;
+          // Removed Perfect/Great/OK distinction
+
 
           // Check for streak milestones
           let streakMilestone: number | null = null;
@@ -233,22 +214,40 @@ export function useGameLoop(beatmap: Beatmap): {
               ...s,
               noteState: "idle",
               feedbackText: null,
+              feedbackLetter: null,
             }));
           }, FEEDBACK_DURATION_MS);
+
+          const hitLogEntry: DebugLogEntry = {
+            timestamp: Date.now(),
+            type: "HIT",
+            letter: activeNote.letter,
+            delta: activeNote.time - elapsed,
+            quality: "HIT",
+            confidence: latestUnconsumed?.confidence,
+          };
+
+          // Calculate NEXT note immediately for seamless tracking
+          const nextIndex = activeIndex + 1;
+          const nextNote = beatmap.notes[nextIndex];
+          const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
+          const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
 
           return {
             ...prev,
             currentTime: elapsed,
-            currentNote: activeNote,
-            noteState: "success",
+            currentNote: nextNoteVisible ? nextNote : null, // Switch to next note immediately if visible
+            noteState: "idle", // Reset to idle for the new note
             feedbackText,
+            feedbackLetter: activeNote.letter,
             score: newScore,
             streak: newStreak,
-            activeNoteIndex: activeIndex + 1,
-            lastHitQuality: judgement.quality,
+            activeNoteIndex: nextIndex,
+            lastHitQuality: "HIT",
             streakMilestone,
             comboMultiplier: newMultiplier,
             latestPrediction: latestPred,
+            debugLog: [...prev.debugLog.slice(-20), hitLogEntry],
           };
         } else if (judgement.type === "miss") {
           // Missed deadline
@@ -274,29 +273,49 @@ export function useGameLoop(beatmap: Beatmap): {
               ...s,
               noteState: "idle",
               feedbackText: null,
+              feedbackLetter: null,
             }));
           }, FEEDBACK_DURATION_MS);
+
+          const missLogEntry: DebugLogEntry = {
+            timestamp: Date.now(),
+            type: "MISS",
+            letter: activeNote.letter,
+            delta: activeNote.time - elapsed,
+            confidence: latestUnconsumed?.confidence,
+          };
+
+          // Calculate NEXT note immediately
+          const nextIndex = activeIndex + 1;
+          const nextNote = beatmap.notes[nextIndex];
+          const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
+          const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
 
           return {
             ...prev,
             currentTime: elapsed,
-            currentNote: activeNote,
-            noteState: "miss",
+            currentNote: nextNoteVisible ? nextNote : null,
+            noteState: "idle",
             feedbackText: missedFeedback,
+            feedbackLetter: activeNote.letter,
             lives: newLives,
             streak: 0,
-            activeNoteIndex: activeIndex + 1,
+            activeNoteIndex: nextIndex,
             lastHitQuality: null,
             comboMultiplier: 1,
             latestPrediction: latestPred,
+            debugLog: [...prev.debugLog.slice(-20), missLogEntry],
           };
         }
 
         // Still pending
+        // Only show currentNote in target window when we are within the TRACKING window (Green Zone)
+        const trackingStart = activeNote.time - TRACKING_WINDOW;
+        
         return {
           ...prev,
           currentTime: elapsed,
-          currentNote: elapsed >= earlyStart ? activeNote : null,
+          currentNote: elapsed >= trackingStart ? activeNote : null,
           latestPrediction: latestPred,
         };
       });

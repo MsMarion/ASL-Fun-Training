@@ -10,7 +10,7 @@ export interface UseSignDetectionReturn {
   latency: number;
 }
 
-const FRAME_RATE = 12; // fps
+const FRAME_RATE = 30; // fps
 const FRAME_INTERVAL = 1000 / FRAME_RATE;
 const MAX_PREDICTIONS = 30; // Ring buffer size
 

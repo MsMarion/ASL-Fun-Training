@@ -3,24 +3,23 @@
  * Implements "early OK, late penalized" timing mechanic.
  */
 
-import { type BeatmapNote } from "./beatmap";
+import { type BeatmapNote, NOTE_WINDOW_DURATION, NOTE_LATE_GRACE, NOTE_TRACKING_WINDOW } from "./beatmap";
 
-// Timing windows (in seconds)
-export const EARLY_WINDOW = 5.0; // Notes become hittable 5s before target time
-export const LATE_GRACE = 1.5; // Deadline after target time (very forgiving)
+// Timing windows (in seconds) - imported from beatmap.ts for sync
+export const EARLY_WINDOW = NOTE_WINDOW_DURATION; // Notes become hittable when visible
+export const LATE_GRACE = NOTE_LATE_GRACE; // Deadline after target time
+export const TRACKING_WINDOW = NOTE_TRACKING_WINDOW; // When to start tracking for hits
 export const PERFECT_THRESHOLD = 1.0; // ±1.0s for PERFECT (very generous)
 export const CONFIDENCE_THRESHOLD = 0.50; // Minimum confidence (lowered further)
-export const VISUAL_TRIGGER_WINDOW = 2.0; // Allow hits 2.0s before note reaches target (generous early window)
+export const VISUAL_TRIGGER_WINDOW = NOTE_WINDOW_DURATION; // Hits register when notes appear
 export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
 
 // Scoring constants
-export const PERFECT_POINTS = 100;
-export const GREAT_POINTS = 100;
-export const OK_POINTS = 60;
+export const HIT_POINTS = 100;
 export const STREAK_DIVISOR = 3; // Multiplier increases every 3 hits
 export const MAX_MULTIPLIER = 4;
 
-export type HitQuality = "PERFECT" | "GREAT" | "OK";
+export type HitQuality = "HIT";
 
 export interface SignPrediction {
   letter: string;
@@ -43,31 +42,23 @@ export function calculateMultiplier(streak: number): number {
 
 /**
  * Evaluate a single note against a prediction.
- *
- * Timeline:
- *   [note.time - 2.0] ──GREAT──► [note.time - 0.3] ──PERFECT──► [note.time] ──PERFECT──► [note.time + 0.3] ──OK──► [note.time + 0.8]
- *        │                              │                           │                           │                      │
- *    Early start                    Perfect zone              Target time                  Perfect zone           Deadline
- *
- * @param note The beatmap note to evaluate
- * @param prediction The sign prediction from CV model (or null)
- * @param currentTime Current game time
- * @param streak Current streak count (for multiplier calculation)
- * @returns Judgement result (hit/miss/pending)
+ * Returns HIT as soon as valid prediction is found in the tracking window.
  */
 export function evaluateNote(
   note: BeatmapNote,
   prediction: SignPrediction | null,
   currentTime: number,
   streak: number,
-  gameStartTime: number,
 ): JudgementResult {
-  const earlyStart = note.time - EARLY_WINDOW;
-  const deadline = note.time + LATE_GRACE;
-
-  // Check if we've passed the deadline
-  if (currentTime > deadline) {
-    // If we have a prediction but it was rejected, we can provide a reason
+  const timeUntilTarget = note.time - currentTime;
+  
+  // Note hasn't entered tracking window yet (still approaching)
+  if (timeUntilTarget > TRACKING_WINDOW) {
+    return { type: "pending" };
+  }
+  
+  // Note has exited LATE zone - this is the MISS trigger point (SVG disappears here)
+  if (timeUntilTarget < -LATE_GRACE) {
     if (prediction) {
       if (prediction.letter.toUpperCase() !== note.letter.toUpperCase()) {
         return { type: "miss", reason: "WRONG SIGN", sawLetter: prediction.letter };
@@ -78,71 +69,26 @@ export function evaluateNote(
     }
     return { type: "miss", reason: "TOO LATE", sawLetter: prediction?.letter ?? "None" };
   }
-
-  // If we haven't reached the early window yet, it's still pending
-  if (currentTime < earlyStart) {
-    return { type: "pending" };
+  
+  // In tracking window - check for valid HIT
+  if (prediction && 
+      prediction.letter.toUpperCase() === note.letter.toUpperCase() &&
+      prediction.confidence >= CONFIDENCE_THRESHOLD &&
+      prediction.handDetected) {
+    
+    // Valid HIT - simple binary state
+    const multiplier = calculateMultiplier(streak);
+    
+    return {
+      type: "hit",
+      quality: "HIT",
+      points: HIT_POINTS * multiplier,
+      sawLetter: prediction.letter,
+    };
   }
-
-  // No valid prediction yet
-  if (!prediction) {
-    return { type: "pending" };
-  }
-
-  // Check if prediction matches the note
-  if (prediction.letter.toUpperCase() !== note.letter.toUpperCase()) {
-    return { type: "pending" }; // Wrong letter doesn't cause immediate miss
-  }
-
-  // Confidence check
-  if (prediction.confidence < CONFIDENCE_THRESHOLD) {
-    return { type: "pending" };
-  }
-
-  // Hand must be detected
-  if (!prediction.handDetected) {
-    return { type: "pending" };
-  }
-
-  // We have a valid hit! Determine quality based on timing
-  // For "hold-to-hit" mechanics: check if the CURRENT GAME TIME is within the visual window
-  // (not when the prediction was made - the user may have been holding the sign for a while)
-
-  // VISUAL SYNC: If the note hasn't reached the visual trigger zone yet, defer the hit.
-  // This uses currentTime (game clock) not the prediction timestamp.
-  const timeUntilTarget = note.time - currentTime;
-  if (timeUntilTarget > VISUAL_TRIGGER_WINDOW) {
-    // Note is still too far away visually - keep holding!
-    return { type: "pending" };
-  }
-
-  // Use currentTime for timing quality (since user may have been holding the sign)
-  const timeDiff = Math.abs(currentTime - note.time);
-  const multiplier = calculateMultiplier(streak);
-
-  let quality: HitQuality;
-  let basePoints: number;
-
-  if (timeDiff <= PERFECT_THRESHOLD) {
-    // Within ±1.0s of target
-    quality = "PERFECT";
-    basePoints = PERFECT_POINTS;
-  } else if (currentTime < note.time) {
-    // Early (within window but before target)
-    quality = "GREAT";
-    basePoints = GREAT_POINTS;
-  } else {
-    // Late (after target but within grace)
-    quality = "OK";
-    basePoints = OK_POINTS;
-  }
-
-  return {
-    type: "hit",
-    quality,
-    points: basePoints * multiplier,
-    sawLetter: prediction.letter,
-  };
+  
+  // Still in tracking window, no valid hit yet - keep waiting
+  return { type: "pending" };
 }
 
 /**
