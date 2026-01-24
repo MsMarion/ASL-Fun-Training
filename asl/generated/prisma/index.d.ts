@@ -996,6 +996,8 @@ export namespace Prisma {
     isCommunity: boolean | null
     albumName: string | null
     thumbnailName: string | null
+    thumbnailUrl: string | null
+    audioUrl: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -1006,6 +1008,8 @@ export namespace Prisma {
     isCommunity: boolean | null
     albumName: string | null
     thumbnailName: string | null
+    thumbnailUrl: string | null
+    audioUrl: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -1016,6 +1020,8 @@ export namespace Prisma {
     isCommunity: number
     albumName: number
     thumbnailName: number
+    thumbnailUrl: number
+    audioUrl: number
     createdAt: number
     v: number
     _all: number
@@ -1036,6 +1042,8 @@ export namespace Prisma {
     isCommunity?: true
     albumName?: true
     thumbnailName?: true
+    thumbnailUrl?: true
+    audioUrl?: true
     createdAt?: true
     v?: true
   }
@@ -1046,6 +1054,8 @@ export namespace Prisma {
     isCommunity?: true
     albumName?: true
     thumbnailName?: true
+    thumbnailUrl?: true
+    audioUrl?: true
     createdAt?: true
     v?: true
   }
@@ -1056,6 +1066,8 @@ export namespace Prisma {
     isCommunity?: true
     albumName?: true
     thumbnailName?: true
+    thumbnailUrl?: true
+    audioUrl?: true
     createdAt?: true
     v?: true
     _all?: true
@@ -1153,6 +1165,8 @@ export namespace Prisma {
     isCommunity: boolean
     albumName: string | null
     thumbnailName: string | null
+    thumbnailUrl: string | null
+    audioUrl: string | null
     createdAt: Date
     v: number
     _count: SongCountAggregateOutputType | null
@@ -1182,6 +1196,8 @@ export namespace Prisma {
     isCommunity?: boolean
     albumName?: boolean
     thumbnailName?: boolean
+    thumbnailUrl?: boolean
+    audioUrl?: boolean
     interactions?: boolean | InteractionDefaultArgs<ExtArgs>
     createdAt?: boolean
     v?: boolean
@@ -1195,11 +1211,13 @@ export namespace Prisma {
     isCommunity?: boolean
     albumName?: boolean
     thumbnailName?: boolean
+    thumbnailUrl?: boolean
+    audioUrl?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type SongOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songName" | "isCommunity" | "albumName" | "thumbnailName" | "interactions" | "createdAt" | "v", ExtArgs["result"]["song"]>
+  export type SongOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songName" | "isCommunity" | "albumName" | "thumbnailName" | "thumbnailUrl" | "audioUrl" | "interactions" | "createdAt" | "v", ExtArgs["result"]["song"]>
   export type SongInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $SongPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1211,6 +1229,8 @@ export namespace Prisma {
       isCommunity: boolean
       albumName: string | null
       thumbnailName: string | null
+      thumbnailUrl: string | null
+      audioUrl: string | null
       createdAt: Date
       v: number
     }, ExtArgs["result"]["song"]>
@@ -1612,6 +1632,8 @@ export namespace Prisma {
     readonly isCommunity: FieldRef<"Song", 'Boolean'>
     readonly albumName: FieldRef<"Song", 'String'>
     readonly thumbnailName: FieldRef<"Song", 'String'>
+    readonly thumbnailUrl: FieldRef<"Song", 'String'>
+    readonly audioUrl: FieldRef<"Song", 'String'>
     readonly createdAt: FieldRef<"Song", 'DateTime'>
     readonly v: FieldRef<"Song", 'Int'>
   }
@@ -2997,6 +3019,8 @@ export namespace Prisma {
     isCommunity: 'isCommunity',
     albumName: 'albumName',
     thumbnailName: 'thumbnailName',
+    thumbnailUrl: 'thumbnailUrl',
+    audioUrl: 'audioUrl',
     createdAt: 'createdAt',
     v: 'v'
   };
@@ -3112,6 +3136,8 @@ export namespace Prisma {
     isCommunity?: BoolFilter<"Song"> | boolean
     albumName?: StringNullableFilter<"Song"> | string | null
     thumbnailName?: StringNullableFilter<"Song"> | string | null
+    thumbnailUrl?: StringNullableFilter<"Song"> | string | null
+    audioUrl?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
     v?: IntFilter<"Song"> | number
@@ -3123,6 +3149,8 @@ export namespace Prisma {
     isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
+    thumbnailUrl?: SortOrder
+    audioUrl?: SortOrder
     interactions?: InteractionOrderByCompositeAggregateInput
     createdAt?: SortOrder
     v?: SortOrder
@@ -3137,6 +3165,8 @@ export namespace Prisma {
     isCommunity?: BoolFilter<"Song"> | boolean
     albumName?: StringNullableFilter<"Song"> | string | null
     thumbnailName?: StringNullableFilter<"Song"> | string | null
+    thumbnailUrl?: StringNullableFilter<"Song"> | string | null
+    audioUrl?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
     v?: IntFilter<"Song"> | number
@@ -3148,6 +3178,8 @@ export namespace Prisma {
     isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
+    thumbnailUrl?: SortOrder
+    audioUrl?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     _count?: SongCountOrderByAggregateInput
@@ -3166,6 +3198,8 @@ export namespace Prisma {
     isCommunity?: BoolWithAggregatesFilter<"Song"> | boolean
     albumName?: StringNullableWithAggregatesFilter<"Song"> | string | null
     thumbnailName?: StringNullableWithAggregatesFilter<"Song"> | string | null
+    thumbnailUrl?: StringNullableWithAggregatesFilter<"Song"> | string | null
+    audioUrl?: StringNullableWithAggregatesFilter<"Song"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Song"> | Date | string
     v?: IntWithAggregatesFilter<"Song"> | number
   }
@@ -3235,6 +3269,8 @@ export namespace Prisma {
     isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
+    thumbnailUrl?: string | null
+    audioUrl?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -3246,6 +3282,8 @@ export namespace Prisma {
     isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
+    thumbnailUrl?: string | null
+    audioUrl?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -3256,6 +3294,8 @@ export namespace Prisma {
     isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -3266,6 +3306,8 @@ export namespace Prisma {
     isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -3277,6 +3319,8 @@ export namespace Prisma {
     isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
+    thumbnailUrl?: string | null
+    audioUrl?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -3287,6 +3331,8 @@ export namespace Prisma {
     isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -3297,6 +3343,8 @@ export namespace Prisma {
     isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -3443,6 +3491,8 @@ export namespace Prisma {
     isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
+    thumbnailUrl?: SortOrder
+    audioUrl?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -3457,6 +3507,8 @@ export namespace Prisma {
     isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
+    thumbnailUrl?: SortOrder
+    audioUrl?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -3467,6 +3519,8 @@ export namespace Prisma {
     isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
+    thumbnailUrl?: SortOrder
+    audioUrl?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }

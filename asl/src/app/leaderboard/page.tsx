@@ -42,7 +42,7 @@ const LeaderboardPage = () => {
     const [submittedScore, setSubmittedScore] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const targetPos = useRef({ x: 0, y: 0 });
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | undefined>(undefined);
 
     // Fetch leaderboard data
     const { data: leaderboardData, refetch } = api.leaderboard.getTop.useQuery(
@@ -52,10 +52,10 @@ const LeaderboardPage = () => {
 
     // Mutation to create new entry
     const createEntry = api.leaderboard.create.useMutation({
-        onSuccess: () => {
+        onSuccess: async () => {
             setShowNameModal(false);
             setSubmittedScore(true);
-            refetch();
+            await refetch();
         },
     });
 
