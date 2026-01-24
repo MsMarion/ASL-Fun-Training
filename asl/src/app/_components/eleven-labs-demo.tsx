@@ -40,7 +40,7 @@ export function ElevenLabsDemo() {
             }
 
             // Create blob and play
-            const audioBlob = new Blob(chunks, { type: "audio/mpeg" });
+            const audioBlob = new Blob(chunks as BlobPart[], { type: "audio/mpeg" });
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             await audio.play();
