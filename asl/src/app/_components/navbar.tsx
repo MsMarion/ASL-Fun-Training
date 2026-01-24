@@ -9,9 +9,9 @@ type Route = {
 };
 
 const routes: readonly Route[] = [
+  { title: "COMMUNITY SONGS", href: "/community" },
   { title: "DEV MODE", href: "/devmode" },
-  { title: "SONG SELECTION", href: "/songselection" },
-  { title: "GENERATE", href: "/generate" },
+  { title: "OFFICIAL SONGS", href: "/songselection" },
 ] as const;
 
 
