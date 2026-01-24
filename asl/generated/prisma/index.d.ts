@@ -902,6 +902,7 @@ export namespace Prisma {
   export type SongMinAggregateOutputType = {
     id: string | null
     songName: string | null
+    isCommunity: boolean | null
     albumName: string | null
     thumbnailName: string | null
     createdAt: Date | null
@@ -911,6 +912,7 @@ export namespace Prisma {
   export type SongMaxAggregateOutputType = {
     id: string | null
     songName: string | null
+    isCommunity: boolean | null
     albumName: string | null
     thumbnailName: string | null
     createdAt: Date | null
@@ -920,6 +922,7 @@ export namespace Prisma {
   export type SongCountAggregateOutputType = {
     id: number
     songName: number
+    isCommunity: number
     albumName: number
     thumbnailName: number
     createdAt: number
@@ -939,6 +942,7 @@ export namespace Prisma {
   export type SongMinAggregateInputType = {
     id?: true
     songName?: true
+    isCommunity?: true
     albumName?: true
     thumbnailName?: true
     createdAt?: true
@@ -948,6 +952,7 @@ export namespace Prisma {
   export type SongMaxAggregateInputType = {
     id?: true
     songName?: true
+    isCommunity?: true
     albumName?: true
     thumbnailName?: true
     createdAt?: true
@@ -957,6 +962,7 @@ export namespace Prisma {
   export type SongCountAggregateInputType = {
     id?: true
     songName?: true
+    isCommunity?: true
     albumName?: true
     thumbnailName?: true
     createdAt?: true
@@ -1053,6 +1059,7 @@ export namespace Prisma {
   export type SongGroupByOutputType = {
     id: string
     songName: string
+    isCommunity: boolean
     albumName: string | null
     thumbnailName: string | null
     createdAt: Date
@@ -1081,6 +1088,7 @@ export namespace Prisma {
   export type SongSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     songName?: boolean
+    isCommunity?: boolean
     albumName?: boolean
     thumbnailName?: boolean
     interactions?: boolean | InteractionDefaultArgs<ExtArgs>
@@ -1093,13 +1101,14 @@ export namespace Prisma {
   export type SongSelectScalar = {
     id?: boolean
     songName?: boolean
+    isCommunity?: boolean
     albumName?: boolean
     thumbnailName?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type SongOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songName" | "albumName" | "thumbnailName" | "interactions" | "createdAt" | "v", ExtArgs["result"]["song"]>
+  export type SongOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songName" | "isCommunity" | "albumName" | "thumbnailName" | "interactions" | "createdAt" | "v", ExtArgs["result"]["song"]>
   export type SongInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $SongPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1108,6 +1117,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       songName: string
+      isCommunity: boolean
       albumName: string | null
       thumbnailName: string | null
       createdAt: Date
@@ -1508,6 +1518,7 @@ export namespace Prisma {
   interface SongFieldRefs {
     readonly id: FieldRef<"Song", 'String'>
     readonly songName: FieldRef<"Song", 'String'>
+    readonly isCommunity: FieldRef<"Song", 'Boolean'>
     readonly albumName: FieldRef<"Song", 'String'>
     readonly thumbnailName: FieldRef<"Song", 'String'>
     readonly createdAt: FieldRef<"Song", 'DateTime'>
@@ -1907,6 +1918,7 @@ export namespace Prisma {
   export const SongScalarFieldEnum: {
     id: 'id',
     songName: 'songName',
+    isCommunity: 'isCommunity',
     albumName: 'albumName',
     thumbnailName: 'thumbnailName',
     createdAt: 'createdAt',
@@ -1948,6 +1960,13 @@ export namespace Prisma {
    * Reference to a field of type 'String[]'
    */
   export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2002,6 +2021,7 @@ export namespace Prisma {
     NOT?: SongWhereInput | SongWhereInput[]
     id?: StringFilter<"Song"> | string
     songName?: StringFilter<"Song"> | string
+    isCommunity?: BoolFilter<"Song"> | boolean
     albumName?: StringNullableFilter<"Song"> | string | null
     thumbnailName?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
@@ -2012,6 +2032,7 @@ export namespace Prisma {
   export type SongOrderByWithRelationInput = {
     id?: SortOrder
     songName?: SortOrder
+    isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
     interactions?: InteractionOrderByCompositeAggregateInput
@@ -2025,6 +2046,7 @@ export namespace Prisma {
     OR?: SongWhereInput[]
     NOT?: SongWhereInput | SongWhereInput[]
     songName?: StringFilter<"Song"> | string
+    isCommunity?: BoolFilter<"Song"> | boolean
     albumName?: StringNullableFilter<"Song"> | string | null
     thumbnailName?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
@@ -2035,6 +2057,7 @@ export namespace Prisma {
   export type SongOrderByWithAggregationInput = {
     id?: SortOrder
     songName?: SortOrder
+    isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
     createdAt?: SortOrder
@@ -2052,6 +2075,7 @@ export namespace Prisma {
     NOT?: SongScalarWhereWithAggregatesInput | SongScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Song"> | string
     songName?: StringWithAggregatesFilter<"Song"> | string
+    isCommunity?: BoolWithAggregatesFilter<"Song"> | boolean
     albumName?: StringNullableWithAggregatesFilter<"Song"> | string | null
     thumbnailName?: StringNullableWithAggregatesFilter<"Song"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Song"> | Date | string
@@ -2061,6 +2085,7 @@ export namespace Prisma {
   export type SongCreateInput = {
     id?: string
     songName: string
+    isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2071,6 +2096,7 @@ export namespace Prisma {
   export type SongUncheckedCreateInput = {
     id?: string
     songName: string
+    isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2080,6 +2106,7 @@ export namespace Prisma {
 
   export type SongUpdateInput = {
     songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2089,6 +2116,7 @@ export namespace Prisma {
 
   export type SongUncheckedUpdateInput = {
     songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2099,6 +2127,7 @@ export namespace Prisma {
   export type SongCreateManyInput = {
     id?: string
     songName: string
+    isCommunity: boolean
     albumName?: string | null
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2108,6 +2137,7 @@ export namespace Prisma {
 
   export type SongUpdateManyMutationInput = {
     songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2117,6 +2147,7 @@ export namespace Prisma {
 
   export type SongUncheckedUpdateManyInput = {
     songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
     albumName?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
@@ -2137,6 +2168,11 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -2198,6 +2234,7 @@ export namespace Prisma {
   export type SongCountOrderByAggregateInput = {
     id?: SortOrder
     songName?: SortOrder
+    isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
     createdAt?: SortOrder
@@ -2211,6 +2248,7 @@ export namespace Prisma {
   export type SongMaxOrderByAggregateInput = {
     id?: SortOrder
     songName?: SortOrder
+    isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
     createdAt?: SortOrder
@@ -2220,6 +2258,7 @@ export namespace Prisma {
   export type SongMinOrderByAggregateInput = {
     id?: SortOrder
     songName?: SortOrder
+    isCommunity?: SortOrder
     albumName?: SortOrder
     thumbnailName?: SortOrder
     createdAt?: SortOrder
@@ -2246,6 +2285,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -2310,6 +2357,10 @@ export namespace Prisma {
     set?: string
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
     unset?: boolean
@@ -2346,6 +2397,11 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedStringNullableFilter<$PrismaModel = never> = {
@@ -2408,6 +2464,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {

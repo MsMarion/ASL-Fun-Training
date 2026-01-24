@@ -11,6 +11,7 @@ const createSongSchema = z.object({
   songName: z.string().min(1, "Song name is required").max(200, "Song name too long"),
   albumName: z.string().min(1, "Album name is required").max(200, "Album name too long"),
   thumbnailName: z.string().optional(),
+  isCommunity: z.boolean().optional().default(false),
   interactions: z.array(
     z.object({
       key: z.string().min(1, "Interaction key is required"),
@@ -32,6 +33,44 @@ export const songRouter = createTRPCRouter({
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch songs",
+      });
+    }
+  }),
+
+  getCommunitySongs: publicProcedure.query(async () => {
+    try {
+      const songs = await db.song.findMany({
+        where: {
+          isCommunity: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return songs;
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch community songs",
+      });
+    }
+  }),
+
+  getOfficialSongs: publicProcedure.query(async () => {
+    try {
+      const songs = await db.song.findMany({
+        where: {
+          isCommunity: false,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return songs;
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch official songs",
       });
     }
   }),
@@ -81,6 +120,7 @@ export const songRouter = createTRPCRouter({
         const song = await db.song.create({
           data: {
             songName: input.songName,
+            isCommunity: input.isCommunity,
             albumName: input.albumName,
             thumbnailName: input.thumbnailName,
             interactions,
