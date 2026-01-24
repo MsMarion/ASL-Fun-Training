@@ -18,6 +18,8 @@ model Song {
   isCommunity   Boolean
   albumName     String?
   thumbnailName String?
+  thumbnailUrl  String?
+  audioUrl      String?
   interactions  Interaction[]
   createdAt     DateTime      @default(now())
   v             Int           @default(0) @map("__v")
