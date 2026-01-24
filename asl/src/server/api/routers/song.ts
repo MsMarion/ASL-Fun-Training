@@ -11,6 +11,8 @@ const createSongSchema = z.object({
   songName: z.string().min(1, "Song name is required").max(200, "Song name too long"),
   albumName: z.string().min(1, "Album name is required").max(200, "Album name too long"),
   thumbnailName: z.string().optional(),
+  thumbnailUrl: z.string().url().optional(),
+  audioUrl: z.string().url().optional(),
   isCommunity: z.boolean().optional().default(false),
   interactions: z.array(
     z.object({
@@ -123,6 +125,8 @@ export const songRouter = createTRPCRouter({
             isCommunity: input.isCommunity,
             albumName: input.albumName,
             thumbnailName: input.thumbnailName,
+            thumbnailUrl: input.thumbnailUrl,
+            audioUrl: input.audioUrl,
             interactions,
           },
         });

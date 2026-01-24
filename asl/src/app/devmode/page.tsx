@@ -108,6 +108,11 @@ export default function DevModePage() {
     const [albumName, setAlbumName] = useState("");
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 
+    // S3 URLs
+    const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
+    const [uploadedThumbnailUrl, setUploadedThumbnailUrl] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
     const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState("");
     const [audioDuration, setAudioDuration] = useState(0);
@@ -147,6 +152,7 @@ export default function DevModePage() {
         setDownloadProgress(0);
         setDownloadError("");
         setVideoTitle("");
+        setUploadedAudioUrl(null);
 
         try {
             const progressInterval = setInterval(() => {
@@ -178,9 +184,23 @@ export default function DevModePage() {
                     throw new Error(errorData.error || "Failed to stream audio");
                 }
 
-                setDownloadProgress(80);
+                setDownloadProgress(60);
                 const audioBlob = await streamResponse.blob();
                 const audioBlobUrl = URL.createObjectURL(audioBlob);
+
+                // Upload to DigitalOcean Spaces
+                setDownloadProgress(70);
+                const formData = new FormData();
+                const filename = `${data.title || data.videoId}.mp3`.replace(/[^a-zA-Z0-9.-]/g, '_');
+                formData.append('file', new File([audioBlob], filename, { type: 'audio/mpeg' }));
+                formData.append('folder', 'audio');
+
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const uploadData = await uploadResponse.json();
 
                 setDownloadProgress(100);
 
@@ -194,6 +214,13 @@ export default function DevModePage() {
                 setIsPlaying(false);
                 setIsRecording(false);
                 setKeyPresses([]);
+
+                if (uploadData.success && uploadData.url) {
+                    setUploadedAudioUrl(uploadData.url);
+                    console.log("Audio uploaded to S3:", uploadData.url);
+                } else {
+                    console.warn("Failed to upload to S3, but local playback available");
+                }
 
                 if (!songName && data.title) {
                     setSongName(data.title);
@@ -210,7 +237,7 @@ export default function DevModePage() {
         }
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith("audio/")) {
             if (audioUrl) {
@@ -221,9 +248,36 @@ export default function DevModePage() {
             setIsPlaying(false);
             setIsRecording(false);
             setKeyPresses([]);
+            setUploadedAudioUrl(null);
 
             if (!songName) {
                 setSongName(file.name.replace(/\.[^/.]+$/, ""));
+            }
+
+            // Upload to DigitalOcean Spaces
+            setIsUploading(true);
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'audio');
+
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const uploadData = await uploadResponse.json();
+
+                if (uploadData.success && uploadData.url) {
+                    setUploadedAudioUrl(uploadData.url);
+                    console.log("Audio uploaded to S3:", uploadData.url);
+                } else {
+                    console.warn("Failed to upload to S3:", uploadData.error);
+                }
+            } catch (error) {
+                console.error("Upload error:", error);
+            } finally {
+                setIsUploading(false);
             }
         }
     };
@@ -232,10 +286,34 @@ export default function DevModePage() {
         fileInputRef.current?.click();
     };
 
-    const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith("image/")) {
             setThumbnailFile(file);
+            setUploadedThumbnailUrl(null);
+
+            // Upload to DigitalOcean Spaces
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'thumbnails');
+
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const uploadData = await uploadResponse.json();
+
+                if (uploadData.success && uploadData.url) {
+                    setUploadedThumbnailUrl(uploadData.url);
+                    console.log("Thumbnail uploaded to S3:", uploadData.url);
+                } else {
+                    console.warn("Failed to upload thumbnail to S3:", uploadData.error);
+                }
+            } catch (error) {
+                console.error("Thumbnail upload error:", error);
+            }
         }
     };
 
@@ -270,6 +348,7 @@ export default function DevModePage() {
         }
         setAudioUrl(null);
         setAudioFile(null);
+        setUploadedAudioUrl(null);
         setIsPlaying(false);
         setIsRecording(false);
         setKeyPresses([]);
@@ -373,17 +452,21 @@ export default function DevModePage() {
                 albumName,
                 isCommunity: true,
                 ...(thumbnailFile && { thumbnailName: thumbnailFile.name }),
+                ...(uploadedThumbnailUrl && { thumbnailUrl: uploadedThumbnailUrl }),
+                ...(uploadedAudioUrl && { audioUrl: uploadedAudioUrl }),
                 ...(keyPresses.length > 0 && { interactions: keyPresses }),
             });
 
             console.log("Song created:", result);
             setSaveMessage("Song saved successfully to community!");
-            
+
             // Reset form
             setSongName("");
             setAlbumName("");
             setThumbnailFile(null);
             setKeyPresses([]);
+            setUploadedAudioUrl(null);
+            setUploadedThumbnailUrl(null);
             if (thumbnailInputRef.current) {
                 thumbnailInputRef.current.value = "";
             }
@@ -522,9 +605,16 @@ export default function DevModePage() {
                                 {thumbnailFile ? "Change Thumbnail" : "Upload Thumbnail"}
                             </button>
                             {thumbnailFile && (
-                                <p className="text-sm" style={{ color: "#d8b4fe" }}>
-                                    Selected: {thumbnailFile.name}
-                                </p>
+                                <div>
+                                    <p className="text-sm" style={{ color: "#d8b4fe" }}>
+                                        Selected: {thumbnailFile.name}
+                                    </p>
+                                    {uploadedThumbnailUrl && (
+                                        <p className="text-xs mt-1" style={{ color: "#22c55e" }}>
+                                            Uploaded to cloud storage
+                                        </p>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -646,12 +736,19 @@ export default function DevModePage() {
                                 )}
 
                                 {videoTitle && !isDownloading && (
-                                    <p
-                                        className="text-sm text-center"
-                                        style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
-                                    >
-                                        Ready: {videoTitle}
-                                    </p>
+                                    <div className="text-center">
+                                        <p
+                                            className="text-sm"
+                                            style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
+                                        >
+                                            Ready: {videoTitle}
+                                        </p>
+                                        {uploadedAudioUrl && (
+                                            <p className="text-xs mt-1" style={{ color: "#22c55e" }}>
+                                                Uploaded to cloud storage
+                                            </p>
+                                        )}
+                                    </div>
                                 )}
 
                                 {downloadError && (
@@ -686,12 +783,24 @@ export default function DevModePage() {
                                 </button>
 
                                 {audioFile && (
-                                    <p
-                                        className="text-sm text-center"
-                                        style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
-                                    >
-                                        Ready: {audioFile.name}
-                                    </p>
+                                    <div className="text-center">
+                                        <p
+                                            className="text-sm"
+                                            style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
+                                        >
+                                            Ready: {audioFile.name}
+                                        </p>
+                                        {isUploading && (
+                                            <p className="text-xs mt-1 animate-pulse" style={{ color: "#fbbf24" }}>
+                                                Uploading to cloud storage...
+                                            </p>
+                                        )}
+                                        {uploadedAudioUrl && !isUploading && (
+                                            <p className="text-xs mt-1" style={{ color: "#22c55e" }}>
+                                                Uploaded to cloud storage
+                                            </p>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
