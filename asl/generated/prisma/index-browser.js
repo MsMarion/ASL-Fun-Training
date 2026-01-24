@@ -120,6 +120,17 @@ exports.Prisma.SongScalarFieldEnum = {
   isCommunity: 'isCommunity',
   albumName: 'albumName',
   thumbnailName: 'thumbnailName',
+  thumbnailUrl: 'thumbnailUrl',
+  audioUrl: 'audioUrl',
+  createdAt: 'createdAt',
+  v: 'v'
+};
+
+exports.Prisma.LeaderboardEntryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  score: 'score',
+  rank: 'rank',
   createdAt: 'createdAt',
   v: 'v'
 };
@@ -136,7 +147,8 @@ exports.Prisma.QueryMode = {
 
 
 exports.Prisma.ModelName = {
-  Song: 'Song'
+  Song: 'Song',
+  LeaderboardEntry: 'LeaderboardEntry'
 };
 
 /**
