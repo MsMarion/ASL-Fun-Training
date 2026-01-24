@@ -15,7 +15,7 @@ datasource db {
 model Song {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   songName      String
-  albumName     String?
+  albumName     String
   thumbnailName String?
   interactions  Interaction[]
   createdAt     DateTime      @default(now())
