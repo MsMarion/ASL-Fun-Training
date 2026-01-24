@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useGameLoop } from "~/hooks/useGameLoop";
 import { useVisualEffects } from "~/hooks/useVisualEffects";
-import { DEMO_BEATMAP } from "~/lib/beatmap";
+import { DEMO_BEATMAP, type Beatmap } from "~/lib/beatmap";
 import { WebcamFeed } from "./WebcamFeed";
 import { Scoreboard } from "./Scoreboard";
 import { TargetWindow } from "./TargetWindow";
@@ -14,10 +14,15 @@ import { ParticleOverlay, type ParticleOverlayRef } from "./ParticleOverlay";
 import { ScreenFlash } from "./ScreenFlash";
 import { EffectsToggle } from "./EffectsToggle";
 
-const WORD = "TVINKLE"; // Letters used in the demo beatmap
+interface GameCanvasProps {
+  beatmap?: Beatmap;
+}
 
-export function GameCanvas() {
-  const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(DEMO_BEATMAP);
+export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
+  const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(beatmap);
+
+  // Derive word from beatmap notes
+  const WORD = beatmap.notes.map(note => note.letter).join('');
   const particleOverlayRef = useRef<ParticleOverlayRef>(null);
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
