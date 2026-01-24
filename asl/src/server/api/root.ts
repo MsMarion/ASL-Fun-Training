@@ -1,5 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { songRouter } from "@/server/api/routers/song";
+import { songRouter } from "~/server/api/routers/song";
 
 /**
  * This is the primary router for your server.
