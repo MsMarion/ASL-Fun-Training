@@ -141,3 +141,129 @@
     transform: translate(-50%, -50%) scale(0.8) translateY(-20px);
   }
 }
+
+/* Combo counter pop animation */
+@keyframes combo-scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Milestone streak banner */
+@keyframes milestone-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  25% {
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+}
+
+/* Screen flash on PERFECT hit */
+@keyframes screen-flash {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Hit zone pulse when note approaching */
+@keyframes hit-zone-pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.9), 0 0 40px rgba(217, 70, 239, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+  }
+}
+
+/* Grid background reaction to hits */
+@keyframes grid-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Score number bump on increase */
+@keyframes score-bump {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Fire text shadow for high streaks */
+@keyframes streak-fire {
+  0% {
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+      0 0 30px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(251, 191, 36, 1), 0 0 30px rgba(251, 191, 36, 0.8),
+      0 0 45px rgba(251, 191, 36, 0.6);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+      0 0 30px rgba(251, 191, 36, 0.4);
+  }
+}
+
+/* Life diamond damage flash */
+@keyframes life-damage {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: scale(0.7);
+    filter: brightness(2) drop-shadow(0 0 8px rgba(248, 113, 113, 0.9));
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
