@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 type Route = {
   readonly title: string;
@@ -10,10 +11,9 @@ type Route = {
 
 const routes: readonly Route[] = [
   { title: "COMMUNITY SONGS", href: "/community" },
-  { title: "DEV MODE", href: "/devmode" },
   { title: "OFFICIAL SONGS", href: "/songselection" },
+  { title: "DEV MODE", href: "/devmode" },
 ] as const;
-
 
 const getRoute = (index: number): Route => {
   const route = routes[(index + routes.length) % routes.length];
@@ -22,6 +22,7 @@ const getRoute = (index: number): Route => {
 };
 
 const Navbar: React.FC = () => {
+  const pathname = usePathname();
   const [activeIndex, setActiveIndex] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem("navbarActiveIndex");
@@ -30,12 +31,17 @@ const Navbar: React.FC = () => {
     return 0;
   });
 
+  // Check if current route matches the active tab
+  const isCurrentRoute = useMemo(() => {
+    const currentRoute = getRoute(activeIndex);
+    return pathname === currentRoute.href;
+  }, [pathname, activeIndex]);
+
   const { currentRoute, prevRoute, nextRoute } = useMemo(() => ({
     currentRoute: getRoute(activeIndex),
     prevRoute: getRoute(activeIndex - 1),
     nextRoute: getRoute(activeIndex + 1),
   }), [activeIndex]);
-
 
   const handlePrevious = (): void => {
     setActiveIndex((i) => {
@@ -65,7 +71,7 @@ const Navbar: React.FC = () => {
 
   return (
     <div className="flex items-end justify-center gap-4 p-8">
-      <Link href={prevRoute.href} onClick={handlePrevious} className="z-100 ">
+      <Link href={prevRoute.href} onClick={handlePrevious} className="z-100">
         <button
           type="button"
           className={`${glowButton} translate-x-67 z-100 border-l-1 border-t-1 border-b-1 border-white`}
@@ -97,52 +103,56 @@ const Navbar: React.FC = () => {
           color: "var(--cyan)",
           opacity: 0.7,
           marginBottom: "8px",
-              boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
-
+          boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
         }}
       >
         <span className="font-[subheading-font] text-xl text-center text-white">{prevRoute.title}</span>
       </div>
 
-         {/* Main Center Tab */}
-        <div className="relative -translate-y-2 z-1">
-          {/* Outer semicircle with white border */}
+      {/* Main Center Tab with Bounce Animation */}
+      <div className={`relative -translate-y-2 z-1`}>
+        {/* Outer semicircle with white border */}
+        <div
+          className="border-1 border-white"
+          style={{
+            width: "300px",
+            height: "200px",
+            backgroundColor: "var(--purple)",
+            borderRadius: "200px 200px 0 0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontWeight: "bold",
+            boxShadow: isCurrentRoute 
+              ? "0 0 60px rgba(45,226,230,0.8), 0 0 120px rgba(146,0,117,0.6)" 
+              : "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
+            transition: "box-shadow 0.3s ease-in-out",
+          }}
+        >
+          {/* Inner semicircle with grid pattern */}
           <div
-            className="border-1 border-white"
+            className="absolute bottom-5"
             style={{
-              width: "300px",
-              height: "200px",
-              backgroundColor: "var(--purple)",
-              borderRadius: "200px 200px 0 0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "bold",
-              boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
+              width: "220px",
+              height: "140px",
+              backgroundColor: "transparent",
+              borderRadius: "180px 180px 0 0",
+              border: "1px solid white",
+              backgroundImage: `
+                linear-gradient(0deg, white 1px, transparent 1px),
+                linear-gradient(90deg, white 1px, transparent 1px)
+              `,
+              backgroundSize: "20px 20px",
+              backgroundPosition: "0 0",
+              opacity: 0.3,
             }}
-          >
-            {/* Inner semicircle with grid pattern */}
-            <div
-              className="absolute bottom-5"
-              style={{
-                width: "220px",
-                height: "140px",
-                backgroundColor: "transparent",
-                borderRadius: "180px 180px 0 0",
-                border: "1px solid white",
-                backgroundImage: `
-                  linear-gradient(0deg, white 1px, transparent 1px),
-                  linear-gradient(90deg, white 1px, transparent 1px)
-                `,
-                backgroundSize: "20px 20px",
-                backgroundPosition: "0 0",
-                opacity: 0.3,
-              }}
-            />
-            <span className="relative z-10 font-[subheading-font] text-4xl text-center text-white">{currentRoute.title}</span>
-          </div>
+          />
+          <span className="relative z-10 p-20 font-[subheading-font] flex-wrap text-4xl text-center text-white">
+            {currentRoute.title}
+          </span>
         </div>
+      </div>
 
       <div
         className="translate-x-15 transition-all duration-200 border-r-1 border-t-1 border-b-1 border-white"
@@ -158,7 +168,6 @@ const Navbar: React.FC = () => {
           opacity: 0.7,
           marginBottom: "8px",
           boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
-
         }}
       >
         <span className="font-[subheading-font] text-xl text-center text-white">{nextRoute.title}</span>
