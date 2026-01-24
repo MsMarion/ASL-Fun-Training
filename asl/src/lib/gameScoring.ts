@@ -6,10 +6,12 @@
 import { type BeatmapNote } from "./beatmap";
 
 // Timing windows (in seconds)
-export const EARLY_WINDOW = 2.0; // Notes become hittable 2s before target time
+export const EARLY_WINDOW = 5.0; // Notes become hittable 5s before target time
 export const LATE_GRACE = 0.8; // Deadline after target time
 export const PERFECT_THRESHOLD = 0.3; // ±0.3s for PERFECT
 export const CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence to accept prediction
+export const VISUAL_TRIGGER_WINDOW = 0.5; // Only trigger hit when note is visually close (0.5s)
+export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
 
 // Scoring constants
 export const PERFECT_POINTS = 100;
@@ -58,6 +60,7 @@ export function evaluateNote(
   prediction: SignPrediction | null,
   currentTime: number,
   streak: number,
+  gameStartTime: number,
 ): JudgementResult {
   const earlyStart = note.time - EARLY_WINDOW;
   const deadline = note.time + LATE_GRACE;
@@ -93,7 +96,18 @@ export function evaluateNote(
   }
 
   // We have a valid hit! Determine quality based on timing
-  const timeDiff = Math.abs(prediction.clientTimestamp - note.time);
+  // Calculate relative time of the prediction (seconds from game start)
+  // We have a valid hit! Determine quality based on timing
+  // Calculate relative time of the prediction (seconds from game start)
+  const relativePredTime = (prediction.clientTimestamp - gameStartTime) - INPUT_OFFSET;
+
+  // VISUAL SYNC: If the hit is VALID but visually "Too Early" (too far from target),
+  // defer it. We want the user to hold the sign until it hits the target.
+  if (note.time - relativePredTime > VISUAL_TRIGGER_WINDOW) {
+    return { type: "pending" };
+  }
+
+  const timeDiff = Math.abs(relativePredTime - note.time);
   const multiplier = calculateMultiplier(streak);
 
   let quality: HitQuality;
@@ -103,12 +117,12 @@ export function evaluateNote(
     // Within ±0.3s of target
     quality = "PERFECT";
     basePoints = PERFECT_POINTS;
-  } else if (prediction.clientTimestamp < note.time) {
-    // Early (beyond 0.3s but within 2.0s window)
+  } else if (relativePredTime < note.time) {
+    // Early (within window but before target)
     quality = "GREAT";
     basePoints = GREAT_POINTS;
   } else {
-    // Late (beyond 0.3s but within grace period)
+    // Late (after target but within grace)
     quality = "OK";
     basePoints = OK_POINTS;
   }
@@ -136,22 +150,40 @@ export function findBestPrediction(
   note: BeatmapNote,
   earlyStart: number,
   deadline: number,
+  gameStartTime: number,
+  ignoredTimestamps: Set<number>,
 ): SignPrediction | null {
+  // Debug logging
+  /*
+  console.log(`Checking note ${note.letter} at ${note.time}`);
+  console.log(`Window: ${earlyStart} -> ${deadline}`);
+  console.log(`Predictions: ${predictions.length}`);
+  */
+
   const validPredictions = predictions.filter(
-    (p) =>
-      p.letter.toUpperCase() === note.letter.toUpperCase() &&
-      p.confidence >= CONFIDENCE_THRESHOLD &&
-      p.handDetected &&
-      p.clientTimestamp >= earlyStart &&
-      p.clientTimestamp <= deadline,
+    (p) => {
+      // Ignore consumed predictions
+      if (ignoredTimestamps.has(p.clientTimestamp)) {
+        return false;
+      }
+
+      const matchLetter = p.letter.toUpperCase() === note.letter.toUpperCase();
+      const matchConf = p.confidence >= CONFIDENCE_THRESHOLD;
+      const matchHand = p.handDetected;
+
+      // Apply Input Offset
+      const relativeTime = (p.clientTimestamp - gameStartTime) - INPUT_OFFSET;
+      const matchTime = relativeTime >= earlyStart && relativeTime <= deadline;
+
+      return matchLetter && matchConf && matchHand && matchTime;
+    }
   );
 
   if (validPredictions.length === 0) {
     return null;
   }
 
-  // Return prediction with highest confidence
-  return validPredictions.reduce((best, current) =>
-    current.confidence > best.confidence ? current : best,
-  );
+  // Return the LATEST valid prediction (most recent)
+  // This ensures we use the "current" state of the hand, closest to the target
+  return validPredictions[validPredictions.length - 1] ?? null;
 }

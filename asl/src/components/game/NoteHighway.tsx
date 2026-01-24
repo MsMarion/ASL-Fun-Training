@@ -6,14 +6,18 @@ import { SignSymbolHighway } from "~/components/SignSymbolHighway";
 interface NoteHighwayProps {
   notes: BeatmapNote[];
   currentTime: number;
+  activeNoteIndex: number;
 }
 
 const WINDOW_DURATION = 4; // seconds visible before target
 const HIT_ZONE_PERCENT = 15; // hit zone at 15% from left
 
-export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
-  // Filter notes that are within the visible window
-  const visibleNotes = notes.filter((note) => {
+export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighwayProps) {
+  // Filter notes that are within the visible window AND not yet processed
+  const visibleNotes = notes.filter((note, index) => {
+    // Hide notes that we've already passed (hit or miss)
+    if (index < activeNoteIndex) return false;
+
     const timeUntil = note.time - currentTime;
     return timeUntil > -0.5 && timeUntil < WINDOW_DURATION;
   });

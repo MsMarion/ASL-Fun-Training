@@ -121,7 +121,11 @@ export default function ScriptedDemoPage() {
 
             {/* Bottom: Highway + Lyrics */}
             <div className="relative z-10 flex flex-col gap-2 p-4">
-                <NoteHighway notes={state.notes} currentTime={state.currentTime} />
+                <NoteHighway
+                    notes={state.notes}
+                    currentTime={state.currentTime}
+                    activeNoteIndex={state.activeNoteIndex ?? 0}
+                />
                 <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
             </div>
 
