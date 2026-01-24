@@ -7,10 +7,10 @@ import { type BeatmapNote } from "./beatmap";
 
 // Timing windows (in seconds)
 export const EARLY_WINDOW = 5.0; // Notes become hittable 5s before target time
-export const LATE_GRACE = 1.0; // Deadline after target time (Increased from 0.8)
-export const PERFECT_THRESHOLD = 0.5; // ±0.5s for PERFECT (Increased from 0.3)
-export const CONFIDENCE_THRESHOLD = 0.55; // Minimum confidence (Decreased from 0.7)
-export const VISUAL_TRIGGER_WINDOW = 0.6; // Visual trigger window (Increased from 0.5)
+export const LATE_GRACE = 1.5; // Deadline after target time (very forgiving)
+export const PERFECT_THRESHOLD = 1.0; // ±1.0s for PERFECT (very generous)
+export const CONFIDENCE_THRESHOLD = 0.50; // Minimum confidence (lowered further)
+export const VISUAL_TRIGGER_WINDOW = 2.0; // Allow hits 2.0s before note reaches target (generous early window)
 export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
 
 // Scoring constants
@@ -105,26 +105,29 @@ export function evaluateNote(
   }
 
   // We have a valid hit! Determine quality based on timing
-  // Calculate relative time of the prediction (seconds from game start)
-  const relativePredTime = (prediction.clientTimestamp - gameStartTime) - INPUT_OFFSET;
+  // For "hold-to-hit" mechanics: check if the CURRENT GAME TIME is within the visual window
+  // (not when the prediction was made - the user may have been holding the sign for a while)
 
-  // VISUAL SYNC: If the hit is VALID but visually "Too Early" (too far from target),
-  // defer it. We want the user to hold the sign until it hits the target.
-  if (note.time - relativePredTime > VISUAL_TRIGGER_WINDOW) {
+  // VISUAL SYNC: If the note hasn't reached the visual trigger zone yet, defer the hit.
+  // This uses currentTime (game clock) not the prediction timestamp.
+  const timeUntilTarget = note.time - currentTime;
+  if (timeUntilTarget > VISUAL_TRIGGER_WINDOW) {
+    // Note is still too far away visually - keep holding!
     return { type: "pending" };
   }
 
-  const timeDiff = Math.abs(relativePredTime - note.time);
+  // Use currentTime for timing quality (since user may have been holding the sign)
+  const timeDiff = Math.abs(currentTime - note.time);
   const multiplier = calculateMultiplier(streak);
 
   let quality: HitQuality;
   let basePoints: number;
 
   if (timeDiff <= PERFECT_THRESHOLD) {
-    // Within ±0.5s of target
+    // Within ±1.0s of target
     quality = "PERFECT";
     basePoints = PERFECT_POINTS;
-  } else if (relativePredTime < note.time) {
+  } else if (currentTime < note.time) {
     // Early (within window but before target)
     quality = "GREAT";
     basePoints = GREAT_POINTS;
