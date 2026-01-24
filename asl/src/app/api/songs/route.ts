@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import connectDB from "~/lib/mongodb";
-import Song from "~/models/Song";
+import { db } from "~/server/db";
 
 export async function POST(request: Request) {
     try {
-        await connectDB();
-
         const { albumName, songName, thumbnailName, interactions } =
             await request.json();
 
-        const song = await Song.create({
-            albumName,
-            songName,
-            thumbnailName,
-            interactions,
+        const song = await db.song.create({
+            data: {
+                songName,
+                albumName,
+                thumbnailName,
+                interactions: interactions ?? [],
+            },
         });
 
         return NextResponse.json({ success: true, song }, { status: 201 });
@@ -28,8 +27,9 @@ export async function POST(request: Request) {
 
 export async function GET() {
     try {
-        await connectDB();
-        const songs = await Song.find().sort({ createdAt: -1 });
+        const songs = await db.song.findMany({
+            orderBy: { createdAt: "desc" },
+        });
         return NextResponse.json({ success: true, songs });
     } catch (error) {
         console.error("Error fetching songs:", error);
