@@ -1,19 +1,33 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button } from "~/components/ui/button";
 
 interface KeyPress {
     key: string;
     timeElapsed: number;
 }
 
+type AudioTab = "youtube" | "upload";
+
 export default function DevModePage() {
-    const [audioFile, setAudioFile] = useState<File | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [keyPresses, setKeyPresses] = useState<KeyPress[]>([]);
+
+    // Tab state
+    const [activeTab, setActiveTab] = useState<AudioTab>("youtube");
+
+    // YouTube
+    const [youtubeUrl, setYoutubeUrl] = useState("");
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [downloadError, setDownloadError] = useState("");
+    const [videoTitle, setVideoTitle] = useState("");
+
+    // File upload
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Form fields
     const [songName, setSongName] = useState("");
@@ -22,9 +36,12 @@ export default function DevModePage() {
 
     const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState("");
+    const [audioDuration, setAudioDuration] = useState(0);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editKey, setEditKey] = useState("");
+    const [editTime, setEditTime] = useState("");
 
     const audioRef = useRef<HTMLAudioElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
     // Key press listener while recording
@@ -44,6 +61,78 @@ export default function DevModePage() {
         return () => window.removeEventListener("keydown", handleKeyPress);
     }, [isRecording]);
 
+    const handleYoutubeDownload = async () => {
+        if (!youtubeUrl.trim()) {
+            setDownloadError("Please enter a YouTube URL");
+            return;
+        }
+
+        setIsDownloading(true);
+        setDownloadProgress(0);
+        setDownloadError("");
+        setVideoTitle("");
+
+        try {
+            const progressInterval = setInterval(() => {
+                setDownloadProgress((prev) => {
+                    if (prev >= 25) {
+                        clearInterval(progressInterval);
+                        return 25;
+                    }
+                    return prev + 5;
+                });
+            }, 200);
+
+            const response = await fetch("/api/youtube", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: youtubeUrl }),
+            });
+
+            const data = await response.json();
+
+            clearInterval(progressInterval);
+
+            if (data.success && data.videoId) {
+                setDownloadProgress(30);
+
+                const streamResponse = await fetch(`/api/youtube?videoId=${data.videoId}`);
+                if (!streamResponse.ok) {
+                    const errorData = await streamResponse.json().catch(() => ({}));
+                    throw new Error(errorData.error || "Failed to stream audio");
+                }
+
+                setDownloadProgress(80);
+                const audioBlob = await streamResponse.blob();
+                const audioBlobUrl = URL.createObjectURL(audioBlob);
+
+                setDownloadProgress(100);
+
+                if (audioUrl) {
+                    URL.revokeObjectURL(audioUrl);
+                }
+
+                setAudioUrl(audioBlobUrl);
+                setVideoTitle(data.title || "YouTube Audio");
+                setIsPlaying(false);
+                setIsRecording(false);
+                setKeyPresses([]);
+
+                if (!songName && data.title) {
+                    setSongName(data.title);
+                }
+            } else {
+                throw new Error(data.error || "Failed to get video info");
+            }
+        } catch (error) {
+            console.error("Download error:", error);
+            setDownloadError(error instanceof Error ? error.message : "Failed to download audio");
+            setDownloadProgress(0);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith("audio/")) {
@@ -55,7 +144,15 @@ export default function DevModePage() {
             setIsPlaying(false);
             setIsRecording(false);
             setKeyPresses([]);
+
+            if (!songName) {
+                setSongName(file.name.replace(/\.[^/.]+$/, ""));
+            }
         }
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
     };
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,10 +160,6 @@ export default function DevModePage() {
         if (file && file.type.startsWith("image/")) {
             setThumbnailFile(file);
         }
-    };
-
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
     };
 
     const handleThumbnailClick = () => {
@@ -98,14 +191,54 @@ export default function DevModePage() {
         if (audioUrl) {
             URL.revokeObjectURL(audioUrl);
         }
-        setAudioFile(null);
         setAudioUrl(null);
+        setAudioFile(null);
         setIsPlaying(false);
         setIsRecording(false);
         setKeyPresses([]);
+        setYoutubeUrl("");
+        setVideoTitle("");
+        setDownloadProgress(0);
+        setDownloadError("");
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
+    };
+
+    const deleteKeyPress = (index: number) => {
+        setKeyPresses((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const startEditing = (index: number) => {
+        const kp = keyPresses[index];
+        if (kp) {
+            setEditingIndex(index);
+            setEditKey(kp.key);
+            setEditTime(kp.timeElapsed.toString());
+        }
+    };
+
+    const saveEdit = () => {
+        if (editingIndex === null) return;
+        const newTime = parseFloat(editTime);
+        if (isNaN(newTime) || newTime < 0) return;
+
+        setKeyPresses((prev) =>
+            prev.map((kp, i) =>
+                i === editingIndex
+                    ? { key: editKey || kp.key, timeElapsed: newTime }
+                    : kp
+            )
+        );
+        setEditingIndex(null);
+        setEditKey("");
+        setEditTime("");
+    };
+
+    const cancelEdit = () => {
+        setEditingIndex(null);
+        setEditKey("");
+        setEditTime("");
     };
 
     const handleSave = async () => {
@@ -166,10 +299,10 @@ export default function DevModePage() {
             }}
         >
             <h1
-                className="text-4xl font-bold tracking-widest"
+                className="text-5xl tracking-widest font-[family-name:var(--font-monoton)]"
                 style={{
-                    color: "#00d4d4",
-                    textShadow: "0 0 20px rgba(0, 212, 212, 0.5)",
+                    color: "#d8b4fe",
+                    textShadow: "0 0 30px rgba(216, 180, 254, 0.6), 0 0 60px rgba(216, 180, 254, 0.4)",
                 }}
             >
                 DEV MODE
@@ -180,22 +313,19 @@ export default function DevModePage() {
                 className="flex w-full max-w-md flex-col gap-4 rounded-2xl border-2 p-8"
                 style={{
                     backgroundColor: "rgba(13, 13, 26, 0.8)",
-                    borderColor: "#00d4d4",
-                    boxShadow: "0 0 20px rgba(0, 212, 212, 0.2), inset 0 0 20px rgba(0, 212, 212, 0.05)",
+                    borderColor: "#d8b4fe",
+                    boxShadow: "0 0 30px rgba(216, 180, 254, 0.4), inset 0 0 20px rgba(216, 180, 254, 0.05)",
                 }}
             >
                 <h2
-                    className="text-xl font-semibold"
-                    style={{ color: "#00d4d4" }}
+                    className="text-2xl font-[family-name:var(--font-monoton)]"
+                    style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.5)" }}
                 >
                     Song Details
                 </h2>
 
                 <div className="flex flex-col gap-2">
-                    <label
-                        className="text-sm font-medium"
-                        style={{ color: "#a855f7" }}
-                    >
+                    <label className="text-sm font-medium" style={{ color: "#d8b4fe" }}>
                         Song Title
                     </label>
                     <input
@@ -206,18 +336,14 @@ export default function DevModePage() {
                         className="rounded-lg border-2 px-4 py-3 transition-all focus:outline-none"
                         style={{
                             backgroundColor: "rgba(20, 20, 40, 0.8)",
-                            borderColor: "#a855f7",
+                            borderColor: "#d8b4fe",
                             color: "#ffffff",
-                            boxShadow: "0 0 10px rgba(168, 85, 247, 0.2)",
+                            boxShadow: "0 0 20px rgba(216, 180, 254, 0.3)",
                         }}
-                    />
-                </div>
+                    />                </div>
 
                 <div className="flex flex-col gap-2">
-                    <label
-                        className="text-sm font-medium"
-                        style={{ color: "#a855f7" }}
-                    >
+                    <label className="text-sm font-medium" style={{ color: "#d8b4fe" }}>
                         Album Title
                     </label>
                     <input
@@ -228,18 +354,14 @@ export default function DevModePage() {
                         className="rounded-lg border-2 px-4 py-3 transition-all focus:outline-none"
                         style={{
                             backgroundColor: "rgba(20, 20, 40, 0.8)",
-                            borderColor: "#a855f7",
+                            borderColor: "#d8b4fe",
                             color: "#ffffff",
-                            boxShadow: "0 0 10px rgba(168, 85, 247, 0.2)",
+                            boxShadow: "0 0 20px rgba(216, 180, 254, 0.3)",
                         }}
-                    />
-                </div>
+                    />                </div>
 
                 <div className="flex flex-col gap-2">
-                    <label
-                        className="text-sm font-medium"
-                        style={{ color: "#a855f7" }}
-                    >
+                    <label className="text-sm font-medium" style={{ color: "#d8b4fe" }}>
                         Thumbnail
                     </label>
                     <input
@@ -253,54 +375,185 @@ export default function DevModePage() {
                         onClick={handleThumbnailClick}
                         className="rounded-lg border-2 border-dashed px-4 py-3 text-sm font-medium transition-all hover:bg-purple-500/10"
                         style={{
-                            borderColor: "#a855f7",
-                            color: "#a855f7",
+                            borderColor: "#d8b4fe",
+                            color: "#d8b4fe",
                         }}
                     >
                         {thumbnailFile ? "Change Thumbnail" : "Upload Thumbnail"}
                     </button>
                     {thumbnailFile && (
-                        <p className="text-sm" style={{ color: "#00d4d4" }}>
+                        <p className="text-sm" style={{ color: "#d8b4fe" }}>
                             Selected: {thumbnailFile.name}
                         </p>
                     )}
                 </div>
             </div>
 
-            {/* Audio Upload Section */}
+            {/* Audio Source Section with Tabs */}
             <div
-                className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed p-8"
+                className="flex w-full max-w-md flex-col gap-4 rounded-2xl border-2 p-8"
                 style={{
                     backgroundColor: "rgba(13, 13, 26, 0.8)",
-                    borderColor: "#00d4d4",
-                    boxShadow: "0 0 20px rgba(0, 212, 212, 0.2)",
+                    borderColor: "#d8b4fe",
+                    boxShadow: "0 0 30px rgba(216, 180, 254, 0.4), inset 0 0 20px rgba(216, 180, 254, 0.05)",
+                    transition: "all 0.3s ease",
                 }}
             >
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="audio/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                />
-
-                <button
-                    onClick={handleUploadClick}
-                    className="rounded-lg border-2 px-6 py-3 text-lg font-semibold transition-all hover:scale-105"
+                <h2
+                    className="text-2xl font-[family-name:var(--font-monoton)]"
                     style={{
-                        borderColor: "#00d4d4",
-                        color: "#00d4d4",
-                        backgroundColor: "transparent",
-                        boxShadow: "0 0 15px rgba(0, 212, 212, 0.3)",
+                        color: "#d8b4fe",
+                        textShadow: "0 0 15px rgba(216, 180, 254, 0.5)",
                     }}
                 >
-                    {audioFile ? "Change Audio File" : "Upload Audio File"}
-                </button>
+                    Audio Source
+                </h2>
 
-                {audioFile && (
-                    <p className="text-sm" style={{ color: "#a855f7" }}>
-                        Selected: {audioFile.name}
-                    </p>
+                {/* Tabs */}
+                <div className="flex rounded-lg overflow-hidden" style={{ border: "2px solid rgba(255,255,255,0.1)" }}>
+                    <button
+                        onClick={() => setActiveTab("youtube")}
+                        className="flex-1 px-4 py-3 font-semibold transition-all"
+                        style={{
+                            backgroundColor: activeTab === "youtube" ? "#d8b4fe" : "transparent",
+                            color: activeTab === "youtube" ? "#ffffff" : "#d8b4fe",
+                            boxShadow: activeTab === "youtube" ? "0 0 15px rgba(216, 180, 254, 0.5)" : "none",
+                        }}
+                    >
+                        YouTube
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("upload")}
+                        className="flex-1 px-4 py-3 font-semibold transition-all"
+                        style={{
+                            backgroundColor: activeTab === "upload" ? "#d8b4fe" : "transparent",
+                            color: activeTab === "upload" ? "#ffffff" : "#d8b4fe",
+                            boxShadow: activeTab === "upload" ? "0 0 15px rgba(216, 180, 254, 0.5)" : "none",
+                        }}
+                    >
+                        Upload
+                    </button>
+                </div>
+
+                {/* YouTube Tab Content */}
+                {activeTab === "youtube" && (
+                    <div className="flex flex-col gap-3">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={youtubeUrl}
+                                onChange={(e) => setYoutubeUrl(e.target.value)}
+                                placeholder="Paste YouTube URL here..."
+                                disabled={isDownloading}
+                                className="w-full rounded-lg border-2 px-4 py-4 pr-12 transition-all focus:outline-none disabled:opacity-50"
+                                style={{
+                                    backgroundColor: "rgba(20, 20, 40, 0.8)",
+                                    borderColor: "#d8b4fe",
+                                    color: "#ffffff",
+                                    boxShadow: "0 0 25px rgba(216, 180, 254, 0.3)",
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !isDownloading) {
+                                        handleYoutubeDownload();
+                                    }
+                                }}
+                            />
+                            <div
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-2xl"
+                                style={{ color: "#d8b4fe" }}
+                            >
+                                ▶
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleYoutubeDownload}
+                            disabled={isDownloading || !youtubeUrl.trim()}
+                            className="w-full rounded-lg px-6 py-3 text-lg font-bold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+                            style={{
+                                background: isDownloading
+                                    ? "linear-gradient(135deg, #d8b4fe, #d8b4fe)"
+                                    : "#d8b4fe",
+                                color: "#ffffff",
+                                boxShadow: "0 0 20px rgba(216, 180, 254, 0.4)",
+                            }}
+                        >
+                            {isDownloading ? "Downloading..." : "Download Audio"}
+                        </button>
+
+                        {isDownloading && (
+                            <div className="relative">
+                                <div
+                                    className="h-3 w-full rounded-full overflow-hidden"
+                                    style={{
+                                        backgroundColor: "rgba(20, 20, 40, 0.8)",
+                                        border: "1px solid rgba(216, 180, 254, 0.3)",
+                                    }}
+                                >
+                                    <div
+                                        className="h-full rounded-full transition-all duration-300"
+                                        style={{
+                                            width: `${downloadProgress}%`,
+                                            background: "linear-gradient(90deg, #d8b4fe, #d8b4fe)",
+                                            boxShadow: "0 0 20px rgba(216, 180, 254, 0.8)",
+                                        }}
+                                    />
+                                </div>
+                                <p className="text-center text-xs mt-2" style={{ color: "#d8b4fe" }}>
+                                    {downloadProgress}% complete
+                                </p>
+                            </div>
+                        )}
+
+                        {videoTitle && !isDownloading && (
+                            <p
+                                className="text-sm text-center"
+                                style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
+                            >
+                                Ready: {videoTitle}
+                            </p>
+                        )}
+
+                        {downloadError && (
+                            <p className="text-sm text-center" style={{ color: "#d8b4fe" }}>
+                                {downloadError}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* Upload Tab Content */}
+                {activeTab === "upload" && (
+                    <div className="flex flex-col gap-3">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="audio/*"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                        />
+
+                        <button
+                            onClick={handleUploadClick}
+                            className="w-full rounded-lg border-2 border-dashed px-6 py-8 text-lg font-semibold transition-all hover:scale-[1.02] hover:bg-green-500/10"
+                            style={{
+                                borderColor: "#d8b4fe",
+                                color: "#d8b4fe",
+                                backgroundColor: "rgba(20, 20, 40, 0.8)",
+                            }}
+                        >
+                            {audioFile ? "Change Audio File" : "Click to Upload Audio"}
+                        </button>
+
+                        {audioFile && (
+                            <p
+                                className="text-sm text-center"
+                                style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.7)" }}
+                            >
+                                Ready: {audioFile.name}
+                            </p>
+                        )}
+                    </div>
                 )}
             </div>
 
@@ -310,17 +563,19 @@ export default function DevModePage() {
                     className="flex flex-col items-center gap-4 rounded-2xl border-2 p-8"
                     style={{
                         backgroundColor: "rgba(13, 13, 26, 0.8)",
-                        borderColor: isRecording ? "#a855f7" : "#00d4d4",
-                        boxShadow: isRecording
-                            ? "0 0 30px rgba(168, 85, 247, 0.4)"
-                            : "0 0 20px rgba(0, 212, 212, 0.2)",
-                        transition: "all 0.3s ease",
+                                            borderColor: "#d8b4fe",
+                                            boxShadow: "0 0 40px rgba(216, 180, 254, 0.5)",                        transition: "all 0.3s ease",
                     }}
                 >
                     <audio
                         ref={audioRef}
                         src={audioUrl}
                         onEnded={handleAudioEnded}
+                        onLoadedMetadata={() => {
+                            if (audioRef.current) {
+                                setAudioDuration(audioRef.current.duration);
+                            }
+                        }}
                         className="hidden"
                     />
 
@@ -330,9 +585,9 @@ export default function DevModePage() {
                                 onClick={startRecording}
                                 className="rounded-lg px-6 py-3 text-lg font-bold transition-all hover:scale-105"
                                 style={{
-                                    backgroundColor: "#a855f7",
+                                    backgroundColor: "#d8b4fe",
                                     color: "#ffffff",
-                                    boxShadow: "0 0 20px rgba(168, 85, 247, 0.5)",
+                                    boxShadow: "0 0 30px rgba(216, 180, 254, 0.6)",
                                 }}
                             >
                                 Start Recording
@@ -342,9 +597,9 @@ export default function DevModePage() {
                                 onClick={stopRecording}
                                 className="animate-pulse rounded-lg px-6 py-3 text-lg font-bold transition-all hover:scale-105"
                                 style={{
-                                    backgroundColor: "#ef4444",
+                                    backgroundColor: "#d8b4fe",
                                     color: "#ffffff",
-                                    boxShadow: "0 0 20px rgba(239, 68, 68, 0.5)",
+                                    boxShadow: "0 0 30px rgba(216, 180, 254, 0.6)",
                                 }}
                             >
                                 Stop Recording
@@ -355,8 +610,8 @@ export default function DevModePage() {
                             onClick={handleRemoveAudio}
                             className="rounded-lg border-2 px-6 py-3 text-lg font-semibold transition-all hover:bg-red-500/20"
                             style={{
-                                borderColor: "#ef4444",
-                                color: "#ef4444",
+                                borderColor: "#d8b4fe",
+                                color: "#d8b4fe",
                             }}
                         >
                             Remove
@@ -364,19 +619,196 @@ export default function DevModePage() {
                     </div>
 
                     {isRecording && (
-                        <p
-                            className="animate-pulse text-sm font-medium"
-                            style={{ color: "#a855f7" }}
-                        >
+                        <p className="animate-pulse text-sm font-medium" style={{ color: "#d8b4fe" }}>
                             Recording... Press keys to log timestamps
                         </p>
                     )}
 
                     {keyPresses.length > 0 && (
-                        <p className="text-sm" style={{ color: "#00d4d4" }}>
+                        <p className="text-sm" style={{ color: "#d8b4fe" }}>
                             Recorded {keyPresses.length} keystrokes
                         </p>
                     )}
+                </div>
+            )}
+
+            {/* Timeline Section */}
+            {keyPresses.length > 0 && (
+                <div
+                    className="flex w-full max-w-4xl flex-col gap-4 rounded-2xl border-2 p-8"
+                    style={{
+                        backgroundColor: "rgba(13, 13, 26, 0.8)",
+                        borderColor: "#d8b4fe",
+                        boxShadow: "0 0 30px rgba(216, 180, 254, 0.4)",
+                    }}
+                >
+                    <h2
+                        className="text-2xl font-[family-name:var(--font-monoton)]"
+                        style={{ color: "#d8b4fe", textShadow: "0 0 15px rgba(216, 180, 254, 0.5)" }}
+                    >
+                        Timeline
+                    </h2>
+
+                    <div className="relative">
+                        <div
+                            className="h-16 w-full rounded-lg relative overflow-hidden"
+                            style={{
+                                backgroundColor: "rgba(20, 20, 40, 0.8)",
+                                border: "1px solid rgba(216, 180, 254, 0.3)",
+                            }}
+                        >
+                            {keyPresses.map((kp, index) => {
+                                const position = audioDuration > 0
+                                    ? (kp.timeElapsed / audioDuration) * 100
+                                    : 0;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="absolute top-0 h-full flex flex-col items-center justify-center group"
+                                        style={{
+                                            left: `${position}%`,
+                                            transform: "translateX(-50%)",
+                                        }}
+                                    >
+                                        <div
+                                            className="w-1 h-full"
+                                            style={{
+                                                backgroundColor: "#d8b4fe",
+                                                boxShadow: "0 0 20px rgba(216, 180, 254, 0.8)",
+                                            }}
+                                        />
+                                        <div
+                                            className="absolute -top-8 px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                            style={{
+                                                backgroundColor: "#d8b4fe",
+                                                color: "#fff",
+                                            }}
+                                        >
+                                            {kp.key} @ {kp.timeElapsed.toFixed(2)}s
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+                            <span>0:00</span>
+                            <span>{audioDuration > 0 ? `${Math.floor(audioDuration / 60)}:${String(Math.floor(audioDuration % 60)).padStart(2, '0')}` : '--:--'}</span>
+                        </div>
+                    </div>
+
+                    <div
+                        className="max-h-64 overflow-y-auto rounded-lg p-4"
+                        style={{
+                            backgroundColor: "rgba(20, 20, 40, 0.8)",
+                            border: "1px solid rgba(216, 180, 254, 0.3)",
+                        }}
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                            {keyPresses.map((kp, index) => (
+                                <div
+                                    key={index}
+                                    className="flex items-center justify-between gap-2 rounded-lg px-3 py-2"
+                                    style={{
+                                        backgroundColor: editingIndex === index
+                                            ? "rgba(0, 212, 212, 0.1)"
+                                            : "rgba(216, 180, 254, 0.1)",
+                                        border: editingIndex === index
+                                            ? "1px solid rgba(0, 212, 212, 0.5)"
+                                            : "1px solid rgba(216, 180, 254, 0.3)",
+                                    }}
+                                >
+                                    {editingIndex === index ? (
+                                        <>
+                                            <div className="flex items-center gap-2 flex-1">
+                                                <input
+                                                    type="text"
+                                                    value={editKey}
+                                                    onChange={(e) => setEditKey(e.target.value)}
+                                                    className="w-12 px-2 py-1 rounded text-center font-mono font-bold"
+                                                    style={{
+                                                        backgroundColor: "rgba(20, 20, 40, 0.8)",
+                                                        border: "1px solid #00d4d4",
+                                                        color: "#00d4d4",
+                                                    }}
+                                                    maxLength={1}
+                                                />
+                                                <input
+                                                    type="number"
+                                                    value={editTime}
+                                                    onChange={(e) => setEditTime(e.target.value)}
+                                                    className="w-20 px-2 py-1 rounded text-xs"
+                                                    style={{
+                                                        backgroundColor: "rgba(20, 20, 40, 0.8)",
+                                                        border: "1px solid #00d4d4",
+                                                        color: "#fff",
+                                                    }}
+                                                    step="0.01"
+                                                    min="0"
+                                                />
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={saveEdit}
+                                                    className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105"
+                                                    style={{
+                                                        backgroundColor: "#00d4d4",
+                                                        color: "#0d0d1a",
+                                                    }}
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={cancelEdit}
+                                                    className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105"
+                                                    style={{
+                                                        backgroundColor: "rgba(255,255,255,0.2)",
+                                                        color: "#fff",
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className="font-mono font-bold text-lg"
+                                                    style={{ color: "#00d4d4" }}
+                                                >
+                                                    {kp.key === " " ? "␣" : kp.key}
+                                                </span>
+                                                <span
+                                                    className="text-xs"
+                                                    style={{ color: "rgba(255,255,255,0.6)" }}
+                                                >
+                                                    {kp.timeElapsed.toFixed(2)}s
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={() => startEditing(index)}
+                                                    className="px-2 py-1 rounded text-xs transition-all hover:bg-cyan-500/20"
+                                                    style={{ color: "#00d4d4" }}
+                                                    title="Edit"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteKeyPress(index)}
+                                                    className="px-2 py-1 rounded text-xs transition-all hover:bg-red-500/20"
+                                                    style={{ color: "#ef4444" }}
+                                                    title="Delete"
+                                                >
+                                                    X
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -386,8 +818,8 @@ export default function DevModePage() {
                     className="flex flex-col items-center gap-4 rounded-2xl border-2 p-8"
                     style={{
                         backgroundColor: "rgba(13, 13, 26, 0.8)",
-                        borderColor: "#00d4d4",
-                        boxShadow: "0 0 20px rgba(0, 212, 212, 0.2)",
+                        borderColor: "#d8b4fe",
+                        boxShadow: "0 0 30px rgba(216, 180, 254, 0.4)",
                     }}
                 >
                     <button
@@ -395,9 +827,9 @@ export default function DevModePage() {
                         disabled={isSaving}
                         className="rounded-lg px-8 py-4 text-lg font-bold transition-all hover:scale-105 disabled:opacity-50"
                         style={{
-                            background: "linear-gradient(135deg, #00d4d4, #a855f7)",
+                            background: "linear-gradient(135deg, #d8b4fe, #d8b4fe)",
                             color: "#ffffff",
-                            boxShadow: "0 0 25px rgba(0, 212, 212, 0.4), 0 0 25px rgba(168, 85, 247, 0.4)",
+                            boxShadow: "0 0 35px rgba(216, 180, 254, 0.6)",
                         }}
                     >
                         {isSaving ? "Saving..." : "Save to Database"}
@@ -407,12 +839,10 @@ export default function DevModePage() {
                         <p
                             className="text-sm font-medium"
                             style={{
-                                color: saveMessage.includes("success")
-                                    ? "#00d4d4"
-                                    : "#ef4444",
+                                color: saveMessage.includes("success") ? "#d8b4fe" : "#d8b4fe",
                                 textShadow: saveMessage.includes("success")
-                                    ? "0 0 10px rgba(0, 212, 212, 0.5)"
-                                    : "0 0 10px rgba(239, 68, 68, 0.5)",
+                                    ? "0 0 15px rgba(216, 180, 254, 0.7)"
+                                    : "0 0 15px rgba(216, 180, 254, 0.7)",
                             }}
                         >
                             {saveMessage}
@@ -420,8 +850,6 @@ export default function DevModePage() {
                     )}
                 </div>
             )}
-
-
         </div>
     );
 }
