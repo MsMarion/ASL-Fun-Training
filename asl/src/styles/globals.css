@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --magenta: #920075;
+  --darkpurple: #2e2157;
+  --cyan: #2de2e6;
+  --purple: #540d6e;
+  --ink: #0d0221;
 }
+
+
