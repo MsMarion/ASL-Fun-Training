@@ -9,7 +9,7 @@ import { z } from "zod";
 
 const createSongSchema = z.object({
   songName: z.string().min(1, "Song name is required").max(200, "Song name too long"),
-  albumName: z.string().optional(),
+  albumName: z.string().min(1, "Album name is required").max(200, "Album name too long"),
   thumbnailName: z.string().optional(),
   interactions: z.array(
     // TODO: we have to figure out how the devmode form for the set works

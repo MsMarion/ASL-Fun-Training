@@ -1053,7 +1053,7 @@ export namespace Prisma {
   export type SongGroupByOutputType = {
     id: string
     songName: string
-    albumName: string | null
+    albumName: string
     thumbnailName: string | null
     createdAt: Date
     v: number
@@ -1108,7 +1108,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       songName: string
-      albumName: string | null
+      albumName: string
       thumbnailName: string | null
       createdAt: Date
       v: number
@@ -2002,7 +2002,7 @@ export namespace Prisma {
     NOT?: SongWhereInput | SongWhereInput[]
     id?: StringFilter<"Song"> | string
     songName?: StringFilter<"Song"> | string
-    albumName?: StringNullableFilter<"Song"> | string | null
+    albumName?: StringFilter<"Song"> | string
     thumbnailName?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
@@ -2025,7 +2025,7 @@ export namespace Prisma {
     OR?: SongWhereInput[]
     NOT?: SongWhereInput | SongWhereInput[]
     songName?: StringFilter<"Song"> | string
-    albumName?: StringNullableFilter<"Song"> | string | null
+    albumName?: StringFilter<"Song"> | string
     thumbnailName?: StringNullableFilter<"Song"> | string | null
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
@@ -2052,7 +2052,7 @@ export namespace Prisma {
     NOT?: SongScalarWhereWithAggregatesInput | SongScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Song"> | string
     songName?: StringWithAggregatesFilter<"Song"> | string
-    albumName?: StringNullableWithAggregatesFilter<"Song"> | string | null
+    albumName?: StringWithAggregatesFilter<"Song"> | string
     thumbnailName?: StringNullableWithAggregatesFilter<"Song"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Song"> | Date | string
     v?: IntWithAggregatesFilter<"Song"> | number
@@ -2061,7 +2061,7 @@ export namespace Prisma {
   export type SongCreateInput = {
     id?: string
     songName: string
-    albumName?: string | null
+    albumName: string
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
@@ -2071,7 +2071,7 @@ export namespace Prisma {
   export type SongUncheckedCreateInput = {
     id?: string
     songName: string
-    albumName?: string | null
+    albumName: string
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
@@ -2080,7 +2080,7 @@ export namespace Prisma {
 
   export type SongUpdateInput = {
     songName?: StringFieldUpdateOperationsInput | string
-    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    albumName?: StringFieldUpdateOperationsInput | string
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -2089,7 +2089,7 @@ export namespace Prisma {
 
   export type SongUncheckedUpdateInput = {
     songName?: StringFieldUpdateOperationsInput | string
-    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    albumName?: StringFieldUpdateOperationsInput | string
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -2099,7 +2099,7 @@ export namespace Prisma {
   export type SongCreateManyInput = {
     id?: string
     songName: string
-    albumName?: string | null
+    albumName: string
     thumbnailName?: string | null
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
@@ -2108,7 +2108,7 @@ export namespace Prisma {
 
   export type SongUpdateManyMutationInput = {
     songName?: StringFieldUpdateOperationsInput | string
-    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    albumName?: StringFieldUpdateOperationsInput | string
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -2117,7 +2117,7 @@ export namespace Prisma {
 
   export type SongUncheckedUpdateManyInput = {
     songName?: StringFieldUpdateOperationsInput | string
-    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    albumName?: StringFieldUpdateOperationsInput | string
     thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
