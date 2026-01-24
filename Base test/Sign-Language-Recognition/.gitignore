@@ -13,3 +13,5 @@ compressor/__pycache__/
 
 # Raw Downlaods
 raw_downloads/
+
+venv/
