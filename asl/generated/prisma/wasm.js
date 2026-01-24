@@ -86,9 +86,13 @@ Prisma.NullTypes = {
 /**
  * Enums
  */
-exports.Prisma.UserScalarFieldEnum = {
+exports.Prisma.SongScalarFieldEnum = {
   id: 'id',
-  name: 'name'
+  songName: 'songName',
+  albumName: 'albumName',
+  thumbnailName: 'thumbnailName',
+  createdAt: 'createdAt',
+  v: 'v'
 };
 
 exports.Prisma.SortOrder = {
@@ -103,7 +107,7 @@ exports.Prisma.QueryMode = {
 
 
 exports.Prisma.ModelName = {
-  User: 'User'
+  Song: 'Song'
 };
 /**
  * Create the Client
@@ -144,6 +148,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mongodb",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -152,13 +157,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id   String @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name String\n}\n",
-  "inlineSchemaHash": "11901777ff8857edc9cb06ce4bbbc99299a24310a2b1e6ff926dff7737288115",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ADD MODELS HERE\nmodel Song {\n  id            String        @id @default(auto()) @map(\"_id\") @db.ObjectId\n  songName      String\n  albumName     String\n  thumbnailName String?\n  interactions  Interaction[]\n  createdAt     DateTime      @default(now())\n  v             Int           @default(0) @map(\"__v\")\n}\n\ntype Interaction {\n  key         String\n  timeElapsed Float // Changed from Double to Float for consistency\n}\n",
+  "inlineSchemaHash": "aefe04545cf43efb0eb7f8616bc15bb74ced39085acdafb57a99d656de694de0",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Song\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"songName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"albumName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"interactions\",\"kind\":\"object\",\"type\":\"Interaction\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
