@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import { Button } from "~/components/ui/button";
 
 const elevenlabs = new ElevenLabsClient({
     apiKey: "sk_047f6a4749901f9749fcd5253b92c75112c05b09ae616e62"
@@ -58,9 +59,9 @@ export default function Home() {
     return (
         <div className="">
             hello swamp hacks!!
-            <button onClick={playAudio} disabled={isLoading}>
+            <Button onClick={playAudio} disabled={isLoading}>
                 {isLoading ? "Loading..." : "Mi Button"}
-            </button>
+            </Button>
         </div>
     );
 }
