@@ -120,6 +120,8 @@ exports.Prisma.SongScalarFieldEnum = {
   isCommunity: 'isCommunity',
   albumName: 'albumName',
   thumbnailName: 'thumbnailName',
+  thumbnailUrl: 'thumbnailUrl',
+  audioUrl: 'audioUrl',
   createdAt: 'createdAt',
   v: 'v'
 };

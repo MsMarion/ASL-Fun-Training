@@ -92,6 +92,8 @@ exports.Prisma.SongScalarFieldEnum = {
   isCommunity: 'isCommunity',
   albumName: 'albumName',
   thumbnailName: 'thumbnailName',
+  thumbnailUrl: 'thumbnailUrl',
+  audioUrl: 'audioUrl',
   createdAt: 'createdAt',
   v: 'v'
 };
@@ -167,13 +169,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ADD MODELS HERE\nmodel Song {\n  id            String        @id @default(auto()) @map(\"_id\") @db.ObjectId\n  songName      String\n  isCommunity   Boolean\n  albumName     String?\n  thumbnailName String?\n  interactions  Interaction[]\n  createdAt     DateTime      @default(now())\n  v             Int           @default(0) @map(\"__v\")\n}\n\nmodel LeaderboardEntry {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String\n  score     Int\n  rank      Int\n  createdAt DateTime @default(now())\n  v         Int      @default(0) @map(\"__v\")\n}\n\ntype Interaction {\n  key         String\n  timeElapsed Float // Changed from Double to Float for consistency\n}\n",
-  "inlineSchemaHash": "c2f3de35d6615819eaf29368c1eecd1d5257390cf546743b2f61040f62776a65",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ADD MODELS HERE\nmodel Song {\n  id            String        @id @default(auto()) @map(\"_id\") @db.ObjectId\n  songName      String\n  isCommunity   Boolean\n  albumName     String?\n  thumbnailName String?\n  thumbnailUrl  String?\n  audioUrl      String?\n  interactions  Interaction[]\n  createdAt     DateTime      @default(now())\n  v             Int           @default(0) @map(\"__v\")\n}\n\nmodel LeaderboardEntry {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String\n  score     Int\n  rank      Int\n  createdAt DateTime @default(now())\n  v         Int      @default(0) @map(\"__v\")\n}\n\ntype Interaction {\n  key         String\n  timeElapsed Float // Changed from Double to Float for consistency\n}\n",
+  "inlineSchemaHash": "f23316c100b0e91ae7fa5439446fb77cc4ba4bd87c0f12248dc19ea65c44e6ca",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Song\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"songName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isCommunity\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"albumName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"interactions\",\"kind\":\"object\",\"type\":\"Interaction\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"LeaderboardEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rank\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Song\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"songName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isCommunity\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"albumName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"audioUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"interactions\",\"kind\":\"object\",\"type\":\"Interaction\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"LeaderboardEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rank\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
