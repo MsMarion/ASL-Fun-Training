@@ -13,10 +13,11 @@ import { ParticleOverlay, type ParticleOverlayRef } from "~/components/game/Part
 import { ScreenFlash } from "~/components/game/ScreenFlash";
 import { EffectsToggle } from "~/components/game/EffectsToggle";
 
-const WORD = "TVINKLE";
-
 export default function EffectsDemoPage() {
   const state = useMockGameLoop(DEMO_BEATMAP);
+
+  // Derive word from beatmap notes
+  const WORD = DEMO_BEATMAP.notes.map(note => note.letter).join('');
   const particleOverlayRef = useRef<ParticleOverlayRef>(null);
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
