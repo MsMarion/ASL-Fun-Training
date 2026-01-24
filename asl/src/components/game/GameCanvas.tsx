@@ -112,9 +112,38 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
 
       {/* Bottom: Note highway + lyrics */}
       <div className="relative z-10 flex flex-col gap-2 p-4">
-        <NoteHighway notes={state.notes} currentTime={state.currentTime} />
+        <NoteHighway
+          notes={state.notes}
+          currentTime={state.currentTime}
+          activeNoteIndex={state.activeNoteIndex}
+        />
         <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
       </div>
+
+      {/* Debug Info: Detected Sign */}
+      {state.latestPrediction && (
+        <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
+          <div className="bg-black/80 backdrop-blur text-white px-3 py-2 rounded-lg border border-white/20 shadow-lg flex flex-col items-end">
+            <span className="text-xs text-gray-400 font-mono tracking-wider">DETECTED</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold bg-gradient-to-br from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                {state.latestPrediction.letter}
+              </span>
+              <span className="text-xs text-green-400 font-mono">
+                {Math.min(100, (state.latestPrediction.confidence * 100)).toFixed(0)}%
+              </span>
+            </div>
+            <div className="flex items-center gap-1 mt-1 border-t border-white/10 pt-1 w-full justify-end">
+              <span className="text-[10px] text-gray-400 font-mono">LATENCY</span>
+              <span className={`text-xs font-mono ${state.latency < 100 ? "text-green-400" :
+                state.latency < 200 ? "text-yellow-400" : "text-red-400"
+                }`}>
+                {state.latency}ms
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
