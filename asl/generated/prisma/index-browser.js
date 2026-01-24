@@ -117,6 +117,7 @@ Prisma.NullTypes = {
 exports.Prisma.SongScalarFieldEnum = {
   id: 'id',
   songName: 'songName',
+  isCommunity: 'isCommunity',
   albumName: 'albumName',
   thumbnailName: 'thumbnailName',
   createdAt: 'createdAt',
