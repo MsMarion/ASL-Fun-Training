@@ -7,10 +7,10 @@ import { type BeatmapNote } from "./beatmap";
 
 // Timing windows (in seconds)
 export const EARLY_WINDOW = 5.0; // Notes become hittable 5s before target time
-export const LATE_GRACE = 0.8; // Deadline after target time
-export const PERFECT_THRESHOLD = 0.3; // ±0.3s for PERFECT
-export const CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence to accept prediction
-export const VISUAL_TRIGGER_WINDOW = 0.5; // Only trigger hit when note is visually close (0.5s)
+export const LATE_GRACE = 1.0; // Deadline after target time (Increased from 0.8)
+export const PERFECT_THRESHOLD = 0.5; // ±0.5s for PERFECT (Increased from 0.3)
+export const CONFIDENCE_THRESHOLD = 0.55; // Minimum confidence (Decreased from 0.7)
+export const VISUAL_TRIGGER_WINDOW = 0.6; // Visual trigger window (Increased from 0.5)
 export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
 
 // Scoring constants
@@ -30,8 +30,8 @@ export interface SignPrediction {
 }
 
 export type JudgementResult =
-  | { type: "hit"; quality: HitQuality; points: number }
-  | { type: "miss" }
+  | { type: "hit"; quality: HitQuality; points: number; sawLetter: string }
+  | { type: "miss"; reason: "TOO LATE" | "WRONG SIGN" | "LOW CONFIDENCE" | "NONE"; sawLetter: string }
   | { type: "pending" };
 
 /**
@@ -67,7 +67,16 @@ export function evaluateNote(
 
   // Check if we've passed the deadline
   if (currentTime > deadline) {
-    return { type: "miss" };
+    // If we have a prediction but it was rejected, we can provide a reason
+    if (prediction) {
+      if (prediction.letter.toUpperCase() !== note.letter.toUpperCase()) {
+        return { type: "miss", reason: "WRONG SIGN", sawLetter: prediction.letter };
+      }
+      if (prediction.confidence < CONFIDENCE_THRESHOLD) {
+        return { type: "miss", reason: "LOW CONFIDENCE", sawLetter: prediction.letter };
+      }
+    }
+    return { type: "miss", reason: "TOO LATE", sawLetter: prediction?.letter ?? "None" };
   }
 
   // If we haven't reached the early window yet, it's still pending
@@ -97,8 +106,6 @@ export function evaluateNote(
 
   // We have a valid hit! Determine quality based on timing
   // Calculate relative time of the prediction (seconds from game start)
-  // We have a valid hit! Determine quality based on timing
-  // Calculate relative time of the prediction (seconds from game start)
   const relativePredTime = (prediction.clientTimestamp - gameStartTime) - INPUT_OFFSET;
 
   // VISUAL SYNC: If the hit is VALID but visually "Too Early" (too far from target),
@@ -114,7 +121,7 @@ export function evaluateNote(
   let basePoints: number;
 
   if (timeDiff <= PERFECT_THRESHOLD) {
-    // Within ±0.3s of target
+    // Within ±0.5s of target
     quality = "PERFECT";
     basePoints = PERFECT_POINTS;
   } else if (relativePredTime < note.time) {
@@ -131,6 +138,7 @@ export function evaluateNote(
     type: "hit",
     quality,
     points: basePoints * multiplier,
+    sawLetter: prediction.letter,
   };
 }
 
