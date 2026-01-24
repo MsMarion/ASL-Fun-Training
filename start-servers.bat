@@ -25,7 +25,7 @@ if %ERRORLEVEL% EQU 0 (
     call conda activate asl-v_1 >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
         echo Using 'asl-v_1' environment
-        start "ML API Server" cmd /k "conda activate asl-v_1 && python api_server_http.py"
+        start "ML API Server" cmd /k "conda activate asl-v_3 && python api_server_http.py"
         goto :SERVER_STARTED
     )
 

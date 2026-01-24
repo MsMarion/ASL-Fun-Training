@@ -9,6 +9,11 @@ export interface Beatmap {
   totalDuration: number;
 }
 
+// Shared timing constants - single source of truth
+export const NOTE_WINDOW_DURATION = 4.0; // How long notes are visible before target (seconds)
+export const NOTE_LATE_GRACE = 1.5;      // Grace period after target time for late hits
+export const NOTE_TRACKING_WINDOW = 2.0; // When to start tracking for hits (seconds before target)
+
 /**
  * Generate a beatmap from a sequence of letters with fixed spacing
  */
@@ -51,9 +56,8 @@ export const DEMO_BEATMAP: Beatmap = {
   totalDuration: 26.0,
 };
 
-// Easy mode: 8 distinct, easy-to-recognize signs with generous spacing
-// Letters: A, B, C, L, O, Y, I, V
-export const EASY_MODE = generateBeatmap("Easy Mode", "ABCLOYIV", 3.0);
+// Easy mode: Alternating V and W for testing
+export const EASY_MODE = generateBeatmap("Easy Mode", "ABCDE", 3.0);
 
 /**
  * Get beatmap by ID (for dynamic route loading)

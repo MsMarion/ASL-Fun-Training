@@ -44,7 +44,7 @@ export function TargetWindow({ letter, state, streak = 0, isMatching = false }: 
 
   return (
     <div
-      className={`flex items-center justify-center rounded-2xl border-2 transition-all duration-150 ${isMatchingIdle ? "animate-pulse" : ""}`}
+      className={`relative flex items-center justify-center rounded-2xl border-2 transition-all duration-150 ${isMatchingIdle ? "animate-pulse" : ""}`}
       style={{
         width: "220px",
         height: "260px",
@@ -57,21 +57,32 @@ export function TargetWindow({ letter, state, streak = 0, isMatching = false }: 
           : "rgba(13,8,32,0.6)",
       }}
     >
-      {/* "HOLD IT!" indicator when matching */}
-      {isMatchingIdle && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <span className="text-sm font-bold text-yellow-400 animate-bounce">
-            ✓ HOLD IT!
-          </span>
-        </div>
-      )}
+      {/* "HOLD IT!" indicator removed - hits are immediate */}
 
       {letter ? (
-        <SignSymbolPrimary
-          letter={letter}
-          state={state}
-          className="w-36 h-44"
-        />
+        <>
+          {/* Letter label in corner */}
+          <div
+            className="absolute top-2 left-2 font-mono font-bold text-2xl"
+            style={{
+              color: isMatchingIdle
+                ? "rgba(250,204,21,0.9)"
+                : state === "success"
+                  ? "rgba(74,222,128,0.9)"
+                  : state === "miss"
+                    ? "rgba(248,113,113,0.9)"
+                    : "rgba(255,255,255,0.7)",
+              textShadow: `0 0 10px ${shadowColor}`,
+            }}
+          >
+            {letter}
+          </div>
+          <SignSymbolPrimary
+            letter={letter}
+            state={state}
+            className="w-36 h-44"
+          />
+        </>
       ) : (
         <div
           className="text-2xl font-mono opacity-30"
