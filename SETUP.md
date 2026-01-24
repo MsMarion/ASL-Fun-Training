@@ -101,6 +101,17 @@ npm run dev
 ### Windows Users
 *   **"Conda is not recognized"**: Make sure you added Anaconda to your PATH during installation, or use the "Anaconda Prompt" instead of standard CMD/PowerShell.
 *   **Camera Permission**: Windows might block camera access. Check Settings > Privacy > Camera.
+*   **`ImportError: cannot import name 'Image' from 'PIL'`**: This indicates a corrupted installation or version conflict between Pillow and Matplotlib.
+    Run these commands **exactly as shown** to clean and reinstall them:
+    ```bash
+    pip uninstall matplotlib pillow -y
+    pip install --no-cache-dir matplotlib pillow
+    ```
+    If that still fails, try installing via Conda instead:
+    ```bash
+    pip uninstall pillow -y
+    conda install -c conda-forge pillow
+    ```
 
 ### All Users
 *   **"Module not found" error**: Make sure you activated the environment (`conda activate asl-fun`) before running the server.
