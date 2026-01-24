@@ -1,0 +1,1 @@
+This folder contains scripts and tools for generating cartoon symbols and diagrams as assets.

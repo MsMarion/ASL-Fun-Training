@@ -1,0 +1,1 @@
+This folder is for scripts and notebooks used for training the ASL classification models.

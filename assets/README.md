@@ -1,0 +1,1 @@
+This folder will store generated assets like cartoon symbols and diagrams for ASL phrases and images.

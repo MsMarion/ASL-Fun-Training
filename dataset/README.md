@@ -1,0 +1,1 @@
+This folder will contain the dataset of ASL images and videos.

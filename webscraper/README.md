@@ -1,0 +1,1 @@
+This folder is for scripts that will scrape the web for ASL videos and images.

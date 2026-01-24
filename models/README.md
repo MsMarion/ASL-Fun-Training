@@ -1,0 +1,1 @@
+This folder will store the trained machine learning models for ASL classification.
