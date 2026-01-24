@@ -120,7 +120,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/kaisprunger/ASL-Fun-Training/asl/generated/prisma",
+      "value": "/Users/ericgeorge/workspace/code/ASL-Fun-Training/asl/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -134,7 +134,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/kaisprunger/ASL-Fun-Training/asl/prisma/schema.prisma",
+    "sourceFilePath": "/Users/ericgeorge/workspace/code/ASL-Fun-Training/asl/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
