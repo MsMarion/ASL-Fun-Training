@@ -114,11 +114,41 @@ Prisma.NullTypes = {
  * Enums
  */
 
-undefined
+exports.Prisma.SongScalarFieldEnum = {
+  id: 'id',
+  songName: 'songName',
+  isCommunity: 'isCommunity',
+  albumName: 'albumName',
+  thumbnailName: 'thumbnailName',
+  thumbnailUrl: 'thumbnailUrl',
+  audioUrl: 'audioUrl',
+  createdAt: 'createdAt',
+  v: 'v'
+};
+
+exports.Prisma.LeaderboardEntryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  score: 'score',
+  rank: 'rank',
+  createdAt: 'createdAt',
+  v: 'v'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
 
 
 exports.Prisma.ModelName = {
-
+  Song: 'Song',
+  LeaderboardEntry: 'LeaderboardEntry'
 };
 
 /**
