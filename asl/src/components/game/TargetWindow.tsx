@@ -5,6 +5,7 @@ import { SignSymbolPrimary, type SignState } from "~/components/SignSymbolPrimar
 interface TargetWindowProps {
   letter: string | null;
   state: SignState;
+  streak?: number;
 }
 
 const BORDER_COLORS: Record<SignState, string> = {
@@ -19,7 +20,15 @@ const SHADOW_COLORS: Record<SignState, string> = {
   miss: "rgba(248,113,113,0.5)",
 };
 
-export function TargetWindow({ letter, state }: TargetWindowProps) {
+export function TargetWindow({ letter, state, streak = 0 }: TargetWindowProps) {
+  // Progressive glow based on streak
+  const glowMultiplier = Math.min(1 + (streak / 10) * 0.8, 2.5);
+
+  const shadowColor = SHADOW_COLORS[state];
+  const enhancedShadow = state === "idle" && streak > 0
+    ? `0 0 ${30 * glowMultiplier}px ${shadowColor}, inset 0 0 ${20 * glowMultiplier}px ${shadowColor}`
+    : `0 0 30px ${shadowColor}, inset 0 0 20px ${shadowColor}`;
+
   return (
     <div
       className="flex items-center justify-center rounded-2xl border-2 transition-all duration-300"
@@ -28,7 +37,7 @@ export function TargetWindow({ letter, state }: TargetWindowProps) {
         height: "260px",
         borderColor: BORDER_COLORS[state],
         borderStyle: state === "idle" ? "dashed" : "solid",
-        boxShadow: `0 0 30px ${SHADOW_COLORS[state]}, inset 0 0 20px ${SHADOW_COLORS[state]}`,
+        boxShadow: enhancedShadow,
         background: "rgba(13,8,32,0.6)",
       }}
     >

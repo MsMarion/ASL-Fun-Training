@@ -18,6 +18,16 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
     return timeUntil > -0.5 && timeUntil < WINDOW_DURATION;
   });
 
+  // Find closest upcoming note for timing arc
+  const upcomingNote = notes.find((note) => note.time > currentTime);
+  const timeUntilNext = upcomingNote ? upcomingNote.time - currentTime : null;
+  const isNoteApproaching = timeUntilNext !== null && timeUntilNext < 0.5;
+
+  // Timing arc progress (fill from 0 to 1 as note approaches)
+  const arcProgress = timeUntilNext !== null && timeUntilNext < 2
+    ? Math.max(0, 1 - timeUntilNext / 2)
+    : 0;
+
   return (
     <div className="relative w-full overflow-hidden" style={{ height: "100px" }}>
       {/* Highway track background */}
@@ -35,19 +45,59 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
         style={{
           left: `${HIT_ZONE_PERCENT}%`,
           background: "rgba(217,70,239,0.8)",
-          boxShadow: "0 0 10px rgba(217,70,239,0.6), 0 0 20px rgba(217,70,239,0.3)",
+          boxShadow: isNoteApproaching
+            ? "0 0 20px rgba(217,70,239,0.9), 0 0 40px rgba(217,70,239,0.5)"
+            : "0 0 10px rgba(217,70,239,0.6), 0 0 20px rgba(217,70,239,0.3)",
+          transition: "box-shadow 0.3s ease-out",
         }}
       />
 
-      {/* Hit zone glow area */}
+      {/* Hit zone glow area with pulse */}
       <div
         className="absolute top-0 bottom-0"
         style={{
           left: `${HIT_ZONE_PERCENT - 3}%`,
           width: "6%",
           background: "radial-gradient(ellipse at center, rgba(217,70,239,0.15) 0%, transparent 70%)",
+          animation: isNoteApproaching ? "hit-zone-pulse 0.5s ease-in-out infinite" : "none",
         }}
       />
+
+      {/* Timing arc (SVG circle) */}
+      <svg
+        className="pointer-events-none absolute"
+        style={{
+          left: `${HIT_ZONE_PERCENT}%`,
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "80px",
+          height: "80px",
+        }}
+      >
+        <circle
+          cx="40"
+          cy="40"
+          r="35"
+          fill="none"
+          stroke="rgba(217,70,239,0.3)"
+          strokeWidth="2"
+        />
+        <circle
+          cx="40"
+          cy="40"
+          r="35"
+          fill="none"
+          stroke="rgba(217,70,239,0.9)"
+          strokeWidth="3"
+          strokeDasharray={`${2 * Math.PI * 35}`}
+          strokeDashoffset={`${2 * Math.PI * 35 * (1 - arcProgress)}`}
+          style={{
+            transform: "rotate(-90deg)",
+            transformOrigin: "center",
+            transition: "stroke-dashoffset 0.05s linear",
+          }}
+        />
+      </svg>
 
       {/* Notes */}
       {visibleNotes.map((note, i) => {
@@ -60,6 +110,10 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
         const isPast = timeUntil < 0;
         const opacity = isPast ? Math.max(0, 1 + timeUntil * 2) : Math.min(1, (WINDOW_DURATION - timeUntil) / 0.5);
         const scale = isPast ? Math.max(0.5, 1 + timeUntil * 0.5) : 1;
+
+        // Note brightness: dim purple to bright magenta as it approaches
+        const brightness = Math.max(0.5, 1 - timeUntil / WINDOW_DURATION);
+        const trailOpacity = Math.max(0, brightness - 0.3);
 
         return (
           <div
@@ -75,7 +129,27 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
               height: "70px",
             }}
           >
-            <SignSymbolHighway letter={note.letter} className="w-full h-full" />
+            {/* Note trail glow */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(90deg, transparent 0%, rgba(217,70,239,${trailOpacity * 0.4}) 50%, rgba(217,70,239,${trailOpacity * 0.6}) 100%)`,
+                filter: "blur(12px)",
+                transform: "scaleX(1.5)",
+                opacity: trailOpacity,
+              }}
+            />
+            <div
+              className="relative z-10 w-full h-full"
+              style={{
+                filter: `brightness(${brightness}) drop-shadow(0 0 ${8 * brightness}px rgba(217,70,239,${brightness * 0.8}))`,
+              }}
+            >
+              <SignSymbolHighway
+                letter={note.letter}
+                className="w-full h-full"
+              />
+            </div>
           </div>
         );
       })}

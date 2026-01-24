@@ -12,6 +12,12 @@ export interface GameState {
   noteState: "idle" | "success" | "miss";
   feedbackText: string | null;
   notes: BeatmapNote[];
+  lastHitQuality: "PERFECT" | "GREAT" | "OK" | null;
+  streakMilestone: number | null;
+  comboMultiplier: number;
+  handDetected: boolean;
+  isConnected: boolean;
+  activeNoteIndex: number;
 }
 
 const INITIAL_LIVES = 5;
@@ -28,6 +34,12 @@ export function useMockGameLoop(beatmap: Beatmap): GameState {
     noteState: "idle",
     feedbackText: null,
     notes: beatmap.notes,
+    lastHitQuality: null,
+    streakMilestone: null,
+    comboMultiplier: 1,
+    handDetected: true,
+    isConnected: true,
+    activeNoteIndex: 0,
   });
 
   const animFrameRef = useRef<number>(0);
@@ -47,6 +59,10 @@ export function useMockGameLoop(beatmap: Beatmap): GameState {
       currentNote: null,
       noteState: "idle",
       feedbackText: null,
+      lastHitQuality: null,
+      streakMilestone: null,
+      comboMultiplier: 1,
+      activeNoteIndex: 0,
     }));
   }, []);
 
@@ -80,10 +96,31 @@ export function useMockGameLoop(beatmap: Beatmap): GameState {
             const newLives = isHit ? prev.lives : Math.max(prev.lives - 1, 0);
 
             let feedbackText: string | null = null;
+            let hitQuality: "PERFECT" | "GREAT" | "OK" | null = null;
             if (isHit) {
-              feedbackText = newStreak >= 5 ? "PERFECT!" : "GREAT!";
+              const rand = Math.random();
+              if (rand < 0.5) {
+                feedbackText = "PERFECT!";
+                hitQuality = "PERFECT";
+              } else if (rand < 0.85) {
+                feedbackText = "GREAT!";
+                hitQuality = "GREAT";
+              } else {
+                feedbackText = "OK!";
+                hitQuality = "OK";
+              }
             } else {
               feedbackText = "MISS!";
+            }
+
+            // Check for streak milestones
+            let streakMilestone: number | null = null;
+            if (isHit && (newStreak === 5 || newStreak === 10 || newStreak === 25)) {
+              streakMilestone = newStreak;
+              // Clear milestone after 1s
+              setTimeout(() => {
+                setState((s) => ({ ...s, streakMilestone: null }));
+              }, 1000);
             }
 
             return {
@@ -94,6 +131,10 @@ export function useMockGameLoop(beatmap: Beatmap): GameState {
               streak: newStreak,
               lives: newLives,
               feedbackText,
+              lastHitQuality: hitQuality,
+              streakMilestone,
+              comboMultiplier: multiplier,
+              activeNoteIndex: nextIndex + 1,
             };
           });
 
