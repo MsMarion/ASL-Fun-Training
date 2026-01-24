@@ -1,7 +1,8 @@
 "use client";
 
 import { useGameLoop } from "~/hooks/useGameLoop";
-import { DEMO_BEATMAP } from "~/lib/beatmap";
+import { type Beatmap } from "~/lib/beatmap";
+import { getBeatmapWord } from "~/lib/beatmapUtils";
 import { WebcamFeed } from "./WebcamFeed";
 import { Scoreboard } from "./Scoreboard";
 import { TargetWindow } from "./TargetWindow";
@@ -9,19 +10,22 @@ import { NoteHighway } from "./NoteHighway";
 import { HitFeedback } from "./HitFeedback";
 import { LyricsBar } from "./LyricsBar";
 
-const WORD = "TVINKLE"; // Letters used in the demo beatmap
+interface GameCanvasProps {
+  beatmap: Beatmap;
+}
 
-export function GameCanvas() {
-  const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(DEMO_BEATMAP);
+export function GameCanvas({ beatmap }: GameCanvasProps) {
+  const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(beatmap);
+
+  // Get the word being spelled by the beatmap
+  const word = getBeatmapWord(beatmap);
 
   // Calculate which letter index we're at in the word
   const currentLetterIndex = Math.min(
-    DEMO_BEATMAP.notes.findIndex((n) => n.time > state.currentTime),
-    WORD.length - 1,
+    beatmap.notes.findIndex((n) => n.time > state.currentTime),
+    word.length - 1,
   );
-  const letterIdx = currentLetterIndex === -1 ? WORD.length - 1 : Math.max(0, currentLetterIndex - 1);
-  // Adjust for second repetition
-  const adjustedIdx = letterIdx >= WORD.length ? letterIdx % WORD.length : letterIdx;
+  const letterIdx = currentLetterIndex === -1 ? word.length - 1 : Math.max(0, currentLetterIndex - 1);
 
   return (
     <div
@@ -56,7 +60,21 @@ export function GameCanvas() {
       {/* Bottom: Note highway + lyrics */}
       <div className="relative z-10 flex flex-col gap-2 p-4">
         <NoteHighway notes={state.notes} currentTime={state.currentTime} />
-        <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
+        <LyricsBar word={word} currentLetterIndex={letterIdx} />
+      </div>
+
+      {/* Song title display */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <div
+          className="font-mono text-sm font-semibold px-4 py-2 rounded-full"
+          style={{
+            background: "rgba(13,8,32,0.8)",
+            color: "#e0e7ff",
+            border: "1px solid rgba(217,70,239,0.3)",
+          }}
+        >
+          {beatmap.title}
+        </div>
       </div>
     </div>
   );
