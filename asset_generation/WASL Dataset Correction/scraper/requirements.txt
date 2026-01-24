@@ -1,0 +1,24 @@
+# ASL Video Scraper Dependencies
+# Visual browser automation
+playwright>=1.40.0
+
+# Async operations
+aiohttp>=3.9.0
+aiofiles>=23.0.0
+
+# HTML parsing
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Database ORM (SQLite now, MongoDB-ready)
+sqlalchemy>=2.0.0
+
+# Pretty console output and progress
+rich>=13.0.0
+tqdm>=4.66.0
+
+# Retry logic
+tenacity>=8.0.0
+
+# CLI framework
+click>=8.1.0
