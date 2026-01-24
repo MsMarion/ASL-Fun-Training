@@ -11,6 +11,12 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    // DigitalOcean Spaces (S3-compatible)
+    DO_SPACES_KEY: z.string().optional(),
+    DO_SPACES_SECRET: z.string().optional(),
+    DO_SPACES_ENDPOINT: z.string().optional(), // e.g., "nyc3.digitaloceanspaces.com"
+    DO_SPACES_BUCKET: z.string().optional(),
+    DO_SPACES_REGION: z.string().default("nyc3"),
   },
 
   /**
@@ -29,6 +35,11 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    DO_SPACES_KEY: process.env.DO_SPACES_KEY,
+    DO_SPACES_SECRET: process.env.DO_SPACES_SECRET,
+    DO_SPACES_ENDPOINT: process.env.DO_SPACES_ENDPOINT,
+    DO_SPACES_BUCKET: process.env.DO_SPACES_BUCKET,
+    DO_SPACES_REGION: process.env.DO_SPACES_REGION,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
