@@ -99,8 +99,8 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
       // Amplitude Envelope for the texture
       const noiseGain = ctx.createGain();
       noiseGain.gain.setValueAtTime(0, t);
-      noiseGain.gain.linearRampToValueAtTime(0.2, t + 0.01); // Lower volume than body
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      noiseGain.gain.linearRampToValueAtTime(0.5, t + 0.01); // Boosted "whoosh" volume
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
 
       noise.connect(filter);
       filter.connect(noiseGain);

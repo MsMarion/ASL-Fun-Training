@@ -29,12 +29,15 @@ const anta = Anta({
   variable: "--font-anta",
 });
 
+import { UnifiedBackground } from "./_components/UnifiedBackground";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable} ${monoton.variable} ${anta.variable}`}>
       <body className="font-[family-name:var(--font-anta)]">
+        <UnifiedBackground />
         <BackgroundMusic />
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
