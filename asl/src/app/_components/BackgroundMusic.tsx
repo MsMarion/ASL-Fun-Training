@@ -60,6 +60,31 @@ export function BackgroundMusic() {
         };
     }, [hasInteracted, isPlaying, pathname, isMuted]);
 
+    // Handle audio ducking events
+    useEffect(() => {
+        const handleDuckStart = () => {
+            if (audioRef.current) {
+                // Dim to 0.02
+                audioRef.current.volume = 0.02;
+            }
+        };
+
+        const handleDuckEnd = () => {
+            if (audioRef.current) {
+                // Restore to 0.1
+                audioRef.current.volume = 0.1;
+            }
+        };
+
+        window.addEventListener("audio-preview-start", handleDuckStart);
+        window.addEventListener("audio-preview-end", handleDuckEnd);
+
+        return () => {
+            window.removeEventListener("audio-preview-start", handleDuckStart);
+            window.removeEventListener("audio-preview-end", handleDuckEnd);
+        };
+    }, []);
+
     const toggleMute = () => {
         if (audioRef.current) {
             audioRef.current.muted = !isMuted;

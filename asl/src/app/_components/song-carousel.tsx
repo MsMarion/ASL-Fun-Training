@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +10,7 @@ interface Song {
   songName: string;
   albumName: string | null;
   thumbnailName?: string | null;
+  audioUrl?: string | null;
 }
 
 interface SongCarouselProps {
@@ -109,6 +110,52 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
       noise.start(t);
     } catch (e) {
       console.error("Audio generation failed", e);
+    }
+  };
+
+  // --- Audio Preview Logic ---
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Cleanup audio on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleMouseEnter = (song: Song) => {
+    if (!song.audioUrl) return;
+
+    // Stop extended playback if any
+    if (audioRef.current) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current = new Audio();
+    }
+
+    try {
+      audioRef.current.src = song.audioUrl;
+      audioRef.current.volume = 0.5;
+      audioRef.current.play().catch(err => console.error("Preview play error:", err));
+      
+      // Dispatch event to dim background music
+      window.dispatchEvent(new Event("audio-preview-start"));
+    } catch (e) {
+      console.error("Error setting up audio preview", e);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (audioRef.current) {
+      // Fade out effect could be nice, but immediate stop is safer for UI responsiveness
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      
+      // Dispatch event to restore background music
+      window.dispatchEvent(new Event("audio-preview-end"));
     }
   };
 
@@ -245,6 +292,12 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                       const diff = offset;
                       navigate(diff);
                     }
+                  }}
+                  onMouseEnter={() => {
+                    if (isCenter) handleMouseEnter(song);
+                  }}
+                  onMouseLeave={() => {
+                    if (isCenter) handleMouseLeave();
                   }}
                 >
                   <div
