@@ -222,6 +222,15 @@ const LeaderboardPage = () => {
 
                 {/* Content */}
                 <div className="relative p-6 md:p-8 max-h-[80vh] overflow-y-auto">
+                  {/* Home Button */}
+                  <Link 
+                    href="/songselection" 
+                    className="absolute top-6 right-6 z-50 text-fuchsia-300 hover:text-cyan-400 transition-colors p-2 rounded-full hover:bg-white/5 border border-transparent hover:border-cyan-400/30 font-bold"
+                    aria-label="Back to Song Selection"
+                  >
+                    <span className="text-xl">🏠</span>
+                  </Link>
+
                   {/* Header with Toggle Buttons */}
                   <div className="mb-6">
                     <h1 className="text-center text-2xl md:text-4xl font-bold text-fuchsia-400 mb-4 tracking-wider" style={{ textShadow: '0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 40px #d946ef' }}>
