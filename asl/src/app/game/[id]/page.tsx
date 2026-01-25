@@ -1,6 +1,3 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { GameCanvas } from "~/components/game/GameCanvas";
 import { getBeatmapById, type Beatmap } from "~/lib/beatmap";
 import { db } from "~/server/db";
