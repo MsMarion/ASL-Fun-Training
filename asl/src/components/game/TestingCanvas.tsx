@@ -10,6 +10,7 @@ import { TestingNoteHighway } from "./TestingNoteHighway";
 import { ScreenFlash } from "./ScreenFlash";
 import { SuccessBurst } from "./SuccessBurst";
 import { FloatingSuccessText } from "./FloatingSuccessText";
+import { useSoundEffects } from "~/hooks/useSoundEffects";
 
 interface TestingCanvasProps {
     beatmap: Beatmap;
@@ -82,9 +83,14 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
         }
     }, [activeNote?.letter]);
 
+    // Sound Effects
+    const { playSuccessSound, playMissSound, initAudio } = useSoundEffects();
+
     useEffect(() => {
         // detect changes in metrics for feedback
         if (metrics.hits > lastMetrics.hits) {
+            playSuccessSound(); // Play sound!
+            
             const pointsGained = metrics.score - lastMetrics.score;
 
             let text = `+${pointsGained}`;
@@ -110,6 +116,8 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
             setSuccessTextTrigger({ text, timestamp: Date.now() });
             setStreak(prev => prev + 1); // Increment streak
         } else if (metrics.misses > lastMetrics.misses) {
+            playMissSound(); // Play sound!
+
             setFeedback({ text: "MISS", color: "text-red-500", id: Date.now() });
 
             // Trigger negative feedback
@@ -120,10 +128,15 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
             setStreak(0); // Reset streak
         }
         setLastMetrics(metrics);
-    }, [metrics, lastMetrics]);
+        
+        // Ensure audio context is ready on first interaction (if not already)
+        if ((metrics.hits > 0 || metrics.misses > 0) && typeof window !== "undefined") {
+            initAudio(); 
+        }
+    }, [metrics, lastMetrics, playSuccessSound, playMissSound, initAudio]);
 
     return (
-        <div className={`relative min-h-screen w-screen overflow-hidden text-white font-sans ${isShaking ? 'animate-shake' : ''}`}>
+        <div className={`relative h-screen w-screen overflow-hidden text-white font-sans ${isShaking ? 'animate-shake' : ''}`}>
             <SynthwaveBackground />
 
             {/* Visual Effects */}

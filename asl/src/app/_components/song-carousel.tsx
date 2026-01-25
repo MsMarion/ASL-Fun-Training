@@ -186,13 +186,13 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
         style={{ perspective: "1000px" }}
       >
         {/* Navigation Buttons */}
-        {songs.length > 1 && (
+        {songs.length > 0 && (
           <>
             <motion.button
               whileHover={{ scale: 1.1, x: -5 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => navigate(-1)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-cyan-400 transition-colors cursor-pointer bg-black/20 p-2 rounded-full backdrop-blur-sm"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-[999] text-white/70 hover:text-cyan-400 transition-colors cursor-pointer bg-black/20 p-2 rounded-full backdrop-blur-sm"
             >
               <ChevronLeft size={64} />
             </motion.button>
@@ -201,7 +201,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
               whileHover={{ scale: 1.1, x: 5 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => navigate(1)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white/70 hover:text-cyan-400 transition-colors cursor-pointer bg-black/20 p-2 rounded-full backdrop-blur-sm"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-[999] text-white/70 hover:text-cyan-400 transition-colors cursor-pointer bg-black/20 p-2 rounded-full backdrop-blur-sm"
             >
               <ChevronRight size={64} />
             </motion.button>
