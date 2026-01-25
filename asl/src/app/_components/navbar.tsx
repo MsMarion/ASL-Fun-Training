@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 type Route = {
   readonly title: string;
@@ -16,20 +17,27 @@ const routes: readonly Route[] = [
 ] as const;
 
 const getRoute = (index: number): Route => {
-  const route = routes[(index + routes.length) % routes.length];
-  if (!route) throw new Error("Invalid route index");
+  // Handle negative indices correctly in JS/TS
+  const wrappedIndex = ((index % routes.length) + routes.length) % routes.length;
+  const route = routes[wrappedIndex];
+  if (!route) return routes[0]; // Fallback safety
   return route;
 };
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const [activeIndex, setActiveIndex] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("navbarActiveIndex");
-      return stored ? Number(stored) : 0;
+
+  // derived state based on pathname is safer than local storage sync
+  const initialIndex = routes.findIndex(r => r.href === pathname);
+  const [activeIndex, setActiveIndex] = useState<number>(initialIndex !== -1 ? initialIndex : 0);
+
+  // Sync activeIndex if pathname changes externally (e.g. browser back button)
+  useEffect(() => {
+    const idx = routes.findIndex(r => r.href === pathname);
+    if (idx !== -1) {
+      setActiveIndex(idx);
     }
-    return 0;
-  });
+  }, [pathname]);
 
   // Check if current route matches the active tab
   const isCurrentRoute = useMemo(() => {
@@ -43,9 +51,41 @@ const Navbar: React.FC = () => {
     nextRoute: getRoute(activeIndex + 1),
   }), [activeIndex]);
 
+  // Audio Context for "Bubbly" Navigation Sound
+  const playBubbleSound = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+
+      const ctx = new AudioContext();
+      const t = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      // rapid pitch drop from high to low simulates a bubble "bloop"
+      osc.frequency.setValueAtTime(800, t);
+      osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.5, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.1);
+    } catch (e) {
+      console.error("Audio generation failed", e);
+    }
+  };
+
   const handlePrevious = (): void => {
+    playBubbleSound();
     setActiveIndex((i) => {
-      const newIndex = i - 1;
+      const newIndex = ((i - 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
         window.localStorage.setItem("navbarActiveIndex", String(newIndex));
       }
@@ -54,8 +94,9 @@ const Navbar: React.FC = () => {
   };
 
   const handleNext = (): void => {
+    playBubbleSound();
     setActiveIndex((i) => {
-      const newIndex = i + 1;
+      const newIndex = ((i + 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
         window.localStorage.setItem("navbarActiveIndex", String(newIndex));
       }
@@ -90,7 +131,10 @@ const Navbar: React.FC = () => {
         </button>
       </Link>
 
-      <div
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.7 }}
+        transition={{ delay: 0.1 }}
         className="-translate-x-15 transition-all duration-200 border-l-1 border-t-1 border-b-1 border-white"
         style={{
           width: "200px",
@@ -101,16 +145,18 @@ const Navbar: React.FC = () => {
           alignItems: "center",
           justifyContent: "center",
           color: "var(--cyan)",
-          opacity: 0.7,
           marginBottom: "8px",
           boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
         }}
       >
         <span className="font-[subheading-font] text-xl text-center text-white">{prevRoute.title}</span>
-      </div>
+      </motion.div>
 
       {/* Main Center Tab with Bounce Animation */}
-      <div className={`relative -translate-y-2 z-1`}>
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className={`relative -translate-y-2 z-1`}
+      >
         {/* Outer semicircle with white border */}
         <div
           className="border-1 border-white"
@@ -124,8 +170,8 @@ const Navbar: React.FC = () => {
             justifyContent: "center",
             color: "white",
             fontWeight: "bold",
-            boxShadow: isCurrentRoute 
-              ? "0 0 60px rgba(45,226,230,0.8), 0 0 120px rgba(146,0,117,0.6)" 
+            boxShadow: isCurrentRoute
+              ? "0 0 60px rgba(45,226,230,0.8), 0 0 120px rgba(146,0,117,0.6)"
               : "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
             transition: "box-shadow 0.3s ease-in-out",
           }}
@@ -152,9 +198,12 @@ const Navbar: React.FC = () => {
             {currentRoute.title}
           </span>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.7 }}
+        transition={{ delay: 0.1 }}
         className="translate-x-15 transition-all duration-200 border-r-1 border-t-1 border-b-1 border-white"
         style={{
           width: "200px",
@@ -165,13 +214,12 @@ const Navbar: React.FC = () => {
           alignItems: "center",
           justifyContent: "center",
           color: "var(--cyan)",
-          opacity: 0.7,
           marginBottom: "8px",
           boxShadow: "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
         }}
       >
         <span className="font-[subheading-font] text-xl text-center text-white">{nextRoute.title}</span>
-      </div>
+      </motion.div>
 
       <Link href={nextRoute.href} onClick={handleNext} className="z-100">
         <button
