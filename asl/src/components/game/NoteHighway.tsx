@@ -148,7 +148,7 @@ export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighway
         // Determine note color/glow based on zone
         let glowColor = "rgba(217,70,239,1)"; // Purple (default/approaching)
         
-        if (timeUntil > NOTE_TRACKING_WINDOW) {
+        if (timeUntil > NOTE_TRACKING_WINDOW - NOTE_LATE_GRACE) {
            // Approaching (Window -> Tracking)
            glowColor = "rgba(56,189,248,0.8)"; // Cyan
         } else if (timeUntil > 0) {

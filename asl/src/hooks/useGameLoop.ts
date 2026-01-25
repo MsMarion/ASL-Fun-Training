@@ -148,26 +148,33 @@ export function useGameLoop(beatmap: Beatmap): {
         }
 
         const activeNote = beatmap.notes[activeIndex]!;
-        const earlyStart = activeNote.time - EARLY_WINDOW;
+        const earlyStart = activeNote.time - TRACKING_WINDOW;
         const deadline = activeNote.time + LATE_GRACE;
 
-        const gameStartTimeSec = startTimeRef.current / 1000;
+        // 1. Search for a VALID HIT in the history (Best Candidate)
+        const bestMatch = findBestPrediction(
+          latestPredictionsRef.current,
+          activeNote,
+          earlyStart,
+          deadline,
+          startTimeRef.current,
+          processedPredictionsRef.current
+        );
 
-        // Find the LATEST unconsumed prediction (regardless of letter)
-        // This allows evaluateNote to see what was being signed even if it's wrong
+        // 2. Also get the absolute latest unconsumed prediction for fallback feedback (e.g. "Wrong Sign")
         const latestUnconsumed = latestPredictionsRef.current
           .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
           .at(-1) || null;
 
         // DEBUG: Log prediction timing
-        if (latestUnconsumed) {
-          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)}, PredTS: ${latestUnconsumed.clientTimestamp.toFixed(3)}, Letter: ${latestUnconsumed.letter}, Conf: ${(latestUnconsumed.confidence * 100).toFixed(0)}%`);
-        } else {
-          console.log(`[DEBUG] Note ${activeNote.letter} @ t=${activeNote.time.toFixed(2)}, Current: ${elapsed.toFixed(2)} - NO PREDICTIONS`);
+        if (bestMatch) {
+             console.log(`[DEBUG] HIT FOUND! Letter: ${bestMatch.letter}, Conf: ${(bestMatch.confidence * 100).toFixed(0)}%`);
+        } else if (latestUnconsumed) {
+             // console.log(`[DEBUG] Pending... Latest: ${latestUnconsumed.letter}`);
         }
 
-        // Evaluate note
-        const judgement = evaluateNote(activeNote, latestUnconsumed, elapsed, prev.streak);
+        // Evaluate note - Prioritize bestMatch (Success) over latestUnconsumed (Current State)
+        const judgement = evaluateNote(activeNote, bestMatch ?? latestUnconsumed, elapsed, prev.streak);
 
         // Debug: Get latest prediction
         const latestPred = latestPredictionsRef.current.length > 0
