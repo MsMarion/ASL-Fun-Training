@@ -30,20 +30,33 @@ export function WhackAMoleCanvas() {
     true
   );
 
-  const HOLD_DURATION = 1500; // 1.5 seconds
+  const HOLD_DURATION = 500; // 0.5 seconds
   const [holdProgress, setHoldProgress] = useState(0);
-  const holdStartRef = useRef<number | null>(null);
+  const accumulatedHoldTimeRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
 
   const latestPrediction = predictions[predictions.length - 1] ?? null;
+
+  // Reset accumulator when target changes
+  useEffect(() => {
+     accumulatedHoldTimeRef.current = 0;
+     setHoldProgress(0);
+     lastFrameTimeRef.current = Date.now();
+  }, [targetLetter, gameState]);
 
   // AI Game Logic Loop
   useEffect(() => {
     // Reset if game not playing or no target
     if (gameState !== "playing" || !targetLetter) {
-        holdStartRef.current = null;
-        setHoldProgress(0);
         return;
     }
+
+    const now = Date.now();
+    const delta = now - lastFrameTimeRef.current;
+    lastFrameTimeRef.current = now;
+
+    // Safety check
+    if (delta > 500) return;
 
     // Check if correct sign is detected
     const isCorrect = latestPrediction && 
@@ -51,28 +64,24 @@ export function WhackAMoleCanvas() {
                       latestPrediction.confidence >= 0.5;
 
     if (isCorrect) {
-        if (!holdStartRef.current) {
-            // Start holding
-            holdStartRef.current = Date.now();
-        } else {
-            // Check duration
-            const elapsed = Date.now() - holdStartRef.current;
-            const progress = Math.min(elapsed / HOLD_DURATION, 1);
-            setHoldProgress(progress);
+        // Build up
+        accumulatedHoldTimeRef.current += delta;
+    }
+    // No decay/reset on incorrect
 
-            if (elapsed >= HOLD_DURATION) {
-                // Success!
-                handleInteraction(targetLetter);
-                holdStartRef.current = null; // Reset
-                setHoldProgress(0);
-            }
-        }
-    } else {
-        // Reset if lost or wrong sign
-        holdStartRef.current = null;
+    // Clamp
+    accumulatedHoldTimeRef.current = Math.max(0, Math.min(accumulatedHoldTimeRef.current, HOLD_DURATION));
+    
+    // Update State
+    setHoldProgress(accumulatedHoldTimeRef.current / HOLD_DURATION);
+
+    if (accumulatedHoldTimeRef.current >= HOLD_DURATION) {
+        // Success!
+        handleInteraction(targetLetter);
+        accumulatedHoldTimeRef.current = 0; // Reset
         setHoldProgress(0);
     }
-  }, [gameState, targetLetter, latestPrediction, handleInteraction, predictions /* re-run on every new prediction update */]);
+  }, [gameState, targetLetter, latestPrediction, handleInteraction, predictions]);
 
   return (
     <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
