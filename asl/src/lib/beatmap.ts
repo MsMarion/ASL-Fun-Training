@@ -7,6 +7,7 @@ export interface Beatmap {
   title: string;
   notes: BeatmapNote[];
   totalDuration: number;
+  audioUrl?: string;
 }
 
 // Shared timing constants - single source of truth
