@@ -78,6 +78,13 @@ export function WhackAMoleCanvas() {
         }
     }, [gameState, targetLetter, latestPrediction, handleInteraction, predictions /* re-run on every new prediction update */]);
 
+    // Auto-redirect when game finishes
+    useEffect(() => {
+        if (gameState === "finished") {
+            router.push(`/leaderboard?score=${score}`);
+        }
+    }, [gameState, score, router]);
+
     return (
         <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
             <SynthwaveBackground />
@@ -186,45 +193,7 @@ export function WhackAMoleCanvas() {
                 </div>
             )}
 
-            {/* Game Over Overlay */}
-            {gameState === "finished" && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md">
-                    <h2 className="text-2xl font-bold text-white mb-2">GAME OVER</h2>
-                    <h1 className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-8">
-                        {score}
-                    </h1>
 
-                    <div className="grid grid-cols-2 gap-8 mb-12 text-center">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-gray-400 text-sm">TOTAL CORRECT</span>
-                            <span className="text-3xl font-bold text-white">{metrics.totalCorrect}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-gray-400 text-sm">AVG REACTION</span>
-                            <span className="text-3xl font-bold text-white">
-                                {metrics.reactionTimes.length > 0
-                                    ? (metrics.reactionTimes.reduce((a, b) => a + b, 0) / metrics.reactionTimes.length).toFixed(0)
-                                    : 0}ms
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => router.push(`/leaderboard?score=${score}`)}
-                            className="px-8 py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(192,38,211,0.5)]"
-                        >
-                            SUBMIT SCORE
-                        </button>
-                        <button
-                            onClick={startGame}
-                            className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                        >
-                            PLAY AGAIN
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* Countdown Overlay */}
             {gameState === "cooldown" && countdown > 0 && (
