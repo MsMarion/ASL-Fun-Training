@@ -20,6 +20,7 @@ export default function ScriptedDemoPage() {
     // Derive word from beatmap notes
     const WORD = DEMO_BEATMAP.notes.map(note => note.letter).join('');
     const particleOverlayRef = useRef<ParticleOverlayRef>(null);
+    const perfectAudioRef = useRef<HTMLAudioElement | null>(null);
     const [effectsEnabled, setEffectsEnabled] = useState(true);
     const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
 
@@ -31,6 +32,35 @@ export default function ScriptedDemoPage() {
                 y: window.innerHeight / 2,
             });
         }
+    }, []);
+
+    // Pre-load "PERFECT!" audio
+    useEffect(() => {
+        const loadAudio = async () => {
+            try {
+                const response = await fetch("/api/tts", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        text: "PERFECT!",
+                        voice_settings: {
+                            stability: 0.5,
+                            similarity_boost: 0.7,
+                        },
+                    }),
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    perfectAudioRef.current = new Audio(url);
+                }
+            } catch (error) {
+                console.error("Failed to load perfect audio:", error);
+            }
+        };
+
+        loadAudio();
     }, []);
 
     // Wire up visual effects
@@ -54,6 +84,14 @@ export default function ScriptedDemoPage() {
     const bgColor = `hsl(${bgHue}, 40%, 6%)`;
     const vignetteOpacity = Math.min(0.3 + (state.streak / 25) * 0.5, 0.8);
     const shouldFlash = state.lastHitQuality === "PERFECT" && state.noteState === "success";
+
+    // Play "PERFECT!" audio on perfect hit
+    useEffect(() => {
+        if (shouldFlash && perfectAudioRef.current) {
+            perfectAudioRef.current.currentTime = 0;
+            perfectAudioRef.current.play().catch(e => console.warn("Audio play failed:", e));
+        }
+    }, [shouldFlash]);
 
     return (
         <div
