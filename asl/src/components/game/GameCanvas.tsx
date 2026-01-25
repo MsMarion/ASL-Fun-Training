@@ -2,8 +2,10 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useGameLoop } from "~/hooks/useGameLoop";
+import { type Beatmap } from "~/lib/beatmap";
+import { getBeatmapWord } from "~/lib/beatmapUtils";
 import { useVisualEffects } from "~/hooks/useVisualEffects";
-import { DEMO_BEATMAP, type Beatmap } from "~/lib/beatmap";
+import { DEMO_BEATMAP } from "~/lib/beatmap";
 import { WebcamFeed } from "./WebcamFeed";
 import { Scoreboard } from "./Scoreboard";
 import { TargetWindow } from "./TargetWindow";
@@ -18,14 +20,15 @@ import { SynthwaveBackground } from "./SynthwaveBackground";
 import { DebugLogPanel } from "./DebugLogPanel";
 
 interface GameCanvasProps {
-  beatmap?: Beatmap;
+  beatmap: Beatmap;
 }
 
-export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
+export function GameCanvas({ beatmap }: GameCanvasProps) {
   const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(beatmap);
 
-  // Derive word from beatmap notes
-  const WORD = beatmap.notes.map(note => note.letter).join('');
+  // Get the word being spelled by the beatmap
+  const word = getBeatmapWord(beatmap);
+
   const particleOverlayRef = useRef<ParticleOverlayRef>(null);
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
@@ -46,10 +49,10 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
     particleEngine: particleOverlayRef.current?.engine ?? null,
     targetWindowCenter,
     enabled: effectsEnabled,
-  });
+  })
 
   // Use activeNoteIndex for lyrics bar to stay in sync with TargetWindow and NoteHighway
-  const adjustedIdx = Math.min(state.activeNoteIndex, WORD.length - 1);
+  const adjustedIdx = Math.min(state.activeNoteIndex, word.length - 1);
 
   // Dynamic background color based on streak (warmer with higher streak)
   const bgHue = 250 - Math.min(state.streak * 2, 40); // Shifts from blue-purple toward magenta
@@ -120,7 +123,21 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
           currentTime={state.currentTime}
           activeNoteIndex={state.activeNoteIndex}
         />
-        <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
+        <LyricsBar word={word} currentLetterIndex={adjustedIdx} />
+      </div>
+
+      {/* Song title display */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <div
+          className="font-mono text-sm font-semibold px-4 py-2 rounded-full"
+          style={{
+            background: "rgba(13,8,32,0.8)",
+            color: "#e0e7ff",
+            border: "1px solid rgba(217,70,239,0.3)",
+          }}
+        >
+          {beatmap.title}
+        </div>
       </div>
 
       {/* Debug Info: Detected Sign - Compact, bottom-left to be secondary */}
