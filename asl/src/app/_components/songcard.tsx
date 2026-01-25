@@ -26,20 +26,27 @@ export function SongCard({ song }: SongCardProps) {
       <div className="p-6">
         {/* Thumbnail placeholder */}
         <div
-          className="mb-4 flex h-32 items-center justify-center rounded-md"
+          className="mb-4 flex h-32 items-center justify-center rounded-md overflow-hidden relative"
           style={{
             background: "linear-gradient(135deg, rgba(217,70,239,0.2) 0%, rgba(34,211,238,0.2) 100%)",
           }}
         >
-          {song.thumbnailName ? (
+          {song.thumbnailUrl || song.thumbnailName ? (
             <img
-              src={`/thumbnails/${song.thumbnailName}`}
+              src={song.thumbnailUrl ?? (song.thumbnailName ? `https://generated-bucket-name.nyc3.digitaloceanspaces.com/${song.thumbnailName}` : "")}
               alt={song.songName}
               className="h-full w-full object-cover rounded-md"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                // Show fallback
+                e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+              }}
             />
           ) : (
-            <span className="text-4xl">🎵</span>
+            <span className="text-4xl fallback-icon">🎵</span>
           )}
+          {/* Hidden fallback icon for error state */}
+          <span className="text-4xl fallback-icon hidden absolute">🎵</span>
         </div>
 
         {/* Song info */}
