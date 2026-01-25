@@ -10,6 +10,7 @@ interface Song {
   songName: string;
   albumName: string | null;
   thumbnailName?: string | null;
+  thumbnailUrl?: string | null;
   audioUrl?: string | null;
 }
 
@@ -311,15 +312,29 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                   >
                     {/* Top Section: Art */}
                     <div className="h-[55%] w-full bg-purple-900 flex items-center justify-center overflow-hidden">
-                      {song.thumbnailName ? (
+                      {song.thumbnailUrl || song.thumbnailName ? (
                         <img
-                          src={`/api/songs/thumbnail/${song.thumbnailName}`}
+                          src={
+                            song.thumbnailUrl || 
+                            (song.thumbnailName ? `https://generated-bucket-name.nyc3.digitaloceanspaces.com/${song.thumbnailName}` : "")
+                            // Fallback logic requires env vars which might not be exposed safely here without NEXT_PUBLIC
+                            // But since we can't easily get env vars here securely if they aren't public, 
+                            // we rely on thumbnailUrl being present from DB (which is best practice) 
+                            // OR we construct the path if we know the bucket pattern.
+                            // The best fix is to use the full URL if available.
+                          }
                           alt={song.songName}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
                         />
                       ) : (
                         <div className="text-purple-400 text-6xl">♪</div>
                       )}
+                      {/* Fallback icon if image fails */}
+                      <div className="hidden text-purple-400 text-6xl">♪</div>
                     </div>
 
                     {/* Info Section */}
