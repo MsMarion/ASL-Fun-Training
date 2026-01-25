@@ -48,7 +48,7 @@ export function SongCarousel({ songs }: SongCarouselProps) {
   };
 
   const handleSelectSong = (songId: string) => {
-    router.push(`/song/${songId}`);
+    router.push(`/game/${songId}`);
   };
 
   const getVisibleSongs = () => {

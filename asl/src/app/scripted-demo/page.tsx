@@ -14,6 +14,8 @@ import { ScreenFlash } from "~/components/game/ScreenFlash";
 import { EffectsToggle } from "~/components/game/EffectsToggle";
 import { SynthwaveBackground } from "~/components/game/SynthwaveBackground";
 
+const TWINKLE_AUDIO_URL = "/api/audio/audio/Twinkle-Twinkle-Little-Star-Nursery-Rhymes-for-Kids-Super-Simple-Songs-1769296557841-a911tr.mp3";
+
 export default function ScriptedDemoPage() {
     const { state, restart } = useScriptedGameLoop(DEMO_BEATMAP);
 
@@ -21,8 +23,29 @@ export default function ScriptedDemoPage() {
     const WORD = DEMO_BEATMAP.notes.map(note => note.letter).join('');
     const particleOverlayRef = useRef<ParticleOverlayRef>(null);
     const perfectAudioRef = useRef<HTMLAudioElement | null>(null);
+    const bgMusicRef = useRef<HTMLAudioElement | null>(null);
     const [effectsEnabled, setEffectsEnabled] = useState(true);
     const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
+    const [hasStarted, setHasStarted] = useState(false);
+
+    // Start game and play music (requires user interaction)
+    const handleStart = () => {
+        setHasStarted(true);
+        const audio = new Audio(TWINKLE_AUDIO_URL);
+        audio.loop = true;
+        bgMusicRef.current = audio;
+        audio.play().catch(e => console.warn("Background music play failed:", e));
+    };
+
+    // Cleanup audio on unmount
+    useEffect(() => {
+        return () => {
+            if (bgMusicRef.current) {
+                bgMusicRef.current.pause();
+                bgMusicRef.current = null;
+            }
+        };
+    }, []);
 
     // Calculate target window center position
     useEffect(() => {
@@ -92,6 +115,25 @@ export default function ScriptedDemoPage() {
             perfectAudioRef.current.play().catch(e => console.warn("Audio play failed:", e));
         }
     }, [shouldFlash]);
+
+    // Start screen
+    if (!hasStarted) {
+        return (
+            <div className="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-[hsl(250,40%,6%)]">
+                <SynthwaveBackground />
+                <div className="relative z-10 flex flex-col items-center gap-6">
+                    <h1 className="font-mono text-4xl font-bold text-purple-300">Twinkle Twinkle</h1>
+                    <p className="font-mono text-lg text-white/60">Scripted Demo</p>
+                    <button
+                        onClick={handleStart}
+                        className="mt-4 rounded-lg border-2 border-cyan-500 bg-cyan-500/20 px-8 py-4 font-mono text-xl font-bold text-cyan-400 transition-all hover:bg-cyan-500/40 hover:scale-105"
+                    >
+                        Start
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div

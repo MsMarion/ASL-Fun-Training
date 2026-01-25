@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
-import { 
+import {
   createTRPCRouter,
   publicProcedure
 } from "../trpc";
+import { getPublicUrl } from "~/lib/s3";
 
 import { z } from "zod";
 
@@ -113,7 +114,7 @@ export const songRouter = createTRPCRouter({
       try {
         // For embedded documents (types), just assign the array directly
         // Explicitly type the interactions to match Prisma's expected type
-        const interactions: { key: string; timeElapsed: number }[] = 
+        const interactions: { key: string; timeElapsed: number }[] =
           input.interactions?.map(i => ({
             key: i.key,
             timeElapsed: i.timeElapsed,
@@ -138,5 +139,12 @@ export const songRouter = createTRPCRouter({
           message: "Failed to create song",
         });
       }
+    }),
+
+  getAudioUrl: publicProcedure
+    .input(z.object({ key: z.string().min(1, "S3 key is required") }))
+    .query(({ input }) => {
+      const url = getPublicUrl(input.key);
+      return { url };
     }),
 });

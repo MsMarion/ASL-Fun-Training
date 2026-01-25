@@ -18,16 +18,40 @@ import { DebugLogPanel } from "./DebugLogPanel";
 
 interface GameCanvasProps {
   beatmap?: Beatmap;
+  audioUrl?: string;
 }
 
-export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
+export function GameCanvas({ beatmap = DEMO_BEATMAP, audioUrl }: GameCanvasProps) {
   const { state, videoRef, canvasRef, webcamReady, webcamError } = useGameLoop(beatmap);
 
   // Derive word from beatmap notes
   const WORD = beatmap.notes.map(note => note.letter).join('');
   const particleOverlayRef = useRef<ParticleOverlayRef>(null);
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
+  const [hasStarted, setHasStarted] = useState(false);
+
+  // Start game and play music (requires user interaction)
+  const handleStart = () => {
+    setHasStarted(true);
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.loop = true;
+      bgMusicRef.current = audio;
+      audio.play().catch(e => console.warn("Background music play failed:", e));
+    }
+  };
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current = null;
+      }
+    };
+  }, []);
 
   // Calculate target window center position
   useEffect(() => {
@@ -59,6 +83,27 @@ export function GameCanvas({ beatmap = DEMO_BEATMAP }: GameCanvasProps) {
 
   // Trigger screen flash on PERFECT hits
   const shouldFlash = state.lastHitQuality === "PERFECT" && state.noteState === "success";
+
+  // Start screen
+  if (!hasStarted) {
+    return (
+      <div className="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-[hsl(250,40%,6%)]">
+        <SynthwaveBackground />
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <h1 className="font-mono text-4xl font-bold text-purple-300">{beatmap.title}</h1>
+          {audioUrl && (
+            <p className="font-mono text-sm text-white/40">with music</p>
+          )}
+          <button
+            onClick={handleStart}
+            className="mt-4 rounded-lg border-2 border-cyan-500 bg-cyan-500/20 px-8 py-4 font-mono text-xl font-bold text-cyan-400 transition-all hover:bg-cyan-500/40 hover:scale-105"
+          >
+            Start Game
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
