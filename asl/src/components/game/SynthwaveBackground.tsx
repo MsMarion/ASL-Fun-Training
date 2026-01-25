@@ -11,9 +11,9 @@ export function SynthwaveBackground() {
             {/* Stars */}
             <div className="absolute inset-0 opacity-50" style={{ background: "radial-gradient(white 1px, transparent 1px) 0 0 / 50px 50px, radial-gradient(white 1px, transparent 1px) 25px 25px / 100px 100px" }} />
 
-            {/* Sun */}
+            {/* Sun - Positioned top-right to avoid center UI */}
             <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-[45vh] w-96 h-96 rounded-full overflow-hidden"
+                className="absolute right-[10vw] top-[10vh] w-64 h-64 rounded-full overflow-hidden"
                 style={{
                     backgroundImage: "linear-gradient(to bottom, #f5d300, #ff0055)",
                     boxShadow: "0 0 60px #ff0055, 0 0 100px #ff0055",
@@ -21,12 +21,12 @@ export function SynthwaveBackground() {
                 }}
             >
                 {/* Sun stripes - now clipped by overflow-hidden on parent */}
-                <div className="absolute inset-0 flex flex-col justify-end pb-8 gap-2 w-full h-full">
+                <div className="absolute inset-0 flex flex-col justify-end pb-6 gap-1.5 w-full h-full">
                     {[...Array(6)].map((_, i) => (
                         <div
                             key={i}
                             className="w-full bg-[#0d0221]"
-                            style={{ height: `${(i + 1) * 6}px`, opacity: 0.6 }}
+                            style={{ height: `${(i + 1) * 4}px`, opacity: 0.6 }}
                         />
                     ))}
                 </div>
