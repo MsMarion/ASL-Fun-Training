@@ -22,32 +22,72 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
   // giving each 'slot' in the timeline a unique ID.
   const [index, setIndex] = useState(0);
 
-  // Short "tick" / card flip sound (Base64 wrapper for a simple UI click)
-  // This is a short placeholder sound.
-  const flipSoundUrl = "data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
-  // Actually, empty wav isn't great. Let's use a real, very short "tick" sound Base64.
-  // Using a known short "pop" or "click" sound.
-  const FLIP_SFX = "data:audio/mp3;base64,SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUWFhYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFhYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAGlzb21tcDQyAFRTU0UAAAAPAAADTGF2ZjU3LjU2LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAJAAACOAAKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK//uQZAAAAAAAIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk=";
-  // Okay, generating a real Base64 string for a sound is risky without a file. 
-  // Better approach: Use the existing 'hit.mp3' for now as a placeholder or assuming the user will add 'flip.mp3'.
-  // But the user asked ME to add it. 
-  // I will use a simple implementation that attempts to play '/audio/card-flip.mp3' and fallbacks or just implementation logic. 
-  // Wait, I can't easily generate a valid MP3 base64 from scratch in my head.
-  // I will add the Logic to play a file called `/audio/flip.mp3` and I will CREATE that file using `write_to_file` if I can? No, I can't write binary easily.
-  // I will use `hit.mp3` for now as a placeholder or - wait, `hit.mp3` is 145 bytes? That's tiny. It might be a simple click.
-  // Let's try pointing to `/hit.mp3` first since it exists in public.
+  // Audio Context to synthesize a realistic "card flip" sound (Hybrid: Noise + Oscillator)
+  const playCardFlipSound = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
 
-  const playFlipSound = () => {
-    // Using hit.mp3 as a placeholder for the flip sound since it exists
-    const audio = new Audio("/hit.mp3");
-    audio.volume = 0.3;
-    audio.currentTime = 0;
-    audio.play().catch((e) => console.log("Audio play failed", e));
+      const ctx = new AudioContext();
+      const t = ctx.currentTime;
+
+      // --- Part 1: The "Round" Body (Oscillator) ---
+      const osc = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+
+      osc.type = "sine"; // Sine is the "roundest" wave
+      osc.frequency.setValueAtTime(120, t); // Start at low-mid (120Hz)
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.1); // Drop pitch quickly (thump)
+
+      oscGain.gain.setValueAtTime(0, t);
+      oscGain.gain.linearRampToValueAtTime(0.5, t + 0.01);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.1);
+
+      // --- Part 2: The "Card" Texture (Filtered Noise) ---
+      // Create a short buffer of white noise
+      const duration = 0.1;
+      const sampleRate = ctx.sampleRate;
+      const bufferSize = sampleRate * duration;
+      const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+      const data = buffer.getChannelData(0);
+
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      // Filter chain: Bandpass to focus the "swish"
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 500; // Center around low-mids for warmth
+      filter.Q.value = 1; // Wide-ish bandwidth
+
+      // Amplitude Envelope for the texture
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, t);
+      noiseGain.gain.linearRampToValueAtTime(0.2, t + 0.01); // Lower volume than body
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+
+      noise.start(t);
+    } catch (e) {
+      console.error("Audio generation failed", e);
+    }
   };
 
   const navigate = (direction: number) => {
     if (songs.length === 0) return;
-    playFlipSound();
+    playCardFlipSound();
     setIndex((prev) => prev + direction);
   };
 
