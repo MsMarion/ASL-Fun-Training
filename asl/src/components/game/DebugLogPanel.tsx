@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { type DebugLogEntry } from "~/hooks/useGameLoop";
+import { type DebugLogEntry } from "~/types/game";
 
 export type { DebugLogEntry };
 
@@ -44,7 +44,7 @@ export function DebugLogPanel({ entries, currentTime }: DebugLogPanelProps) {
   const recentEntries = entries.slice(-8); // Show last 8 entries
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
       <div
         className="bg-black/80 backdrop-blur-sm rounded-lg border border-white/20 shadow-lg overflow-hidden"
         style={{ width: "400px" }}
