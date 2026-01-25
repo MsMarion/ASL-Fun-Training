@@ -1,4 +1,4 @@
-# 🤟 ASL Fun Training
+# 🤟 SignHero 
 
 **A real-time American Sign Language (ASL) learning platform combining rhythm-based gaming with AI-powered hand sign recognition.**
 
