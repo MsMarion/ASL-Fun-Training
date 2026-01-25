@@ -21,7 +21,8 @@ export function useWhackAMoleGame() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [metrics, setMetrics] = useState<GameMetrics>({ reactionTimes: [], totalCorrect: 0 });
-  
+  const [lastHit, setLastHit] = useState<{ points: number; timestamp: number } | null>(null);
+
   // Timers
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,21 +46,21 @@ export function useWhackAMoleGame() {
   // Game Timer Effect
   useEffect(() => {
     if (gameState === "playing" && timeLeft > 0) {
-        gameTimerRef.current = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    // Game Over
-                    setGameState("finished");
-                    setTargetLetter(null);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+      gameTimerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            // Game Over
+            setGameState("finished");
+            setTargetLetter(null);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
 
     return () => {
-        if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     };
   }, [gameState]);
 
@@ -84,7 +85,7 @@ export function useWhackAMoleGame() {
   const nextTurn = () => {
     const randomIdx = Math.floor(Math.random() * FILTERED_LETTERS.length);
     const nextLetter = FILTERED_LETTERS[randomIdx]!;
-    
+
     setTargetLetter(nextLetter);
     setGameState("playing");
     roundStartTimeRef.current = Date.now();
@@ -94,30 +95,33 @@ export function useWhackAMoleGame() {
     if (gameState !== "playing" || !targetLetter) return;
 
     if (letter === targetLetter) {
-        // Correct!
-        const now = Date.now();
-        const reactionTime = now - roundStartTimeRef.current;
-        
-        // Score calculation (faster = more points, max 1000)
-        // Base 500 + bonus for speed (under 2s)
-        const speedBonus = Math.max(0, 2000 - reactionTime) / 4; 
-        const points = Math.floor(500 + speedBonus);
+      // Correct!
+      const now = Date.now();
+      const reactionTime = now - roundStartTimeRef.current;
 
-        setScore(prev => prev + points);
-        setMetrics(prev => ({
-            reactionTimes: [...prev.reactionTimes, reactionTime],
-            totalCorrect: prev.totalCorrect + 1
-        }));
-        
-        // Trigger Cooldown before next
-        startCooldown(1); // Short 1s breath between letters
+      // Score calculation (faster = more points, max 1000)
+      // Base 500 + bonus for speed (under 2s)
+      const speedBonus = Math.max(0, 2000 - reactionTime) / 4;
+      const points = Math.floor(500 + speedBonus);
+
+      setScore(prev => prev + points);
+      setMetrics(prev => ({
+        reactionTimes: [...prev.reactionTimes, reactionTime],
+        totalCorrect: prev.totalCorrect + 1
+      }));
+
+      // Trigger visual feedback
+      setLastHit({ points, timestamp: Date.now() });
+
+      // Trigger Cooldown before next
+      startCooldown(1); // Short 1s breath between letters
     }
   }, [gameState, targetLetter]);
 
   // Cleanup
   useEffect(() => {
     return () => {
-        if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     }
   }, []);
 
@@ -127,6 +131,7 @@ export function useWhackAMoleGame() {
     score,
     countdown,
     metrics,
+    lastHit,
     startGame,
     stopGame,
     handleInteraction,
