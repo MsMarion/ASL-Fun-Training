@@ -16,19 +16,26 @@ interface SongCarouselProps {
   songs: Song[];
 }
 
-export function SongCarousel({ songs }: SongCarouselProps) {
+export function SongCarousel({ songs = [] }: SongCarouselProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isShuffle, setIsShuffle] = useState(false);
 
+  // Reset index if songs array changes to prevent out-of-bounds errors works
+  if (currentIndex >= songs.length && songs.length > 0) {
+    setCurrentIndex(0);
+  }
+
   const handlePrevious = () => {
+    if (songs.length === 0) return;
     setIsShuffle(false);
     setDirection(-1);
     setCurrentIndex((prev) => (prev === 0 ? songs.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
+    if (songs.length === 0) return;
     setIsShuffle(false);
     setDirection(1);
     setCurrentIndex((prev) => (prev === songs.length - 1 ? 0 : prev + 1));
@@ -52,16 +59,23 @@ export function SongCarousel({ songs }: SongCarouselProps) {
   };
 
   const getVisibleSongs = () => {
-    if (songs.length <= 1) {
+    if (!songs || songs.length === 0) {
+      return [];
+    }
+
+    if (songs.length === 1) {
       return [{ song: songs[0], position: "center" as const }];
     }
 
-    const prevIndex = currentIndex === 0 ? songs.length - 1 : currentIndex - 1;
-    const nextIndex = (currentIndex + 1) % songs.length;
+    // Ensure index is valid before calculating neighbors
+    const validIndex = currentIndex >= songs.length ? 0 : currentIndex;
+
+    const prevIndex = validIndex === 0 ? songs.length - 1 : validIndex - 1;
+    const nextIndex = (validIndex + 1) % songs.length;
 
     return [
       { song: songs[prevIndex], position: "left" as const },
-      { song: songs[currentIndex], position: "center" as const },
+      { song: songs[validIndex], position: "center" as const },
       { song: songs[nextIndex], position: "right" as const },
     ];
   };
@@ -140,10 +154,10 @@ export function SongCarousel({ songs }: SongCarouselProps) {
                     whileHover={
                       isCenter
                         ? {
-                            scale: 1.05,
-                            boxShadow:
-                              "0 0 40px rgba(45,226,230,0.8), 0 0 80px rgba(146,0,117,0.6)",
-                          }
+                          scale: 1.05,
+                          boxShadow:
+                            "0 0 40px rgba(45,226,230,0.8), 0 0 80px rgba(146,0,117,0.6)",
+                        }
                         : {}
                     }
                     transition={{ duration: 0.25 }}

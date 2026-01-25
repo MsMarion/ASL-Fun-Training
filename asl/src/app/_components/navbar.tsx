@@ -16,20 +16,27 @@ const routes: readonly Route[] = [
 ] as const;
 
 const getRoute = (index: number): Route => {
-  const route = routes[(index + routes.length) % routes.length];
-  if (!route) throw new Error("Invalid route index");
+  // Handle negative indices correctly in JS/TS
+  const wrappedIndex = ((index % routes.length) + routes.length) % routes.length;
+  const route = routes[wrappedIndex];
+  if (!route) return routes[0]; // Fallback safety
   return route;
 };
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const [activeIndex, setActiveIndex] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("navbarActiveIndex");
-      return stored ? Number(stored) : 0;
+
+  // derived state based on pathname is safer than local storage sync
+  const initialIndex = routes.findIndex(r => r.href === pathname);
+  const [activeIndex, setActiveIndex] = useState<number>(initialIndex !== -1 ? initialIndex : 0);
+
+  // Sync activeIndex if pathname changes externally (e.g. browser back button)
+  useEffect(() => {
+    const idx = routes.findIndex(r => r.href === pathname);
+    if (idx !== -1) {
+      setActiveIndex(idx);
     }
-    return 0;
-  });
+  }, [pathname]);
 
   // Check if current route matches the active tab
   const isCurrentRoute = useMemo(() => {
@@ -45,7 +52,7 @@ const Navbar: React.FC = () => {
 
   const handlePrevious = (): void => {
     setActiveIndex((i) => {
-      const newIndex = i - 1;
+      const newIndex = ((i - 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
         window.localStorage.setItem("navbarActiveIndex", String(newIndex));
       }
@@ -55,7 +62,7 @@ const Navbar: React.FC = () => {
 
   const handleNext = (): void => {
     setActiveIndex((i) => {
-      const newIndex = i + 1;
+      const newIndex = ((i + 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
         window.localStorage.setItem("navbarActiveIndex", String(newIndex));
       }
@@ -124,8 +131,8 @@ const Navbar: React.FC = () => {
             justifyContent: "center",
             color: "white",
             fontWeight: "bold",
-            boxShadow: isCurrentRoute 
-              ? "0 0 60px rgba(45,226,230,0.8), 0 0 120px rgba(146,0,117,0.6)" 
+            boxShadow: isCurrentRoute
+              ? "0 0 60px rgba(45,226,230,0.8), 0 0 120px rgba(146,0,117,0.6)"
               : "0 0 40px rgba(45,226,230,0.4), 0 0 80px rgba(146,0,117,0.3)",
             transition: "box-shadow 0.3s ease-in-out",
           }}
