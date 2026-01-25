@@ -13,7 +13,7 @@ export function SynthwaveBackground() {
 
             {/* Sun */}
             <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-[35vh] w-96 h-96 rounded-full overflow-hidden"
+                className="absolute left-1/2 -translate-x-1/2 bottom-[45vh] w-96 h-96 rounded-full overflow-hidden"
                 style={{
                     backgroundImage: "linear-gradient(to bottom, #f5d300, #ff0055)",
                     boxShadow: "0 0 60px #ff0055, 0 0 100px #ff0055",
@@ -32,21 +32,21 @@ export function SynthwaveBackground() {
                 </div>
             </div>
 
-            {/* Mountains */}
-            <div className="absolute bottom-[35vh] left-0 right-0 h-48 z-[2] flex items-end justify-center pointer-events-none">
+            {/* Mountains - Made larger */}
+            <div className="absolute bottom-[35vh] left-0 right-0 h-72 z-[2] flex items-end justify-center pointer-events-none">
                 {/* Back range */}
-                <svg className="w-full h-full absolute bottom-0 opacity-60" preserveAspectRatio="none" viewBox="0 0 1200 120">
-                    <path d="M0,120 L0,100 L150,20 L300,120 L450,40 L600,120 L750,50 L900,120 L1050,30 L1200,120 Z" fill="#180426" />
+                <svg className="w-full h-full absolute bottom-0" preserveAspectRatio="none" viewBox="0 0 1200 120">
+                    <path d="M0,120 L0,100 L150,20 L300,120 L450,40 L600,120 L750,50 L900,120 L1050,30 L1200,120 Z" fill="#050110" />
                 </svg>
                 {/* Front range */}
-                <svg className="w-full h-32 absolute bottom-0 z-[3]" preserveAspectRatio="none" viewBox="0 0 1200 100">
-                    <path d="M0,100 L0,80 L200,10 L400,100 L600,30 L800,100 L1000,20 L1200,100 Z" fill="#0d0221" />
+                <svg className="w-full h-48 absolute bottom-0 z-[3]" preserveAspectRatio="none" viewBox="0 0 1200 100">
+                    <path d="M0,100 L0,80 L200,10 L400,100 L600,30 L800,100 L1000,20 L1200,100 Z" fill="#000000" />
                 </svg>
             </div>
 
             {/* Palm Trees - Left */}
-            <div className="absolute bottom-[35vh] left-[5vw] w-24 h-48 z-[4] opacity-80 rotate-3 origin-bottom">
-                <svg viewBox="0 0 100 200" className="w-full h-full fill-[#05010a]">
+            <div className="absolute bottom-[35vh] left-[5vw] w-32 h-64 z-[4] rotate-3 origin-bottom">
+                <svg viewBox="0 0 100 200" className="w-full h-full fill-[#000000]">
                     {/* Trunk */}
                     <path d="M45,200 C45,200 50,150 48,100 C46,50 40,20 40,20 L50,20 C50,20 54,50 56,100 C58,150 65,200 65,200 Z" />
                     {/* Leaves */}
@@ -55,8 +55,8 @@ export function SynthwaveBackground() {
             </div>
 
             {/* Palm Trees - Right */}
-            <div className="absolute bottom-[35vh] right-[5vw] w-32 h-64 z-[4] opacity-80 -rotate-3 origin-bottom">
-                <svg viewBox="0 0 100 200" className="w-full h-full fill-[#05010a]">
+            <div className="absolute bottom-[35vh] right-[5vw] w-48 h-80 z-[4] -rotate-3 origin-bottom">
+                <svg viewBox="0 0 100 200" className="w-full h-full fill-[#000000]">
                     {/* Trunk */}
                     <path d="M45,200 C45,200 50,150 48,100 C46,50 40,20 40,20 L50,20 C50,20 54,50 56,100 C58,150 65,200 65,200 Z" />
                     {/* Leaves */}
@@ -97,7 +97,7 @@ export function SynthwaveBackground() {
                         linear-gradient(transparent 95%, #ff00ff 95%, #ff60ff 100%),
                         linear-gradient(90deg, transparent 95%, #ff00ff 95%, #ff60ff 100%)
                     `,
-                        backgroundSize: "30px 30px",
+                        backgroundSize: "20px 20px",
                         backgroundRepeat: "repeat",
                         boxShadow: "0 -20px 60px #ff00ff inset",
                         maskImage: "linear-gradient(to bottom, transparent, black 15%)",
