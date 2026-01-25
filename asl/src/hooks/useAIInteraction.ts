@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { type SignPrediction } from "~/lib/gameScoring";
 
-const HOLD_DURATION = 1500;
+const HOLD_DURATION = 400;
 
 interface AIInteractionProps {
   predictions: SignPrediction[];

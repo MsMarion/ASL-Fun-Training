@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AVAILABLE_LETTERS } from "~/lib/svgLoader";
 
-export type WhackAMoleGameState = "idle" | "playing" | "cooldown" | "finished";
+export type WhackAMoleGameState = "idle" | "starting" | "playing" | "cooldown" | "finished";
 
 export interface GameMetrics {
   reactionTimes: number[];
@@ -15,7 +15,7 @@ const FILTERED_LETTERS = AVAILABLE_LETTERS.filter(
   (letter) => letter !== "Z" && letter !== "J"
 );
 
-const GAME_DURATION = 60;
+const GAME_DURATION = 30;
 const COOLDOWN_DURATION = 3;
 const ROUND_COOLDOWN = 1;
 
@@ -39,57 +39,11 @@ export function useWhackAMoleGame() {
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const roundStartTimeRef = useRef<number>(0);
 
-  const startGame = useCallback(() => {
-    setScore(0);
-    setMetrics({ reactionTimes: [], totalCorrect: 0, totalMisses: 0 });
-    setTimeLeft(GAME_DURATION);
-    setGameState("cooldown");
-    startCooldown(COOLDOWN_DURATION);
-  }, []);
-
-  const resetGame = useCallback(() => {
-    setGameState("idle");
-    setTargetLetter(null);
-    setScore(0);
-    setMetrics({ reactionTimes: [], totalCorrect: 0, totalMisses: 0 });
-    
-    if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
-      countdownTimerRef.current = null;
-    }
-    if (gameTimerRef.current) {
-      clearInterval(gameTimerRef.current);
-      gameTimerRef.current = null;
-    }
-  }, []);
-
-  // Game timer
-  useEffect(() => {
-    if (gameState === "playing" && timeLeft > 0) {
-      gameTimerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setGameState("finished");
-            setTargetLetter(null);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => {
-        if (gameTimerRef.current) {
-          clearInterval(gameTimerRef.current);
-          gameTimerRef.current = null;
-        }
-      };
-    }
-  }, [gameState]);
-
-  const startCooldown = (seconds: number) => {
+  // Helper to manage cooldowns (both initial and inter-round)
+  const startCooldown = useCallback((seconds: number, state: "starting" | "cooldown" = "cooldown") => {
     setCountdown(seconds);
     setTargetLetter(null);
-    setGameState("cooldown");
+    setGameState(state);
 
     let remaining = seconds;
     
@@ -109,14 +63,61 @@ export function useWhackAMoleGame() {
         nextTurn();
       }
     }, 1000);
-  };
+  }, []); // Added dependency array for useCallback
 
-  const nextTurn = () => {
+  const nextTurn = useCallback(() => {
     const nextLetter = FILTERED_LETTERS[Math.floor(Math.random() * FILTERED_LETTERS.length)]!;
     setTargetLetter(nextLetter);
     setGameState("playing");
     roundStartTimeRef.current = Date.now();
-  };
+  }, []);
+
+  const startGame = useCallback(() => {
+    setScore(0);
+    setMetrics({ reactionTimes: [], totalCorrect: 0, totalMisses: 0 });
+    setTimeLeft(GAME_DURATION);
+    setGameState("starting"); // Initial state
+    startCooldown(COOLDOWN_DURATION, "starting");
+  }, [startCooldown]);
+
+  const resetGame = useCallback(() => {
+    setGameState("idle");
+    setTargetLetter(null);
+    setScore(0);
+    setMetrics({ reactionTimes: [], totalCorrect: 0, totalMisses: 0 });
+    
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    if (gameTimerRef.current) {
+      clearInterval(gameTimerRef.current);
+      gameTimerRef.current = null;
+    }
+  }, []);
+
+  // Game timer logic: Pause during "starting", run during "playing" or "cooldown"
+  useEffect(() => {
+    if ((gameState === "playing" || gameState === "cooldown") && timeLeft > 0) {
+      gameTimerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setGameState("finished");
+            setTargetLetter(null);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => {
+        if (gameTimerRef.current) {
+          clearInterval(gameTimerRef.current);
+          gameTimerRef.current = null;
+        }
+      };
+    }
+  }, [gameState, timeLeft]);
 
   const handleCorrectHit = useCallback((letter: string) => {
     if (gameState !== "playing" || letter !== targetLetter) return;
@@ -132,8 +133,9 @@ export function useWhackAMoleGame() {
       totalMisses: prev.totalMisses
     }));
     
-    startCooldown(ROUND_COOLDOWN);
-  }, [gameState, targetLetter]);
+    // Inter-round cooldown
+    startCooldown(ROUND_COOLDOWN, "cooldown");
+  }, [gameState, targetLetter, startCooldown]);
 
   const handleMiss = useCallback(() => {
     setMetrics(prev => ({
@@ -142,6 +144,7 @@ export function useWhackAMoleGame() {
     }));
   }, []);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);

@@ -11,6 +11,7 @@ import { ScreenFlash } from "./ScreenFlash";
 import { SuccessBurst } from "./SuccessBurst";
 import { FloatingSuccessText } from "./FloatingSuccessText";
 import { useSoundEffects } from "~/hooks/useSoundEffects";
+import { SongFinishedOverlay } from "./SongFinishedOverlay";
 
 interface TestingCanvasProps {
     beatmap: Beatmap;
@@ -269,40 +270,10 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
                 )}
             </div>
 
-            {/* Results Screen */}
-            {gameState === "finished" && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md">
-                    <h2 className="text-3xl font-bold text-white mb-4">TEST COMPLETE</h2>
-                    <div className="text-8xl font-black text-purple-400 mb-8">{score}</div>
 
-                    <div className="grid grid-cols-2 gap-8 text-center mb-12">
-                        <div className="flex flex-col">
-                            <span className="text-gray-400">PERFECT</span>
-                            <span className="text-2xl font-bold text-green-400">{metrics.earlyHits}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-gray-400">GOOD</span>
-                            <span className="text-2xl font-bold text-yellow-400">{metrics.lateHits}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-gray-400">MISS</span>
-                            <span className="text-2xl font-bold text-red-400">{metrics.misses}</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-gray-400">ACCURACY</span>
-                            <span className="text-2xl font-bold text-white">
-                                {metrics.hits + metrics.misses > 0
-                                    ? ((metrics.hits / (metrics.hits + metrics.misses)) * 100).toFixed(0)
-                                    : 0}%
-                            </span>
-                        </div>
-                    </div>
-                    <a href="/game/songselection" className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full">
-                        BACK TO SONGS
-                    </a>
-                </div>
-            )}
 
+            {/* Transition Overlay */}
+            <SongFinishedOverlay show={gameState === "finished"} />
         </div>
     );
 }

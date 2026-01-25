@@ -104,7 +104,8 @@ export function useTestingGame(beatmap: Beatmap | null) {
             currentElapsed = audioRef.current.currentTime;
             
             // Safety: If audio ends but loop is weird, rely on duration
-            if (audioRef.current.ended) {
+            // Force finish if we are very close to end or audio ended
+            if (audioRef.current.ended || (audioRef.current.duration > 0 && audioRef.current.currentTime >= audioRef.current.duration - 0.1)) {
                  setGameState("finished");
                  return;
             }

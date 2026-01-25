@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWhackAMoleGame } from "~/hooks/useWhackAMoleGame";
 import { usePlayerManager } from "~/hooks/usePlayerManager";
 import { useAIInteraction } from "~/hooks/useAIInteraction";
@@ -10,6 +10,8 @@ import { WhackAMoleGrid } from "./WhackAMoleGrid";
 import { SynthwaveBackground } from "./SynthwaveBackground";
 import { WebcamFeed } from "./WebcamFeed";
 import { api } from "~/trpc/react";
+import { useSoundEffects } from "~/hooks/useSoundEffects";
+import { FloatingSuccessText } from "./FloatingSuccessText";
 
 export function WhackAMoleCanvas() {
     const {
@@ -44,6 +46,22 @@ export function WhackAMoleCanvas() {
     // Track if we've already submitted for this game session
     const hasSubmittedLeaderboardRef = useRef(false);
 
+    // Visual & Audio Effects
+    const { playSuccessSound, playMissSound, playBackgroundMusic, stopBackgroundMusic, initAudio } = useSoundEffects();
+    // Removed global flash/burst state per user request to keep focus on key
+    const [successTextTrigger, setSuccessTextTrigger] = useState<{ text: string; timestamp: number } | null>(null);
+    const [lastSuccess, setLastSuccess] = useState<string | null>(null);
+
+    // Music control
+    useEffect(() => {
+        if (gameState === "playing" || gameState === "cooldown" || gameState === "starting") {
+            playBackgroundMusic();
+        } else {
+            stopBackgroundMusic();
+        }
+        return () => stopBackgroundMusic();
+    }, [gameState, playBackgroundMusic, stopBackgroundMusic]);
+
     const { videoRef, canvasRef, isReady, error, captureFrame } = useWebcam();
     const { predictions, isConnected, handDetected, latency } = useSignDetection(
         captureFrame,
@@ -56,10 +74,16 @@ export function WhackAMoleCanvas() {
         targetLetter,
         isPlaying: gameState === "playing" && !!playerId,
         isConnected,
-        onCorrect: handleCorrectHit,
+        onCorrect: (letter) => {
+            playSuccessSound();
+            setLastSuccess(letter);
+            // Removed global effects
+            setSuccessTextTrigger({ text: "NICE!", timestamp: Date.now() });
+            handleCorrectHit(letter);
+        },
         onMistake: (showed, expected) => {
-            recordMistake(showed, expected);
-            handleMiss();
+            // Negative feedback disabled per user request
+            // We only care about positive hits
         },
     });
 
@@ -105,11 +129,17 @@ export function WhackAMoleCanvas() {
     const handleGridClick = (clickedLetter: string) => {
         if (gameState !== "playing" || !targetLetter || !playerId) return;
 
+        // Initialize audio on interaction
+        initAudio();
+        
         if (clickedLetter === targetLetter) {
+            playSuccessSound();
+            setLastSuccess(clickedLetter);
+            // Removed global effects
+            setSuccessTextTrigger({ text: "NICE!", timestamp: Date.now() });
             handleCorrectHit(clickedLetter);
         } else {
-            recordMistake(clickedLetter, targetLetter);
-            handleMiss();
+            // Ignore wrong clicks
         }
     };
 
@@ -127,6 +157,9 @@ export function WhackAMoleCanvas() {
     return (
         <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
             <SynthwaveBackground />
+
+            {/* Visual Effects - Global removed, key-specific handled in Grid */}
+            <FloatingSuccessText trigger={successTextTrigger} />
 
             {showNameModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
@@ -196,6 +229,8 @@ export function WhackAMoleCanvas() {
                     {gameState === "playing" ? (
                         <span>FIND <span className="text-fuchsia-400 text-5xl mx-2">{targetLetter}</span> !</span>
                     ) : gameState === "cooldown" ? (
+                        <span className="text-cyan-400">NEXT ROUND...</span>
+                    ) : gameState === "starting" ? (
                         <span className="text-cyan-400">GET READY...</span>
                     ) : gameState === "finished" ? (
                         "TIME'S UP!"
@@ -210,6 +245,8 @@ export function WhackAMoleCanvas() {
                         targetLetter={targetLetter}
                         onInteract={handleGridClick}
                         holdProgress={holdProgress}
+                        recentSuccess={lastSuccess}
+                        successCount={metrics.totalCorrect}
                     />
                 </div>
             </div>
@@ -238,7 +275,7 @@ export function WhackAMoleCanvas() {
                 </div>
             )}
 
-            {gameState === "cooldown" && countdown > 0 && playerId && (
+            {gameState === "starting" && countdown > 0 && playerId && (
                 <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
                     <div className="text-[12rem] font-bold text-white drop-shadow-[0_0_50px_rgba(34,211,238,0.8)] animate-pulse">
                         {countdown}

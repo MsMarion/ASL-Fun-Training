@@ -250,10 +250,23 @@ export function useSoundEffects() {
         playNote(98.00, "square", 0.6, 0.2, 0.2); // G2 (low punch)
     }, [initAudio]);
 
+    const playGameFinishedSound = useCallback(() => {
+        initAudio();
+        // Fanfare
+        playNote(523.25, "square", 0.4, 0.0, 0.2); // C5
+        playNote(659.25, "square", 0.4, 0.15, 0.2); // E5
+        playNote(783.99, "square", 0.4, 0.3, 0.2); // G5
+        playNote(1046.50, "square", 2.0, 0.45, 0.3); // C6 (Long)
+        
+        // Bass Thump
+        playNote(130.81, "sine", 1.5, 0.0, 0.5); // C3
+    }, [initAudio]);
+
     return {
         playSuccessSound,
         playStreakSound,
         playMissSound,
+        playGameFinishedSound,
         playBackgroundMusic,
         stopBackgroundMusic,
         initAudio
