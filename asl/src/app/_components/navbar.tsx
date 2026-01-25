@@ -14,6 +14,7 @@ const routes: readonly Route[] = [
   { title: "COMMUNITY SONGS", href: "/community" },
   { title: "OFFICIAL SONGS", href: "/songselection" },
   { title: "DEV MODE", href: "/devmode" },
+  { title: "LEARN", href: "/traininglobby" },
 ] as const;
 
 const getRoute = (index: number): Route => {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '~/trpc/react';
 
@@ -39,11 +39,12 @@ const getNameColor = (index) => {
 
 const LeaderboardPage = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const playerId = searchParams.get('playerId');
 
   const [smoothPos, setSmoothPos] = useState({ x: 0, y: 0 });
   const [currentTime, setCurrentTime] = useState('');
-  const [view, setView] = useState('report'); // 'report' or 'leaderboard'
+  const [view, setView] = useState('report');
   const containerRef = useRef(null);
   const targetPos = useRef({ x: 0, y: 0 });
   const animationRef = useRef(undefined);
@@ -206,7 +207,6 @@ const LeaderboardPage = () => {
         />
       </div>
 
-
       {/* Main Content Container */}
       <div className="absolute inset-0 z-30 flex justify-center items-center p-4" style={{ transform: `translate(${smoothPos.x * -25}px, ${smoothPos.y * -25}px)` }}>
         <div className="relative max-w-4xl w-full">
@@ -222,37 +222,49 @@ const LeaderboardPage = () => {
 
                 {/* Content */}
                 <div className="relative p-6 md:p-8 max-h-[80vh] overflow-y-auto">
-                  {/* Header with Toggle Buttons */}
+                  {/* Header with Toggle Buttons and Home Button */}
                   <div className="mb-6">
                     <h1 className="text-center text-2xl md:text-4xl font-bold text-fuchsia-400 mb-4 tracking-wider" style={{ textShadow: '0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 40px #d946ef' }}>
                       {view === 'report' ? 'GAME REPORT' : 'LEADERBOARD'}
                     </h1>
                     
                     {/* Toggle Buttons */}
-                    {playerId && (
-                      <div className="flex gap-3 justify-center">
-                        <button
-                          onClick={() => setView('report')}
-                          className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
-                            view === 'report'
-                              ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
-                              : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
-                          }`}
-                        >
-                          REPORT
-                        </button>
-                        <button
-                          onClick={() => setView('leaderboard')}
-                          className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
-                            view === 'leaderboard'
-                              ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
-                              : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
-                          }`}
-                        >
-                          LEADERBOARD
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-3 justify-center mb-4">
+                      {playerId && (
+                        <>
+                          <button
+                            onClick={() => setView('report')}
+                            className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
+                              view === 'report'
+                                ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
+                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
+                            }`}
+                          >
+                            REPORT
+                          </button>
+                          <button
+                            onClick={() => setView('leaderboard')}
+                            className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
+                              view === 'leaderboard'
+                                ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
+                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
+                            }`}
+                          >
+                            LEADERBOARD
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Back to Home Button */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => router.push('/learn')}
+                        className="px-8 py-3 rounded-lg font-mono font-bold tracking-wider transition-all bg-gradient-to-r from-[#2de2e6] to-[#920075] text-[#0d0221] shadow-[0_0_25px_rgba(45,226,230,0.6)] hover:shadow-[0_0_35px_rgba(45,226,230,0.8)] hover:scale-105"
+                      >
+                        ← BACK TO HOME
+                      </button>
+                    </div>
                   </div>
 
                   {view === 'report' && playerData ? (
