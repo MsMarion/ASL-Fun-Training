@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '~/trpc/react';
 
 const RankBadge = ({ rank }: { rank: number }) => {
@@ -328,6 +329,15 @@ const LeaderboardPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* Return to Menu Button */}
+            <Link
+                href="/"
+                className="absolute top-6 left-6 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-[#1a0a2e]/80 border-2 border-fuchsia-500/50 hover:border-cyan-400 hover:bg-[#1a0a2e] text-fuchsia-300 hover:text-cyan-400 transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(45,226,230,0.3)] group"
+            >
+                <span className="text-xl group-hover:-translate-x-1 transition-transform">←</span>
+                <span className="font-mono font-bold tracking-wider" style={{ textShadow: '0 0 10px currentColor' }}>MENU</span>
+            </Link>
 
             {/* CRT Monitor Frame with Leaderboard */}
             <div
