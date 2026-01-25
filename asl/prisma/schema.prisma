@@ -30,12 +30,30 @@ model LeaderboardEntry {
   name      String
   score     Int
   rank      Int
+  playerId  String?  // Add playerId to track unique players
   createdAt DateTime @default(now())
   v         Int      @default(0) @map("__v")
 }
 
+model Player {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  score               Int
+  avgReactionTime     Float
+  mistakesMade        Int
+  correctHits         Int
+  commonMistakes      CommonMistake[]
+  createdAt           DateTime        @default(now())
+  v                   Int             @default(0) @map("__v")
+}
 
 type Interaction {
   key         String
-  timeElapsed Float  // Changed from Double to Float for consistency
+  timeElapsed Float
+}
+
+type CommonMistake {
+  key1  String  // Letter they showed
+  key2  String  // Letter that was expected
+  hits  Int     // Number of times this mistake occurred
 }
