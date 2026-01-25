@@ -6,6 +6,23 @@ Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arca
 
 ---
 
+## 📸 Screenshots & Demos
+
+<!-- Add your GIFs and screenshots here! -->
+
+| Feature | Preview |
+|---------|----------|
+| **Song Game** | ![Song Game](screenshots/song_game.gif) |
+| **Training Mode** | ![Training Mode](screenshots/training_mode.gif) |
+| **Testing Mode** | ![Testing Mode](screenshots/testing_mode.gif) |
+| **Whack-A-Sign** | ![Whack-A-Sign](screenshots/whackamole.gif) |
+| **Sign Detection** | ![Sign Detection](screenshots/sign_detection.gif) |
+| **Visual Effects** | ![Visual Effects](screenshots/effects.gif) |
+
+> 💡 **Tip:** Place your screenshots/GIFs in the `screenshots/` folder and update the paths above.
+
+---
+
 ## ✨ Features
 
 ### 🎮 Game Modes
@@ -19,10 +36,11 @@ Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arca
 
 ### 🤖 AI-Powered Sign Detection
 
-- **Real-time webcam analysis** for fingerspelling recognition
+- **Real-time webcam analysis** using MediaPipe hand tracking
+- **MobileNetV2 CNN** for ASL letter classification (A-Z)
 - **Confidence scoring** displayed per-prediction
 - **Latency monitoring** to ensure responsive gameplay
-- Works entirely in-browser (no server round-trips for detection)
+- Predictions via local Python FastAPI server (~30-50ms latency)
 
 ### 💫 Visual Polish
 
@@ -59,7 +77,7 @@ Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arca
 | **API Layer** | [tRPC](https://trpc.io/) with React Query |
 | **Database** | [MongoDB](https://www.mongodb.com/) via [Prisma ORM](https://www.prisma.io/) |
 | **File Storage** | [AWS S3](https://aws.amazon.com/s3/) (presigned URLs) |
-| **AI/ML** | [Google Generative AI SDK](https://ai.google.dev/) |
+| **AI/ML** | [PyTorch](https://pytorch.org/) (MobileNetV2), [MediaPipe](https://mediapipe.dev/) (hand tracking) |
 | **Audio** | Web Audio API, [YouTubei.js](https://github.com/LuanRT/YouTube.js) for audio extraction |
 
 ---
