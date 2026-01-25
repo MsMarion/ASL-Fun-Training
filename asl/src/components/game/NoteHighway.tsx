@@ -1,19 +1,23 @@
 "use client";
 
-import { type BeatmapNote } from "~/lib/beatmap";
+import { type BeatmapNote, NOTE_WINDOW_DURATION, NOTE_TRACKING_WINDOW, NOTE_LATE_GRACE } from "~/lib/beatmap";
 import { SignSymbolHighway } from "~/components/SignSymbolHighway";
 
 interface NoteHighwayProps {
   notes: BeatmapNote[];
   currentTime: number;
+  activeNoteIndex: number;
 }
 
-const WINDOW_DURATION = 4; // seconds visible before target
-const HIT_ZONE_PERCENT = 15; // hit zone at 15% from left
+const WINDOW_DURATION = NOTE_WINDOW_DURATION; // Synced with beatmap.ts
+const HIT_ZONE_PERCENT = 50; // hit zone centered on screen
 
-export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
-  // Filter notes that are within the visible window
-  const visibleNotes = notes.filter((note) => {
+export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighwayProps) {
+  // Filter notes that are within the visible window AND not yet processed
+  const visibleNotes = notes.filter((note, index) => {
+    // Hide notes that we've already passed (hit or miss)
+    if (index < activeNoteIndex) return false;
+
     const timeUntil = note.time - currentTime;
     return timeUntil > -0.5 && timeUntil < WINDOW_DURATION;
   });
@@ -28,6 +32,13 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
     ? Math.max(0, 1 - timeUntilNext / 2)
     : 0;
 
+  // Calculate visual positions for timing windows
+  const trackingProgress = NOTE_TRACKING_WINDOW / WINDOW_DURATION;
+  const trackingLeft = HIT_ZONE_PERCENT + trackingProgress * (100 - HIT_ZONE_PERCENT);
+  
+  const lateProgress = -NOTE_LATE_GRACE / WINDOW_DURATION;
+  const lateLeft = HIT_ZONE_PERCENT + lateProgress * (100 - HIT_ZONE_PERCENT);
+
   return (
     <div className="relative w-full overflow-hidden" style={{ height: "100px" }}>
       {/* Highway track background */}
@@ -39,16 +50,38 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
         }}
       />
 
-      {/* Hit zone marker */}
+      {/* DEBUG: Visual Markers for Windows */}
+      {/* Start Tracking Marker */}
+      <div 
+        className="absolute top-0 bottom-0 w-px border-l border-dashed border-blue-500/50"
+        style={{ left: `${trackingLeft}%` }}
+      >
+        <div className="absolute top-2 -left-2 -translate-x-full text-[8px] text-blue-400 font-mono whitespace-nowrap">
+          START TRACK
+        </div>
+      </div>
+
+      {/* Miss Deadline Marker */}
+      <div 
+        className="absolute top-0 bottom-0 w-px border-l border-dashed border-red-500/50"
+        style={{ left: `${lateLeft}%` }}
+      >
+         <div className="absolute top-2 left-1 text-[8px] text-red-400 font-mono whitespace-nowrap">
+          MISS LIMIT
+        </div>
+      </div>
+
+      {/* Hit zone marker - center target line */}
       <div
-        className="absolute top-0 bottom-0 w-0.5"
+        className="absolute top-0 bottom-0 w-1"
         style={{
           left: `${HIT_ZONE_PERCENT}%`,
-          background: "rgba(217,70,239,0.8)",
+          background: "rgba(217,70,239,1)",
           boxShadow: isNoteApproaching
             ? "0 0 20px rgba(217,70,239,0.9), 0 0 40px rgba(217,70,239,0.5)"
             : "0 0 10px rgba(217,70,239,0.6), 0 0 20px rgba(217,70,239,0.3)",
           transition: "box-shadow 0.3s ease-out",
+          zIndex: 10,
         }}
       />
 
@@ -56,10 +89,11 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
       <div
         className="absolute top-0 bottom-0"
         style={{
-          left: `${HIT_ZONE_PERCENT - 3}%`,
-          width: "6%",
-          background: "radial-gradient(ellipse at center, rgba(217,70,239,0.15) 0%, transparent 70%)",
+          left: `${HIT_ZONE_PERCENT - 5}%`,
+          width: "10%",
+          background: "radial-gradient(ellipse at center, rgba(217,70,239,0.2) 0%, transparent 70%)",
           animation: isNoteApproaching ? "hit-zone-pulse 0.5s ease-in-out infinite" : "none",
+          zIndex: 8,
         }}
       />
 
@@ -111,9 +145,22 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
         const opacity = isPast ? Math.max(0, 1 + timeUntil * 2) : Math.min(1, (WINDOW_DURATION - timeUntil) / 0.5);
         const scale = isPast ? Math.max(0.5, 1 + timeUntil * 0.5) : 1;
 
-        // Note brightness: dim purple to bright magenta as it approaches
-        const brightness = Math.max(0.5, 1 - timeUntil / WINDOW_DURATION);
-        const trailOpacity = Math.max(0, brightness - 0.3);
+        // Determine note color/glow based on zone
+        let glowColor = "rgba(217,70,239,1)"; // Purple (default/approaching)
+        
+        if (timeUntil > NOTE_TRACKING_WINDOW) {
+           // Approaching (Window -> Tracking)
+           glowColor = "rgba(56,189,248,0.8)"; // Cyan
+        } else if (timeUntil > 0) {
+           // Tracking (Tracking -> Target)
+           glowColor = "rgba(74,222,128,0.9)"; // Green (Active/Good to hit)
+        } else if (timeUntil > -NOTE_LATE_GRACE) {
+           // Late Grace (Target -> Miss)
+           glowColor = "rgba(250,204,21,0.9)"; // Yellow/Gold
+        } else {
+           // Missed
+           glowColor = "rgba(248,113,113,0.9)"; // Red
+        }
 
         return (
           <div
@@ -127,22 +174,23 @@ export function NoteHighway({ notes, currentTime }: NoteHighwayProps) {
               transition: "opacity 0.1s",
               width: "60px",
               height: "70px",
+              zIndex: 20, // Keep notes above markers
             }}
           >
             {/* Note trail glow */}
             <div
               className="absolute inset-0"
               style={{
-                background: `linear-gradient(90deg, transparent 0%, rgba(217,70,239,${trailOpacity * 0.4}) 50%, rgba(217,70,239,${trailOpacity * 0.6}) 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, ${glowColor.replace('1)', '0.4)')} 50%, ${glowColor.replace('1)', '0.6)')} 100%)`,
                 filter: "blur(12px)",
                 transform: "scaleX(1.5)",
-                opacity: trailOpacity,
+                opacity: 0.6,
               }}
             />
             <div
               className="relative z-10 w-full h-full"
               style={{
-                filter: `brightness(${brightness}) drop-shadow(0 0 ${8 * brightness}px rgba(217,70,239,${brightness * 0.8}))`,
+                filter: `drop-shadow(0 0 10px ${glowColor})`,
               }}
             >
               <SignSymbolHighway

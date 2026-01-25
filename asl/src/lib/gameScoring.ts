@@ -3,22 +3,23 @@
  * Implements "early OK, late penalized" timing mechanic.
  */
 
-import { type BeatmapNote } from "./beatmap";
+import { type BeatmapNote, NOTE_WINDOW_DURATION, NOTE_LATE_GRACE, NOTE_TRACKING_WINDOW } from "./beatmap";
 
-// Timing windows (in seconds)
-export const EARLY_WINDOW = 2.0; // Notes become hittable 2s before target time
-export const LATE_GRACE = 0.8; // Deadline after target time
-export const PERFECT_THRESHOLD = 0.3; // ±0.3s for PERFECT
-export const CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence to accept prediction
+// Timing windows (in seconds) - imported from beatmap.ts for sync
+export const EARLY_WINDOW = NOTE_WINDOW_DURATION; // Notes become hittable when visible
+export const LATE_GRACE = NOTE_LATE_GRACE; // Deadline after target time
+export const TRACKING_WINDOW = NOTE_TRACKING_WINDOW; // When to start tracking for hits
+export const PERFECT_THRESHOLD = 1.0; // ±1.0s for PERFECT (very generous)
+export const CONFIDENCE_THRESHOLD = 0.50; // Minimum confidence (lowered further)
+export const VISUAL_TRIGGER_WINDOW = NOTE_WINDOW_DURATION; // Hits register when notes appear
+export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
 
 // Scoring constants
-export const PERFECT_POINTS = 100;
-export const GREAT_POINTS = 100;
-export const OK_POINTS = 60;
+export const HIT_POINTS = 100;
 export const STREAK_DIVISOR = 3; // Multiplier increases every 3 hits
 export const MAX_MULTIPLIER = 4;
 
-export type HitQuality = "PERFECT" | "GREAT" | "OK";
+export type HitQuality = "HIT";
 
 export interface SignPrediction {
   letter: string;
@@ -28,8 +29,8 @@ export interface SignPrediction {
 }
 
 export type JudgementResult =
-  | { type: "hit"; quality: HitQuality; points: number }
-  | { type: "miss" }
+  | { type: "hit"; quality: HitQuality; points: number; sawLetter: string }
+  | { type: "miss"; reason: "TOO LATE" | "WRONG SIGN" | "LOW CONFIDENCE" | "NONE"; sawLetter: string }
   | { type: "pending" };
 
 /**
@@ -41,17 +42,7 @@ export function calculateMultiplier(streak: number): number {
 
 /**
  * Evaluate a single note against a prediction.
- *
- * Timeline:
- *   [note.time - 2.0] ──GREAT──► [note.time - 0.3] ──PERFECT──► [note.time] ──PERFECT──► [note.time + 0.3] ──OK──► [note.time + 0.8]
- *        │                              │                           │                           │                      │
- *    Early start                    Perfect zone              Target time                  Perfect zone           Deadline
- *
- * @param note The beatmap note to evaluate
- * @param prediction The sign prediction from CV model (or null)
- * @param currentTime Current game time
- * @param streak Current streak count (for multiplier calculation)
- * @returns Judgement result (hit/miss/pending)
+ * Returns HIT as soon as valid prediction is found in the tracking window.
  */
 export function evaluateNote(
   note: BeatmapNote,
@@ -59,65 +50,45 @@ export function evaluateNote(
   currentTime: number,
   streak: number,
 ): JudgementResult {
-  const earlyStart = note.time - EARLY_WINDOW;
-  const deadline = note.time + LATE_GRACE;
-
-  // Check if we've passed the deadline
-  if (currentTime > deadline) {
-    return { type: "miss" };
-  }
-
-  // If we haven't reached the early window yet, it's still pending
-  if (currentTime < earlyStart) {
+  const timeUntilTarget = note.time - currentTime;
+  
+  // Note hasn't entered tracking window yet (still approaching)
+  if (timeUntilTarget > TRACKING_WINDOW) {
     return { type: "pending" };
   }
-
-  // No valid prediction yet
-  if (!prediction) {
-    return { type: "pending" };
+  
+  // Note has exited LATE zone - this is the MISS trigger point (SVG disappears here)
+  if (timeUntilTarget < -LATE_GRACE) {
+    if (prediction) {
+      if (prediction.letter.toUpperCase() !== note.letter.toUpperCase()) {
+        return { type: "miss", reason: "WRONG SIGN", sawLetter: prediction.letter };
+      }
+      if (prediction.confidence < CONFIDENCE_THRESHOLD) {
+        return { type: "miss", reason: "LOW CONFIDENCE", sawLetter: prediction.letter };
+      }
+    }
+    return { type: "miss", reason: "TOO LATE", sawLetter: prediction?.letter ?? "None" };
   }
-
-  // Check if prediction matches the note
-  if (prediction.letter.toUpperCase() !== note.letter.toUpperCase()) {
-    return { type: "pending" }; // Wrong letter doesn't cause immediate miss
+  
+  // In tracking window - check for valid HIT
+  if (prediction && 
+      prediction.letter.toUpperCase() === note.letter.toUpperCase() &&
+      prediction.confidence >= CONFIDENCE_THRESHOLD &&
+      prediction.handDetected) {
+    
+    // Valid HIT - simple binary state
+    const multiplier = calculateMultiplier(streak);
+    
+    return {
+      type: "hit",
+      quality: "HIT",
+      points: HIT_POINTS * multiplier,
+      sawLetter: prediction.letter,
+    };
   }
-
-  // Confidence check
-  if (prediction.confidence < CONFIDENCE_THRESHOLD) {
-    return { type: "pending" };
-  }
-
-  // Hand must be detected
-  if (!prediction.handDetected) {
-    return { type: "pending" };
-  }
-
-  // We have a valid hit! Determine quality based on timing
-  const timeDiff = Math.abs(prediction.clientTimestamp - note.time);
-  const multiplier = calculateMultiplier(streak);
-
-  let quality: HitQuality;
-  let basePoints: number;
-
-  if (timeDiff <= PERFECT_THRESHOLD) {
-    // Within ±0.3s of target
-    quality = "PERFECT";
-    basePoints = PERFECT_POINTS;
-  } else if (prediction.clientTimestamp < note.time) {
-    // Early (beyond 0.3s but within 2.0s window)
-    quality = "GREAT";
-    basePoints = GREAT_POINTS;
-  } else {
-    // Late (beyond 0.3s but within grace period)
-    quality = "OK";
-    basePoints = OK_POINTS;
-  }
-
-  return {
-    type: "hit",
-    quality,
-    points: basePoints * multiplier,
-  };
+  
+  // Still in tracking window, no valid hit yet - keep waiting
+  return { type: "pending" };
 }
 
 /**
@@ -136,22 +107,40 @@ export function findBestPrediction(
   note: BeatmapNote,
   earlyStart: number,
   deadline: number,
+  gameStartTime: number,
+  ignoredTimestamps: Set<number>,
 ): SignPrediction | null {
+  // Debug logging
+  /*
+  console.log(`Checking note ${note.letter} at ${note.time}`);
+  console.log(`Window: ${earlyStart} -> ${deadline}`);
+  console.log(`Predictions: ${predictions.length}`);
+  */
+
   const validPredictions = predictions.filter(
-    (p) =>
-      p.letter.toUpperCase() === note.letter.toUpperCase() &&
-      p.confidence >= CONFIDENCE_THRESHOLD &&
-      p.handDetected &&
-      p.clientTimestamp >= earlyStart &&
-      p.clientTimestamp <= deadline,
+    (p) => {
+      // Ignore consumed predictions
+      if (ignoredTimestamps.has(p.clientTimestamp)) {
+        return false;
+      }
+
+      const matchLetter = p.letter.toUpperCase() === note.letter.toUpperCase();
+      const matchConf = p.confidence >= CONFIDENCE_THRESHOLD;
+      const matchHand = p.handDetected;
+
+      // Apply Input Offset
+      const relativeTime = (p.clientTimestamp - gameStartTime) - INPUT_OFFSET;
+      const matchTime = relativeTime >= earlyStart && relativeTime <= deadline;
+
+      return matchLetter && matchConf && matchHand && matchTime;
+    }
   );
 
   if (validPredictions.length === 0) {
     return null;
   }
 
-  // Return prediction with highest confidence
-  return validPredictions.reduce((best, current) =>
-    current.confidence > best.confidence ? current : best,
-  );
+  // Return the LATEST valid prediction (most recent)
+  // This ensures we use the "current" state of the hand, closest to the target
+  return validPredictions[validPredictions.length - 1] ?? null;
 }
