@@ -30,7 +30,8 @@ model LeaderboardEntry {
   name      String
   score     Int
   rank      Int
-  playerId  String?  // Add playerId to track unique players
+  playerId  String?  // Track unique players
+  category  String   // Game mode: "training", "guitar-hero", "just-dance", etc.
   createdAt DateTime @default(now())
   v         Int      @default(0) @map("__v")
 }
@@ -42,6 +43,7 @@ model Player {
   avgReactionTime     Float
   mistakesMade        Int
   correctHits         Int
+  category            String          // Game mode: "training", "guitar-hero", "just-dance", etc.
   commonMistakes      CommonMistake[]
   createdAt           DateTime        @default(now())
   v                   Int             @default(0) @map("__v")

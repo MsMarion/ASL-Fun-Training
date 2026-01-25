@@ -7,12 +7,17 @@ import { type Beatmap } from "~/lib/beatmap";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { TestingNoteHighway } from "./TestingNoteHighway";
+import { NameEntryModal } from "./NameEntryModal";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 interface TestingCanvasProps {
   beatmap: Beatmap;
+  category: string;
 }
 
-export function TestingCanvas({ beatmap }: TestingCanvasProps) {
+export function TestingCanvas({ beatmap, category }: TestingCanvasProps) {
+  const router = useRouter();
   const { 
     gameState, 
     score, 
@@ -29,11 +34,19 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
     processedNotes
   } = useTestingGame(beatmap);
 
+  // Player state
+  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState("");
+  const [showNameModal, setShowNameModal] = useState(true);
+  const [hasSubmittedStats, setHasSubmittedStats] = useState(false);
+
+  // API mutations
+  const createPlayer = api.player.create.useMutation();
+  const addMistake = api.player.addMistake.useMutation();
+  const updateFinalStats = api.player.updateFinalStats.useMutation();
+  const upsertLeaderboard = api.leaderboard.upsert.useMutation();
+
   // Find active note to display
-  // We want to show notes that are within window [-2, +1]
-  // In this mode, we mainly focus on one note at a time, but technically multiple could overlap?
-  // Use sequential assumption for simplicity or find first unhandled in window.
-  
   const activeNoteIndex = beatmap.notes.findIndex((note, i) => {
       if (processedNotes.has(i)) return false;
       const windowStart = note.time - 2.0;
@@ -51,6 +64,9 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
   // Background SVG State
   const [bgSvg, setBgSvg] = useState<{ pathData: string, viewBox: string, transform: string } | null>(null);
 
+  // Mistake tracking - deduplicate mistakes
+  const [lastMistakeKey, setLastMistakeKey] = useState<string>("");
+
   useEffect(() => {
      if (activeNote?.letter) {
          import("~/lib/svgLoader").then(async ({ loadSignSvg }) => {
@@ -67,13 +83,54 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
      }
   }, [activeNote?.letter]);
 
+  // Track mistakes using AI predictions
+  useEffect(() => {
+    if (!playerId || !activeNote || !latestPrediction || !isConnected || gameState !== "playing") {
+      return;
+    }
+
+    const targetLetter = activeNote.letter;
+    const predictedLetter = latestPrediction.letter;
+    const confidence = latestPrediction.confidence;
+
+    // If prediction is confident but wrong, track as mistake
+    if (predictedLetter !== targetLetter && confidence >= 0.5) {
+      const mistakeKey = `${predictedLetter}->${targetLetter}`;
+      
+      // Only track each unique mistake once per note to avoid spam
+      if (mistakeKey !== lastMistakeKey) {
+        setLastMistakeKey(mistakeKey);
+        
+        console.log(`❌ Mistake detected: Showed ${predictedLetter}, Expected ${targetLetter}`);
+        
+        addMistake.mutate({
+          playerId: playerId,
+          key1: predictedLetter, // What they showed
+          key2: targetLetter,    // What was expected
+        }, {
+          onSuccess: () => {
+            console.log(`✅ Mistake recorded: ${mistakeKey}`);
+          },
+          onError: (error) => {
+            console.error("Failed to record mistake:", error);
+          }
+        });
+      }
+    }
+  }, [playerId, activeNote, latestPrediction, isConnected, gameState, lastMistakeKey, addMistake]);
+
+  // Reset mistake key when active note changes
+  useEffect(() => {
+    setLastMistakeKey("");
+  }, [activeNote?.letter]);
+
   useEffect(() => {
       // detect changes in metrics for feedback
       if (metrics.hits > lastMetrics.hits) {
           const pointsGained = metrics.score - lastMetrics.score;
           
           let text = `+${pointsGained}`;
-          let color = "text-yellow-400"; // Okay
+          let color = "text-yellow-400";
           
           if (pointsGained >= 95) {
               text = `PERFECT! +${pointsGained}`;
@@ -93,8 +150,75 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
       setLastMetrics(metrics);
   }, [metrics, lastMetrics]);
 
+  // Handle name submission
+  const handleNameSubmit = async (name: string) => {
+    try {
+      const player = await createPlayer.mutateAsync({
+        name: name,
+        score: 0,
+        avgReactionTime: 0,
+        mistakesMade: 0,
+        correctHits: 0,
+        category: category,
+      });
+
+      setPlayerId(player.id);
+      setPlayerName(name);
+      setShowNameModal(false);
+    } catch (error) {
+      console.error("Failed to create player:", error);
+      alert("Failed to create player. Please try again.");
+    }
+  };
+
+  const handleCancel = () => {
+    router.push('/songselection');
+  };
+
+  // Submit stats when game finishes
+  useEffect(() => {
+    if (!playerId || hasSubmittedStats || gameState !== "finished") return;
+
+    setHasSubmittedStats(true);
+
+    const avgReactionTime = 0; // TODO: track reaction times in useTestingGame
+
+    updateFinalStats.mutate({
+      playerId,
+      score: metrics.score,
+      avgReactionTime: avgReactionTime,
+      mistakesMade: metrics.misses,
+      correctHits: metrics.hits,
+    });
+
+    upsertLeaderboard.mutate({
+      name: playerName,
+      score: metrics.score,
+      playerId: playerId,
+      category: category,
+    }, {
+      onSuccess: () => {
+        console.log("✅ Stats saved to leaderboard");
+        // Redirect to leaderboard after a short delay
+        setTimeout(() => {
+          router.push(`/leaderboard?playerId=${playerId}&category=${category}`);
+        }, 2000);
+      },
+      onError: (error) => {
+        console.error("❌ Failed to save to leaderboard:", error);
+      }
+    });
+  }, [gameState, playerId, hasSubmittedStats, metrics, playerName, category, router, updateFinalStats, upsertLeaderboard]);
+
   return (
     <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
+      <NameEntryModal
+        isOpen={showNameModal}
+        onSubmit={handleNameSubmit}
+        onCancel={handleCancel}
+        isLoading={createPlayer.isPending}
+      />
+
       <SynthwaveBackground />
 
       {/* Background SVG Diagram */}
@@ -132,6 +256,9 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
         />
 
         <div className="flex flex-col items-end gap-2 bg-black/40 p-4 rounded-xl border border-white/10 backdrop-blur-md">
+            <div className="text-sm font-mono text-cyan-400">
+              {playerName ? `PLAYER: ${playerName}` : "SIGN HERO"}
+            </div>
             <div className="text-xl font-bold text-white">TESTING MODE</div>
             <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
                 {score} pts
@@ -156,7 +283,6 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
                  >  
                     <div className="text-2xl text-cyan-400 font-bold mb-4">SIGN NOW!</div>
                     <div className="w-64 h-64 bg-black/50 border-4 border-purple-500 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.4)] relative overflow-hidden">
-                         {/* Timer Bar visualization? */}
                          <div className="absolute bottom-0 left-0 h-2 bg-purple-500 w-full animate-[width_3s_linear_forward]" />
                          
                          <span className="text-9xl font-black text-white drop-shadow-lg">
@@ -176,7 +302,7 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
              ) : null}
           </AnimatePresence>
 
-          {/* New Highway (Right) */}
+          {/* Note Highway */}
           {gameState === "playing" && (
               <TestingNoteHighway notes={beatmap.notes} elapsed={elapsed} />
           )}
@@ -198,23 +324,24 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
           </AnimatePresence>
           
           {/* Start Screen */}
-         {gameState === "idle" && (
+         {gameState === "idle" && !showNameModal && (
             <div className="flex flex-col items-center z-50">
-                <h1 className="text-6xl font-bold mb-8">TIMED CHALLENGE</h1>
+                <h1 className="text-6xl font-bold mb-8">SIGN HERO</h1>
                  <button 
                     onClick={startGame}
                     className="px-12 py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xl rounded-full shadow-lg hover:scale-105 transition-all"
                 >
-                    START TEST
+                    START GAME
                 </button>
             </div>
          )}
       </div>
 
-       {/* Results Screen */}
+       {/* Results Screen - Brief display before redirect */}
        {gameState === "finished" && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md">
-            <h2 className="text-3xl font-bold text-white mb-4">TEST COMPLETE</h2>
+            <div className="text-sm font-mono text-cyan-400 mb-2">PLAYER: {playerName}</div>
+            <h2 className="text-3xl font-bold text-white mb-4">GAME COMPLETE</h2>
             <div className="text-8xl font-black text-purple-400 mb-8">{score}</div>
             
             <div className="grid grid-cols-2 gap-8 text-center mb-12">
@@ -239,12 +366,25 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
                     </span>
                 </div>
             </div>
-             <a href="/game/songselection" className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full">
-                BACK TO SONGS
-            </a>
+            
+            <div className="text-cyan-400 font-mono animate-pulse">
+              Redirecting to leaderboard...
+            </div>
         </div>
        )}
 
+      {/* AI Prediction Debug Display */}
+      {latestPrediction && gameState === "playing" && (
+        <div className="absolute bottom-4 left-4 z-20 bg-black/60 backdrop-blur text-white px-3 py-2 rounded-md border border-white/10">
+          <div className="text-[10px] text-gray-400 font-mono mb-1">AI PREDICTION</div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-cyan-400">{latestPrediction.letter}</span>
+            <span className="text-[10px] text-green-400/80 font-mono">
+              {(latestPrediction.confidence * 100).toFixed(0)}%
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

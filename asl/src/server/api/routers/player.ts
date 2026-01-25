@@ -9,6 +9,7 @@ const createPlayerSchema = z.object({
   avgReactionTime: z.number().min(0),
   mistakesMade: z.number().int().min(0),
   correctHits: z.number().int().min(0),
+  category: z.string().min(1), // Required: "training", "guitar-hero", "just-dance", etc.
 });
 
 const addMistakeSchema = z.object({
@@ -43,6 +44,7 @@ export const playerRouter = createTRPCRouter({
             avgReactionTime: input.avgReactionTime,
             mistakesMade: input.mistakesMade,
             correctHits: input.correctHits,
+            category: input.category,
             commonMistakes: [],
           },
         });
@@ -163,6 +165,28 @@ export const playerRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch player",
+        });
+      }
+    }),
+
+  getByCategory: publicProcedure
+    .input(z.object({ 
+      category: z.string(),
+      limit: z.number().int().min(1).max(100).default(10)
+    }))
+    .query(async ({ input }) => {
+      try {
+        const players = await db.player.findMany({
+          where: { category: input.category },
+          orderBy: { score: "desc" },
+          take: input.limit,
+        });
+
+        return players;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch players by category",
         });
       }
     }),

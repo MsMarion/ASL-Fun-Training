@@ -2217,6 +2217,7 @@ export namespace Prisma {
     score: number | null
     rank: number | null
     playerId: string | null
+    category: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2227,6 +2228,7 @@ export namespace Prisma {
     score: number | null
     rank: number | null
     playerId: string | null
+    category: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2237,6 +2239,7 @@ export namespace Prisma {
     score: number
     rank: number
     playerId: number
+    category: number
     createdAt: number
     v: number
     _all: number
@@ -2261,6 +2264,7 @@ export namespace Prisma {
     score?: true
     rank?: true
     playerId?: true
+    category?: true
     createdAt?: true
     v?: true
   }
@@ -2271,6 +2275,7 @@ export namespace Prisma {
     score?: true
     rank?: true
     playerId?: true
+    category?: true
     createdAt?: true
     v?: true
   }
@@ -2281,6 +2286,7 @@ export namespace Prisma {
     score?: true
     rank?: true
     playerId?: true
+    category?: true
     createdAt?: true
     v?: true
     _all?: true
@@ -2378,6 +2384,7 @@ export namespace Prisma {
     score: number
     rank: number
     playerId: string | null
+    category: string
     createdAt: Date
     v: number
     _count: LeaderboardEntryCountAggregateOutputType | null
@@ -2407,6 +2414,7 @@ export namespace Prisma {
     score?: boolean
     rank?: boolean
     playerId?: boolean
+    category?: boolean
     createdAt?: boolean
     v?: boolean
   }, ExtArgs["result"]["leaderboardEntry"]>
@@ -2419,11 +2427,12 @@ export namespace Prisma {
     score?: boolean
     rank?: boolean
     playerId?: boolean
+    category?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "rank" | "playerId" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
+  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "rank" | "playerId" | "category" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
 
   export type $LeaderboardEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LeaderboardEntry"
@@ -2434,6 +2443,7 @@ export namespace Prisma {
       score: number
       rank: number
       playerId: string | null
+      category: string
       createdAt: Date
       v: number
     }, ExtArgs["result"]["leaderboardEntry"]>
@@ -2833,6 +2843,7 @@ export namespace Prisma {
     readonly score: FieldRef<"LeaderboardEntry", 'Int'>
     readonly rank: FieldRef<"LeaderboardEntry", 'Int'>
     readonly playerId: FieldRef<"LeaderboardEntry", 'String'>
+    readonly category: FieldRef<"LeaderboardEntry", 'String'>
     readonly createdAt: FieldRef<"LeaderboardEntry", 'DateTime'>
     readonly v: FieldRef<"LeaderboardEntry", 'Int'>
   }
@@ -3218,6 +3229,7 @@ export namespace Prisma {
     avgReactionTime: number | null
     mistakesMade: number | null
     correctHits: number | null
+    category: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -3229,6 +3241,7 @@ export namespace Prisma {
     avgReactionTime: number | null
     mistakesMade: number | null
     correctHits: number | null
+    category: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -3240,6 +3253,7 @@ export namespace Prisma {
     avgReactionTime: number
     mistakesMade: number
     correctHits: number
+    category: number
     createdAt: number
     v: number
     _all: number
@@ -3269,6 +3283,7 @@ export namespace Prisma {
     avgReactionTime?: true
     mistakesMade?: true
     correctHits?: true
+    category?: true
     createdAt?: true
     v?: true
   }
@@ -3280,6 +3295,7 @@ export namespace Prisma {
     avgReactionTime?: true
     mistakesMade?: true
     correctHits?: true
+    category?: true
     createdAt?: true
     v?: true
   }
@@ -3291,6 +3307,7 @@ export namespace Prisma {
     avgReactionTime?: true
     mistakesMade?: true
     correctHits?: true
+    category?: true
     createdAt?: true
     v?: true
     _all?: true
@@ -3389,6 +3406,7 @@ export namespace Prisma {
     avgReactionTime: number
     mistakesMade: number
     correctHits: number
+    category: string
     createdAt: Date
     v: number
     _count: PlayerCountAggregateOutputType | null
@@ -3419,6 +3437,7 @@ export namespace Prisma {
     avgReactionTime?: boolean
     mistakesMade?: boolean
     correctHits?: boolean
+    category?: boolean
     commonMistakes?: boolean | CommonMistakeDefaultArgs<ExtArgs>
     createdAt?: boolean
     v?: boolean
@@ -3433,11 +3452,12 @@ export namespace Prisma {
     avgReactionTime?: boolean
     mistakesMade?: boolean
     correctHits?: boolean
+    category?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "avgReactionTime" | "mistakesMade" | "correctHits" | "commonMistakes" | "createdAt" | "v", ExtArgs["result"]["player"]>
+  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "avgReactionTime" | "mistakesMade" | "correctHits" | "category" | "commonMistakes" | "createdAt" | "v", ExtArgs["result"]["player"]>
   export type PlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $PlayerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3450,6 +3470,7 @@ export namespace Prisma {
       avgReactionTime: number
       mistakesMade: number
       correctHits: number
+      category: string
       createdAt: Date
       v: number
     }, ExtArgs["result"]["player"]>
@@ -3852,6 +3873,7 @@ export namespace Prisma {
     readonly avgReactionTime: FieldRef<"Player", 'Float'>
     readonly mistakesMade: FieldRef<"Player", 'Int'>
     readonly correctHits: FieldRef<"Player", 'Int'>
+    readonly category: FieldRef<"Player", 'String'>
     readonly createdAt: FieldRef<"Player", 'DateTime'>
     readonly v: FieldRef<"Player", 'Int'>
   }
@@ -4267,6 +4289,7 @@ export namespace Prisma {
     score: 'score',
     rank: 'rank',
     playerId: 'playerId',
+    category: 'category',
     createdAt: 'createdAt',
     v: 'v'
   };
@@ -4281,6 +4304,7 @@ export namespace Prisma {
     avgReactionTime: 'avgReactionTime',
     mistakesMade: 'mistakesMade',
     correctHits: 'correctHits',
+    category: 'category',
     createdAt: 'createdAt',
     v: 'v'
   };
@@ -4461,6 +4485,7 @@ export namespace Prisma {
     score?: IntFilter<"LeaderboardEntry"> | number
     rank?: IntFilter<"LeaderboardEntry"> | number
     playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    category?: StringFilter<"LeaderboardEntry"> | string
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
   }
@@ -4471,6 +4496,7 @@ export namespace Prisma {
     score?: SortOrder
     rank?: SortOrder
     playerId?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -4484,6 +4510,7 @@ export namespace Prisma {
     score?: IntFilter<"LeaderboardEntry"> | number
     rank?: IntFilter<"LeaderboardEntry"> | number
     playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    category?: StringFilter<"LeaderboardEntry"> | string
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
   }, "id">
@@ -4494,6 +4521,7 @@ export namespace Prisma {
     score?: SortOrder
     rank?: SortOrder
     playerId?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     _count?: LeaderboardEntryCountOrderByAggregateInput
@@ -4512,6 +4540,7 @@ export namespace Prisma {
     score?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
     rank?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
     playerId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
+    category?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
     createdAt?: DateTimeWithAggregatesFilter<"LeaderboardEntry"> | Date | string
     v?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
   }
@@ -4526,6 +4555,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFilter<"Player"> | number
     mistakesMade?: IntFilter<"Player"> | number
     correctHits?: IntFilter<"Player"> | number
+    category?: StringFilter<"Player"> | string
     commonMistakes?: CommonMistakeCompositeListFilter | CommonMistakeObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Player"> | Date | string
     v?: IntFilter<"Player"> | number
@@ -4538,6 +4568,7 @@ export namespace Prisma {
     avgReactionTime?: SortOrder
     mistakesMade?: SortOrder
     correctHits?: SortOrder
+    category?: SortOrder
     commonMistakes?: CommonMistakeOrderByCompositeAggregateInput
     createdAt?: SortOrder
     v?: SortOrder
@@ -4553,6 +4584,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFilter<"Player"> | number
     mistakesMade?: IntFilter<"Player"> | number
     correctHits?: IntFilter<"Player"> | number
+    category?: StringFilter<"Player"> | string
     commonMistakes?: CommonMistakeCompositeListFilter | CommonMistakeObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Player"> | Date | string
     v?: IntFilter<"Player"> | number
@@ -4565,6 +4597,7 @@ export namespace Prisma {
     avgReactionTime?: SortOrder
     mistakesMade?: SortOrder
     correctHits?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     _count?: PlayerCountOrderByAggregateInput
@@ -4584,6 +4617,7 @@ export namespace Prisma {
     avgReactionTime?: FloatWithAggregatesFilter<"Player"> | number
     mistakesMade?: IntWithAggregatesFilter<"Player"> | number
     correctHits?: IntWithAggregatesFilter<"Player"> | number
+    category?: StringWithAggregatesFilter<"Player"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
     v?: IntWithAggregatesFilter<"Player"> | number
   }
@@ -4681,6 +4715,7 @@ export namespace Prisma {
     score: number
     rank: number
     playerId?: string | null
+    category: string
     createdAt?: Date | string
     v?: number
   }
@@ -4691,6 +4726,7 @@ export namespace Prisma {
     score: number
     rank: number
     playerId?: string | null
+    category: string
     createdAt?: Date | string
     v?: number
   }
@@ -4700,6 +4736,7 @@ export namespace Prisma {
     score?: IntFieldUpdateOperationsInput | number
     rank?: IntFieldUpdateOperationsInput | number
     playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4709,6 +4746,7 @@ export namespace Prisma {
     score?: IntFieldUpdateOperationsInput | number
     rank?: IntFieldUpdateOperationsInput | number
     playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4719,6 +4757,7 @@ export namespace Prisma {
     score: number
     rank: number
     playerId?: string | null
+    category: string
     createdAt?: Date | string
     v?: number
   }
@@ -4728,6 +4767,7 @@ export namespace Prisma {
     score?: IntFieldUpdateOperationsInput | number
     rank?: IntFieldUpdateOperationsInput | number
     playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4737,6 +4777,7 @@ export namespace Prisma {
     score?: IntFieldUpdateOperationsInput | number
     rank?: IntFieldUpdateOperationsInput | number
     playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4748,6 +4789,7 @@ export namespace Prisma {
     avgReactionTime: number
     mistakesMade: number
     correctHits: number
+    category: string
     commonMistakes?: XOR<CommonMistakeListCreateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -4760,6 +4802,7 @@ export namespace Prisma {
     avgReactionTime: number
     mistakesMade: number
     correctHits: number
+    category: string
     commonMistakes?: XOR<CommonMistakeListCreateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -4771,6 +4814,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFieldUpdateOperationsInput | number
     mistakesMade?: IntFieldUpdateOperationsInput | number
     correctHits?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
     commonMistakes?: XOR<CommonMistakeListUpdateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -4782,6 +4826,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFieldUpdateOperationsInput | number
     mistakesMade?: IntFieldUpdateOperationsInput | number
     correctHits?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
     commonMistakes?: XOR<CommonMistakeListUpdateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -4794,6 +4839,7 @@ export namespace Prisma {
     avgReactionTime: number
     mistakesMade: number
     correctHits: number
+    category: string
     commonMistakes?: XOR<CommonMistakeListCreateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: Date | string
     v?: number
@@ -4805,6 +4851,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFieldUpdateOperationsInput | number
     mistakesMade?: IntFieldUpdateOperationsInput | number
     correctHits?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
     commonMistakes?: XOR<CommonMistakeListUpdateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -4816,6 +4863,7 @@ export namespace Prisma {
     avgReactionTime?: FloatFieldUpdateOperationsInput | number
     mistakesMade?: IntFieldUpdateOperationsInput | number
     correctHits?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
     commonMistakes?: XOR<CommonMistakeListUpdateEnvelopeInput, CommonMistakeCreateInput> | CommonMistakeCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
@@ -5022,6 +5070,7 @@ export namespace Prisma {
     score?: SortOrder
     rank?: SortOrder
     playerId?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -5038,6 +5087,7 @@ export namespace Prisma {
     score?: SortOrder
     rank?: SortOrder
     playerId?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -5048,6 +5098,7 @@ export namespace Prisma {
     score?: SortOrder
     rank?: SortOrder
     playerId?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -5095,6 +5146,7 @@ export namespace Prisma {
     avgReactionTime?: SortOrder
     mistakesMade?: SortOrder
     correctHits?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -5114,6 +5166,7 @@ export namespace Prisma {
     avgReactionTime?: SortOrder
     mistakesMade?: SortOrder
     correctHits?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -5125,6 +5178,7 @@ export namespace Prisma {
     avgReactionTime?: SortOrder
     mistakesMade?: SortOrder
     correctHits?: SortOrder
+    category?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }

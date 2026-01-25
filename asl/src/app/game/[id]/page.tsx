@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { GameCanvas } from "~/components/game/GameCanvas";
 import { api } from "~/trpc/react";
 import { songToBeatmap, validateBeatmap } from "~/lib/beatmapUtils";
-import { DEMO_BEATMAP } from "~/lib/beatmap";
 
 export default function GamePage() {
   const params = useParams();
@@ -16,7 +15,7 @@ export default function GamePage() {
     { enabled: !!songId }
   );
 
-  // Convert song to beatmap (no fallback to demo in dynamic route)
+  // Convert song to beatmap
   const beatmap = song ? songToBeatmap(song) : null;
 
   // Validate the beatmap
@@ -64,5 +63,5 @@ export default function GamePage() {
     );
   }
 
-  return <GameCanvas beatmap={beatmap} />;
+  return <GameCanvas beatmap={beatmap} category="aslrevolution" />;
 }

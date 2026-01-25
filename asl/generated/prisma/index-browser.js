@@ -132,6 +132,7 @@ exports.Prisma.LeaderboardEntryScalarFieldEnum = {
   score: 'score',
   rank: 'rank',
   playerId: 'playerId',
+  category: 'category',
   createdAt: 'createdAt',
   v: 'v'
 };
@@ -143,6 +144,7 @@ exports.Prisma.PlayerScalarFieldEnum = {
   avgReactionTime: 'avgReactionTime',
   mistakesMade: 'mistakesMade',
   correctHits: 'correctHits',
+  category: 'category',
   createdAt: 'createdAt',
   v: 'v'
 };

@@ -119,7 +119,18 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
   };
 
   const handleModeSelect = (songId: string, mode: string) => {
-    router.push(`/TODO?song=${songId}&mode=${mode}`);
+    if(mode == "aslrevolution") {
+      router.push(`/game/${songId}`);
+
+    } else if(mode == "signhero") {
+      router.push(`/game/testing/${songId}`);
+
+    } else if(mode == "training") {
+      router.push(`/game/training/${songId}`);
+
+
+    }
+
   };
 
   const getVisibleSongs = () => {
@@ -307,7 +318,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                           whileTap={{ scale: 0.95 }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleModeSelect(song.id, "guitar-hero");
+                            handleModeSelect(song.id, "signhero");
                           }}
                           className="hover:scale-105 cursor-pointer relative h-24 rounded-xl bg-gradient-to-r from-[#920075] to-[#540d6e] border-2 border-[#2de2e6] overflow-hidden group"
                           style={{
@@ -316,7 +327,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                         >
                           <div className="absolute inset-0 bg-[#2de2e6]/0 group-hover:bg-[#2de2e6]/10 transition-all"></div>
                           <div className="relative z-10 flex items-center justify-center h-full">
-                            <span className="text-white text-xl font-bold">GUITAR HERO</span>
+                            <span className="text-white text-xl font-bold">SIGN HERO</span>
                           </div>
                         </motion.button>
 
@@ -326,7 +337,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                           whileTap={{ scale: 0.95 }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleModeSelect(song.id, "just-dance");
+                            handleModeSelect(song.id, "aslrevolution");
                           }}
                           className=" hover:scale-105 cursor-pointer relative h-24 rounded-xl bg-gradient-to-r from-[#920075] to-[#540d6e] border-2 border-[#2de2e6] overflow-hidden group"
                           style={{
@@ -335,7 +346,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                         >
                           <div className="absolute inset-0 bg-[#2de2e6]/0 group-hover:bg-[#2de2e6]/10 transition-all"></div>
                           <div className="relative z-10 flex items-center justify-center h-full">
-                            <span className="text-white text-xl font-bold">JUST DANCE</span>
+                            <span className="text-white text-xl font-bold">ASL REVOLUTION</span>
                           </div>
                         </motion.button>
 

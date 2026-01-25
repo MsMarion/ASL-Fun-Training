@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { api } from '~/trpc/react';
 
 const SignSymbol = ({ letter, state = "idle" }) => {
@@ -13,10 +12,7 @@ const SignSymbol = ({ letter, state = "idle" }) => {
   };
   
   return (
-    <div 
-      className="w-full h-full flex items-center justify-center text-4xl font-bold"
-      style={{ color: colors[state] }}
-    >
+    <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: colors[state] }}>
       {letter}
     </div>
   );
@@ -37,10 +33,18 @@ const getNameColor = (index) => {
   return colors[index % colors.length];
 };
 
-const LeaderboardPage = () => {
+const CATEGORY_NAMES = {
+  'sign-hero': 'SIGN HERO',
+  'asl-revolution': 'ASL REVOLUTION',
+  'whack-a-mole': 'WHACK-A-MOLE',
+  'training': 'TRAINING'
+};
+
+export default function LeaderboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const playerId = searchParams.get('playerId');
+  const category = searchParams.get('category') || 'sign-hero';
 
   const [smoothPos, setSmoothPos] = useState({ x: 0, y: 0 });
   const [currentTime, setCurrentTime] = useState('');
@@ -49,11 +53,15 @@ const LeaderboardPage = () => {
   const targetPos = useRef({ x: 0, y: 0 });
   const animationRef = useRef(undefined);
 
-  const { data: playerData, isLoading: playerLoading } = api.player.getById.useQuery(
+  const { data: playerData } = api.player.getById.useQuery(
     { id: playerId! },
     { enabled: !!playerId }
   );
-  const { data: leaderboardData } = api.leaderboard.getTop.useQuery({ limit: 10 });
+  
+  const { data: leaderboardData } = api.leaderboard.getByCategory.useQuery({ 
+    category: category,
+    limit: 10 
+  });
 
   const stars = useMemo(() => {
     return [...Array(100)].map((_, i) => ({
@@ -207,28 +215,25 @@ const LeaderboardPage = () => {
         />
       </div>
 
-      {/* Main Content Container */}
+      {/* Main Content */}
       <div className="absolute inset-0 z-30 flex justify-center items-center p-4" style={{ transform: `translate(${smoothPos.x * -25}px, ${smoothPos.y * -25}px)` }}>
         <div className="relative max-w-4xl w-full">
           <div className="relative rounded-3xl p-2 bg-gradient-to-b from-purple-900 via-fuchsia-900 to-purple-950 shadow-2xl shadow-fuchsia-500/30">
             <div className="rounded-2xl p-1 bg-gradient-to-b from-cyan-500/30 via-fuchsia-500/20 to-purple-500/30">
               <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-[#1a0a2e] to-[#0d0221]">
                 
-                {/* Scanlines */}
                 <div className="absolute inset-0 z-50 pointer-events-none opacity-30" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)' }} />
-
-                {/* Screen glow */}
                 <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/10 via-transparent to-cyan-500/10 pointer-events-none" />
 
-                {/* Content */}
                 <div className="relative p-6 md:p-8 max-h-[80vh] overflow-y-auto">
-                  {/* Header with Toggle Buttons and Home Button */}
                   <div className="mb-6">
-                    <h1 className="text-center text-2xl md:text-4xl font-bold text-fuchsia-400 mb-4 tracking-wider" style={{ textShadow: '0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 40px #d946ef' }}>
+                    <h1 className="text-center text-2xl md:text-4xl font-bold text-fuchsia-400 mb-2 tracking-wider" style={{ textShadow: '0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 40px #d946ef' }}>
                       {view === 'report' ? 'GAME REPORT' : 'LEADERBOARD'}
                     </h1>
+                    <p className="text-center text-cyan-400 text-sm font-mono mb-4" style={{ textShadow: '0 0 10px #2de2e6' }}>
+                      {CATEGORY_NAMES[category] || category.toUpperCase()}
+                    </p>
                     
-                    {/* Toggle Buttons */}
                     <div className="flex gap-3 justify-center mb-4">
                       {playerId && (
                         <>
@@ -237,7 +242,7 @@ const LeaderboardPage = () => {
                             className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
                               view === 'report'
                                 ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
-                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
+                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50'
                             }`}
                           >
                             REPORT
@@ -247,7 +252,7 @@ const LeaderboardPage = () => {
                             className={`px-6 py-2 rounded-lg font-mono font-bold tracking-wider transition-all ${
                               view === 'leaderboard'
                                 ? 'bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-[#0d0221] shadow-[0_0_20px_rgba(45,226,230,0.5)]'
-                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50 hover:text-cyan-400'
+                                : 'bg-[#1a0a2e]/60 border-2 border-fuchsia-500/30 text-fuchsia-300 hover:border-cyan-400/50'
                             }`}
                           >
                             LEADERBOARD
@@ -256,11 +261,10 @@ const LeaderboardPage = () => {
                       )}
                     </div>
 
-                    {/* Back to Home Button */}
                     <div className="flex justify-center">
                       <button
-                        onClick={() => router.push('/learn')}
-                        className="px-8 py-3 rounded-lg font-mono font-bold tracking-wider transition-all bg-gradient-to-r from-[#2de2e6] to-[#920075] text-[#0d0221] shadow-[0_0_25px_rgba(45,226,230,0.6)] hover:shadow-[0_0_35px_rgba(45,226,230,0.8)] hover:scale-105"
+                        onClick={() => router.push('/songselection')}
+                        className="px-8 py-3 rounded-lg font-mono font-bold tracking-wider bg-gradient-to-r from-[#2de2e6] to-[#920075] text-[#0d0221] shadow-[0_0_25px_rgba(45,226,230,0.6)] hover:scale-105 transition-all"
                       >
                         ← BACK TO HOME
                       </button>
@@ -297,8 +301,8 @@ const LeaderboardPage = () => {
                       <div className="mb-6">
                         <h2 className="text-xl font-bold text-fuchsia-400 mb-4 text-center font-mono" style={{ textShadow: '0 0 10px #d946ef' }}>COMMON MISTAKES</h2>
                         <div className="space-y-3">
-                          {playerData.commonMistakes.map((mistake, index) => (
-                            <div key={index} className="bg-black/40 border border-fuchsia-500/20 rounded-lg p-4 hover:bg-fuchsia-500/10 transition-colors" style={{ animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both` }}>
+                          {playerData.commonMistakes && playerData.commonMistakes.map((mistake, index) => (
+                            <div key={index} className="bg-black/40 border border-fuchsia-500/20 rounded-lg p-4 hover:bg-fuchsia-500/10 transition-colors">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-6">
                                   <div className="flex flex-col items-center">
@@ -325,7 +329,7 @@ const LeaderboardPage = () => {
                             </div>
                           ))}
                         </div>
-                        {playerData.commonMistakes.length === 0 && (
+                        {(!playerData.commonMistakes || playerData.commonMistakes.length === 0) && (
                           <div className="text-center text-green-400 font-mono py-8">NO MISTAKES - PERFECT GAME! 🎉</div>
                         )}
                       </div>
@@ -345,14 +349,16 @@ const LeaderboardPage = () => {
                       <div className="space-y-2">
                         {leaderboardData && leaderboardData.length > 0 ? (
                           leaderboardData.map((entry, index) => (
-                            <div key={entry.id} className="grid grid-cols-3 gap-4 items-center text-xs md:text-sm font-mono py-1 hover:bg-fuchsia-500/10 transition-colors rounded" style={{ animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both` }}>
+                            <div key={entry.id} className="grid grid-cols-3 gap-4 items-center text-xs md:text-sm font-mono py-1 hover:bg-fuchsia-500/10 transition-colors rounded">
                               <div className="flex items-center"><RankBadge rank={entry.rank} /></div>
                               <div className={`${getNameColor(index)} font-bold tracking-wide truncate`} style={{ textShadow: '0 0 8px currentColor' }}>{entry.name}</div>
                               <div className="text-right text-cyan-300" style={{ textShadow: '0 0 8px #2de2e6' }}>{entry.score.toLocaleString()}</div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center text-fuchsia-300/50 font-mono py-8">{leaderboardData === undefined ? 'LOADING...' : 'NO SCORES YET'}</div>
+                          <div className="text-center text-fuchsia-300/50 font-mono py-8">
+                            {leaderboardData === undefined ? 'LOADING...' : 'NO SCORES YET FOR THIS MODE'}
+                          </div>
                         )}
                       </div>
 
@@ -380,36 +386,10 @@ const LeaderboardPage = () => {
           0% { background-position: 0 0; }
           100% { background-position: 0 100px; }
         }
-        @keyframes fadeSlideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
         .animate-twinkle {
           animation: twinkle 3s ease-in-out infinite;
-        }
-        .overflow-y-auto::-webkit-scrollbar {
-          width: 8px;
-        }
-        .overflow-y-auto::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 4px;
-        }
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-          background: rgba(217, 70, 239, 0.5);
-          border-radius: 4px;
-        }
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-          background: rgba(217, 70, 239, 0.8);
         }
       `}</style>
     </div>
   );
-};
-
-export default LeaderboardPage;
+}

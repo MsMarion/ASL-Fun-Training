@@ -5,14 +5,19 @@ import { SynthwaveBackground } from "./SynthwaveBackground";
 import { WebcamFeed } from "./WebcamFeed";
 import { type Beatmap } from "~/lib/beatmap";
 import { useEffect, useState } from "react";
-import { AVAILABLE_LETTERS } from "~/lib/svgLoader";
 import { AnimatePresence, motion } from "framer-motion";
+import { NameEntryModal } from "./NameEntryModal";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 interface TrainingCanvasProps {
   beatmap: Beatmap;
+  category: string;
 }
 
-export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
+export function TrainingCanvas({ beatmap, category }: TrainingCanvasProps) {
+  const router = useRouter();
+  
   // TOGGLE: Set to true to enable "Instant Mode" (no hold required)
   const IS_INSTANT_MODE = true;
 
@@ -35,7 +40,20 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
     latency
   } = useTrainingGame(beatmap, IS_INSTANT_MODE);
 
-  // ... rest of hook usage ...
+  // Player state
+  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState("");
+  const [showNameModal, setShowNameModal] = useState(true);
+  const [hasSubmittedStats, setHasSubmittedStats] = useState(false);
+
+  // API mutations
+  const createPlayer = api.player.create.useMutation();
+  const addMistake = api.player.addMistake.useMutation();
+  const updateFinalStats = api.player.updateFinalStats.useMutation();
+  const upsertLeaderboard = api.leaderboard.upsert.useMutation();
+
+  // Mistake tracking - deduplicate mistakes
+  const [lastMistakeKey, setLastMistakeKey] = useState<string>("");
   
   // For visual countdown/progress bar on the current note
   const [visualProgress, setVisualProgress] = useState(0);
@@ -73,8 +91,124 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
      }
   }, [currentNote?.letter]);
 
+  // Track mistakes using AI predictions
+  useEffect(() => {
+    if (!playerId || !currentNote || !latestPrediction || !isConnected || gameState !== "playing") {
+      return;
+    }
+
+    const targetLetter = currentNote.letter;
+    const predictedLetter = latestPrediction.letter;
+    const confidence = latestPrediction.confidence;
+
+    // If prediction is confident but wrong, track as mistake
+    if (predictedLetter !== targetLetter && confidence >= 0.5) {
+      const mistakeKey = `${predictedLetter}->${targetLetter}`;
+      
+      // Only track each unique mistake once per note to avoid spam
+      if (mistakeKey !== lastMistakeKey) {
+        setLastMistakeKey(mistakeKey);
+        
+        console.log(`❌ Mistake detected: Showed ${predictedLetter}, Expected ${targetLetter}`);
+        
+        addMistake.mutate({
+          playerId: playerId,
+          key1: predictedLetter, // What they showed
+          key2: targetLetter,    // What was expected
+        }, {
+          onSuccess: () => {
+            console.log(`✅ Mistake recorded: ${mistakeKey}`);
+          },
+          onError: (error) => {
+            console.error("Failed to record mistake:", error);
+          }
+        });
+      }
+    }
+  }, [playerId, currentNote, latestPrediction, isConnected, gameState, lastMistakeKey, addMistake]);
+
+  // Reset mistake key when current note changes
+  useEffect(() => {
+    setLastMistakeKey("");
+  }, [currentNote?.letter]);
+
+  // Handle name submission
+  const handleNameSubmit = async (name: string) => {
+    try {
+      const player = await createPlayer.mutateAsync({
+        name: name,
+        score: 0,
+        avgReactionTime: 0,
+        mistakesMade: 0,
+        correctHits: 0,
+        category: category,
+      });
+
+      setPlayerId(player.id);
+      setPlayerName(name);
+      setShowNameModal(false);
+    } catch (error) {
+      console.error("Failed to create player:", error);
+      alert("Failed to create player. Please try again.");
+    }
+  };
+
+  const handleCancel = () => {
+    router.push('/songselection');
+  };
+
+  // Submit stats when game finishes
+  useEffect(() => {
+    if (!playerId || hasSubmittedStats || gameState !== "finished") return;
+
+    setHasSubmittedStats(true);
+
+    // Calculate metrics from training results
+    const completedNotes = metrics.noteMetrics.filter(m => m.status === 'success').length;
+    const skippedNotes = metrics.noteMetrics.filter(m => m.status === 'skipped').length;
+    const avgTime = metrics.noteMetrics.length > 0
+      ? Math.round(metrics.noteMetrics.reduce((sum, m) => sum + m.timeSpent, 0) / metrics.noteMetrics.length)
+      : 0;
+
+    // Calculate score: 100 points per successful note, -50 for skipped
+    const score = (completedNotes * 100) - (skippedNotes * 50);
+
+    updateFinalStats.mutate({
+      playerId,
+      score: Math.max(0, score), // Don't allow negative scores
+      avgReactionTime: avgTime,
+      mistakesMade: skippedNotes,
+      correctHits: completedNotes,
+    });
+
+    upsertLeaderboard.mutate({
+      name: playerName,
+      score: Math.max(0, score),
+      playerId: playerId,
+      category: category,
+    }, {
+      onSuccess: () => {
+        console.log("✅ Training stats saved to leaderboard");
+        // Redirect to leaderboard after a short delay
+        setTimeout(() => {
+          router.push(`/leaderboard?playerId=${playerId}&category=${category}`);
+        }, 2000);
+      },
+      onError: (error) => {
+        console.error("❌ Failed to save to leaderboard:", error);
+      }
+    });
+  }, [gameState, playerId, hasSubmittedStats, metrics, playerName, category, router, updateFinalStats, upsertLeaderboard]);
+
   return (
     <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
+      <NameEntryModal
+        isOpen={showNameModal}
+        onSubmit={handleNameSubmit}
+        onCancel={handleCancel}
+        isLoading={createPlayer.isPending}
+      />
+
       <SynthwaveBackground />
 
       {/* Background SVG Diagram */}
@@ -100,7 +234,7 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
         )}
       </AnimatePresence>
 
-      {/* Top Bar: Webcam & Stats & Filters */}
+      {/* Top Bar: Webcam & Stats */}
       <div className="relative z-10 flex items-start justify-between p-4">
         <WebcamFeed 
             videoRef={videoRef}
@@ -111,9 +245,10 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
             handDetected={handDetected}
         />
         
-        {/* Settings Toggle Removed (Code-only now) */}
-        
         <div className="flex flex-col items-end gap-2 bg-black/40 p-4 rounded-xl border border-white/10 backdrop-blur-md">
+            <div className="text-sm font-mono text-cyan-400">
+              {playerName ? `PLAYER: ${playerName}` : "TRAINING"}
+            </div>
             <div className="text-xl font-bold text-white">
                 TRAINING MODE
             </div>
@@ -184,7 +319,7 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
          </AnimatePresence>
 
          {/* Start Screen */}
-         {gameState === "idle" && (
+         {gameState === "idle" && !showNameModal && (
             <div className="flex flex-col items-center">
                  <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-8">
                     {beatmap.title}
@@ -206,9 +341,10 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
          )}
       </div>
 
-       {/* Results Screen */}
+       {/* Results Screen with redirect message */}
        {gameState === "finished" && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto py-20">
+            <div className="text-sm font-mono text-cyan-400 mb-2">PLAYER: {playerName}</div>
             <h2 className="text-2xl font-bold text-white mb-2">TRAINING COMPLETE</h2>
             <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 mb-8">
                 {(metrics.totalTime / 1000).toFixed(1)}s
@@ -230,25 +366,14 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                 ))}
             </div>
 
-            <div className="flex gap-4">
-                <button 
-                    onClick={restartGame}
-                    className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-lg rounded-full transition-all hover:scale-105"
-                >
-                    RETRY
-                </button>
-                 <a 
-                    href="/game/songselection"
-                    className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-full transition-all hover:scale-105"
-                >
-                    EXIT
-                </a>
+            <div className="text-cyan-400 font-mono animate-pulse mb-4">
+              Redirecting to leaderboard...
             </div>
         </div>
       )}
 
       {/* Debug Info: Detected Sign */}
-      {latestPrediction && (
+      {latestPrediction && gameState === "playing" && (
         <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
           <div className="bg-black/80 backdrop-blur text-white px-4 py-3 rounded-xl border border-white/10 shadow-lg flex items-center gap-4">
              <div className="flex flex-col">

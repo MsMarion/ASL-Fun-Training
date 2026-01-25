@@ -56,5 +56,5 @@ export default function TrainingPage() {
     );
   }
 
-  return <TrainingCanvas beatmap={beatmap} />;
+  return <TrainingCanvas beatmap={beatmap} category="training" />;
 }
