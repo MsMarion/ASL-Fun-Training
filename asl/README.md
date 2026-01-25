@@ -1,29 +1,228 @@
-# Create T3 App
+# 🤟 ASL Fun Training
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+**An interactive American Sign Language (ASL) learning game built with real-time AI hand sign recognition.**
 
-## What's next? How do I make an app with this?
+Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arcade-style challenges—all powered by webcam-based machine learning.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+---
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## ✨ Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### 🎮 Game Modes
 
-## Learn More
+| Mode | Description |
+|------|-------------|
+| **Song Game** | A rhythm game where players sign along to beatmaps synced with music. Guitar Hero-style note highway with real-time scoring, combos, and visual effects. |
+| **Training Mode** | Guided practice where each sign is displayed one-at-a-time with visual hints and a 10-second auto-skip timer. Perfect for learning at your own pace. |
+| **Testing Mode** | A timed challenge to measure proficiency. Tracks Perfect/Good/Miss hits, accuracy, and max combo with detailed results. |
+| **Whack-A-Sign** | An arcade-style reflex game. A grid of letters appears, and players must quickly sign or tap the highlighted target. Features streaks and celebrations. |
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### 🤖 AI-Powered Sign Detection
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- **Real-time webcam analysis** for fingerspelling recognition
+- **Confidence scoring** displayed per-prediction
+- **Latency monitoring** to ensure responsive gameplay
+- Works entirely in-browser (no server round-trips for detection)
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### 💫 Visual Polish
 
-## How do I deploy this?
+- **Synthwave aesthetic** with neon grids, palm trees, and animated sun
+- **Framer Motion animations** for smooth transitions
+- **Particle effects** on successful hits (bursts, rays, confetti)
+- **Screen flash & shake** feedback for hits and misses
+- **Streak glow effects** on the note highway (Guitar Hero-style)
+- **Floating score & success text** overlays
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+### 🎵 Audio
+
+- **Background music** with mute toggle
+- **Sound effects** for hits, misses, and streaks
+- Audio context initialization on first user interaction
+
+### 📊 Scoring & Metrics
+
+- **Combo multipliers** for consecutive hits
+- **Accuracy-based scoring** (timing affects points)
+- **Streak milestones** with special celebrations
+- **End-of-game stats** (accuracy %, max combo, hit breakdown)
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | [Next.js 15](https://nextjs.org/) (App Router, Turbopack) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **UI** | [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/) |
+| **Animation** | [Framer Motion](https://www.framer.com/motion/) |
+| **API Layer** | [tRPC](https://trpc.io/) with React Query |
+| **Database** | [MongoDB](https://www.mongodb.com/) via [Prisma ORM](https://www.prisma.io/) |
+| **File Storage** | [AWS S3](https://aws.amazon.com/s3/) (presigned URLs) |
+| **AI/ML** | [Google Generative AI SDK](https://ai.google.dev/) |
+| **Audio** | Web Audio API, [YouTubei.js](https://github.com/LuanRT/YouTube.js) for audio extraction |
+
+---
+
+## 📁 Project Structure
+
+```
+asl/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── game/               # Game modes (song, training, testing)
+│   │   ├── songselection/      # Song browsing carousel
+│   │   ├── leaderboard/        # High scores
+│   │   └── community/          # Community-created content
+│   │
+│   ├── components/
+│   │   ├── game/               # Game canvas components
+│   │   │   ├── GameCanvas.tsx           # Main rhythm game
+│   │   │   ├── TrainingCanvas.tsx       # Practice mode
+│   │   │   ├── TestingCanvas.tsx        # Timed challenge
+│   │   │   ├── WhackAMoleCanvas.tsx     # Arcade mode
+│   │   │   ├── NoteHighway.tsx          # Scrolling notes
+│   │   │   ├── WebcamFeed.tsx           # Camera display
+│   │   │   ├── SuccessBurst.tsx         # Hit effects
+│   │   │   └── SynthwaveBackground.tsx  # Animated background
+│   │   └── ui/                 # Reusable UI primitives
+│   │
+│   ├── hooks/                  # Custom React hooks
+│   │   ├── useGameLoop.ts      # Main game logic
+│   │   ├── useSignDetection.ts # AI prediction integration
+│   │   ├── useWebcam.ts        # Camera capture
+│   │   ├── useSoundEffects.ts  # Audio management
+│   │   └── useVisualEffects.ts # Particle/effect triggers
+│   │
+│   ├── lib/                    # Utility modules
+│   │   ├── beatmap.ts          # Beatmap types & demo data
+│   │   ├── gameScoring.ts      # Scoring logic
+│   │   ├── particleEngine.ts   # Canvas particle effects
+│   │   ├── s3.ts               # AWS S3 integration
+│   │   └── youtube.ts          # Audio extraction
+│   │
+│   ├── server/
+│   │   └── api/                # tRPC routers
+│   │       └── routers/        # song, leaderboard, etc.
+│   │
+│   └── trpc/                   # tRPC client setup
+│
+├── public/
+│   ├── audio/                  # Sound effect files
+│   └── fonts/                  # Custom typography
+│
+└── prisma/
+    └── schema.prisma           # MongoDB schema
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js 20+**
+- **pnpm** (recommended) or npm
+- **MongoDB** instance (local or Atlas)
+- **AWS S3** bucket (for audio/thumbnail storage)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/MsMarion/ASL-Fun-Training.git
+cd ASL-Fun-Training/asl
+
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your MongoDB URI, S3 credentials, etc.
+
+# Generate Prisma client
+pnpm db:generate
+
+# Start development server
+pnpm dev
+```
+
+The app will be available at `http://localhost:3000`.
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | MongoDB connection string |
+| `AWS_ACCESS_KEY_ID` | AWS credentials for S3 |
+| `AWS_SECRET_ACCESS_KEY` | AWS credentials for S3 |
+| `AWS_S3_BUCKET_NAME` | S3 bucket name |
+| `GOOGLE_AI_API_KEY` | Google Generative AI key (optional) |
+
+---
+
+## 🎯 How It Works
+
+### Sign Detection Pipeline
+
+1. **Webcam Capture**: `useWebcam` hook captures video frames at ~30fps
+2. **Frame Processing**: Frames are sent to a detection model
+3. **Prediction**: Model returns predicted letter + confidence score
+4. **Game Logic**: `useGameLoop` compares prediction to current target note
+5. **Feedback**: Visual/audio effects triggered based on hit quality
+
+### Beatmap System
+
+Beatmaps define the sequence and timing of signs:
+
+```typescript
+interface Beatmap {
+  title: string;
+  totalDuration: number; // seconds
+  notes: BeatmapNote[];
+}
+
+interface BeatmapNote {
+  letter: string;  // e.g., "A", "B", "C"
+  time: number;    // seconds from start
+}
+```
+
+---
+
+## 📜 Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server with Turbopack |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm db:studio` | Open Prisma Studio |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | TypeScript type checking |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is for educational purposes.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with the [T3 Stack](https://create.t3.gg/)
+- Synthwave aesthetics inspired by retro gaming
+- ASL fingerspelling charts for sign references
