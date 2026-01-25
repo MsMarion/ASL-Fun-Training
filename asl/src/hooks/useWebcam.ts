@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseWebcamReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -96,7 +96,7 @@ export function useWebcam(): UseWebcamReturn {
    * Capture a single frame from the video element as a JPEG blob.
    * Returns null if the video is not ready or canvas is unavailable.
    */
-  const captureFrame = async (): Promise<Blob | null> => {
+  const captureFrame = useCallback(async (): Promise<Blob | null> => {
     if (!isReady || !videoRef.current || !canvasRef.current) {
       return null;
     }
@@ -126,7 +126,7 @@ export function useWebcam(): UseWebcamReturn {
         JPEG_QUALITY,
       );
     });
-  };
+  }, [isReady]);
 
   return {
     videoRef,

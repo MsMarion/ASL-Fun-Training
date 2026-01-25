@@ -18,6 +18,8 @@ export interface GameState {
   handDetected: boolean;
   isConnected: boolean;
   activeNoteIndex: number;
+  latestPrediction: { letter: string; confidence: number } | null;
+  latency: number;
 }
 
 const INITIAL_LIVES = 5;
@@ -43,8 +45,8 @@ const DEMO_SCRIPT: ScriptStep[] = [
 ];
 
 export function useScriptedGameLoop(beatmap: Beatmap): {
-    state: GameState;
-    restart: () => void;
+  state: GameState;
+  restart: () => void;
 } {
   const [state, setState] = useState<GameState>({
     currentTime: 0,
@@ -61,6 +63,8 @@ export function useScriptedGameLoop(beatmap: Beatmap): {
     handDetected: true,
     isConnected: true,
     activeNoteIndex: 0,
+    latestPrediction: null,
+    latency: 0,
   });
 
   const animFrameRef = useRef<number>(0);
@@ -84,6 +88,8 @@ export function useScriptedGameLoop(beatmap: Beatmap): {
       streakMilestone: null,
       comboMultiplier: 1,
       activeNoteIndex: 0,
+      latestPrediction: null,
+      latency: 0,
     }));
   }, []);
 

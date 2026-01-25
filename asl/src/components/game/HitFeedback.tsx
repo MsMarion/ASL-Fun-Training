@@ -14,13 +14,11 @@ export function HitFeedback({
   comboMultiplier = 1,
 }: HitFeedbackProps) {
   const color =
-    text === "MISS!"
-      ? "#f87171"
-      : text === "PERFECT!"
-        ? "#4ade80"
-        : text === "OK!"
-          ? "#60a5fa"
-          : "#fbbf24";
+    text?.includes("MISS")
+      ? "#f87171" // Red
+      : text?.includes("HIT")
+        ? "#4ade80" // Green
+        : "#fbbf24"; // Default Yellow
 
   const showCombo = text && text !== "MISS!" && comboMultiplier > 1;
 

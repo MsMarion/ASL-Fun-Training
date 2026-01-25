@@ -34,38 +34,30 @@ echo "--------------------------------------"
 # Check if conda environment exists
 if conda env list | grep -q "asl-v_3"; then
     echo "✓ Found conda environment: asl-v_3"
-    cd "Base test/Sign-Language-Recognition"
+    # Start HTTP server
+    conda run -n asl-v_3 python api_server_http.py &
+    API_PID=$!
+    echo "✓ ML API server started (PID: $API_PID)"
+    echo "  Endpoint: http://localhost:8000"
 
-    # Start WebSocket server in background
-    conda run -n asl-v_3 python -m app.websocket_api &
-    WS_PID=$!
-    echo "✓ WebSocket server started (PID: $WS_PID)"
-    echo "  Endpoint: ws://localhost:8000/ws/predict"
+elif conda env list | grep -q "asl-fun"; then
+    echo "✓ Found conda environment: asl-fun"
+    # Start HTTP server
+    conda run -n asl-fun python api_server_http.py &
+    API_PID=$!
+    echo "✓ ML API server started (PID: $API_PID)"
+    echo "  Endpoint: http://localhost:8000"
 
-    cd ../..
 else
-    echo "⚠️  Warning: conda environment 'asl-v_3' not found"
+    echo "⚠️  Warning: Conda environment 'asl-v_1' or 'asl-fun' not found"
     echo "   Attempting to start with system Python..."
+    echo "   Please ensure dependencies are installed (fastapi, uvicorn, torch, mediapipe, opencv-python)"
 
-    cd "Base test/Sign-Language-Recognition"
-
-    # Check if virtual environment exists
-    if [ ! -d "venv" ]; then
-        echo "   Creating virtual environment..."
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install -r requirements-websocket.txt
-    else
-        source venv/bin/activate
-    fi
-
-    # Start WebSocket server in background
-    python3 -m app.websocket_api &
-    WS_PID=$!
-    echo "✓ WebSocket server started (PID: $WS_PID)"
-    echo "  Endpoint: ws://localhost:8000/ws/predict"
-
-    cd ../..
+    # Start HTTP server
+    python3 api_server_http.py &
+    API_PID=$!
+    echo "✓ ML API server started (PID: $API_PID)"
+    echo "  Endpoint: http://localhost:8000"
 fi
 
 # Wait a bit for the server to start
