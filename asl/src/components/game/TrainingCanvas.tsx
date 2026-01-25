@@ -10,6 +10,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ScreenFlash } from "./ScreenFlash";
 import { SuccessBurst } from "./SuccessBurst";
 import { FloatingSuccessText } from "./FloatingSuccessText";
+import { SongFinishedOverlay } from "./SongFinishedOverlay";
+import { useSoundEffects } from "~/hooks/useSoundEffects";
 
 interface TrainingCanvasProps {
     beatmap: Beatmap;
@@ -82,17 +84,36 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
         }
     }, [currentNote?.letter]);
 
-    // Trigger visual effects on successful note completion
+    // Sound Effects
+    const { playSuccessSound, playMissSound } = useSoundEffects();
+    
+    // Track previous skipped count
+    const lastSkippedCountRef = useRef(0);
+
+    // Trigger visual effects on note completion
     useEffect(() => {
         const successCount = metrics.noteMetrics.filter(m => m.status === "success").length;
+        const skippedCount = metrics.noteMetrics.filter(m => m.status === "skipped").length;
+        
+        // Success Event
         if (successCount > lastSuccessCountRef.current) {
+            playSuccessSound();
             setShowFlash(true);
             setTimeout(() => setShowFlash(false), 100);
             setHitTrigger(prev => prev + 1);
             setSuccessTextTrigger({ text: "NICE!", timestamp: Date.now() });
         }
+        
+        // Skipped Event
+        if (skippedCount > lastSkippedCountRef.current) {
+            playMissSound();
+            // Optional: Negative visual feedback for skipping?
+            setSuccessTextTrigger({ text: "SKIPPED", timestamp: Date.now() });
+        }
+        
         lastSuccessCountRef.current = successCount;
-    }, [metrics.noteMetrics]);
+        lastSkippedCountRef.current = skippedCount;
+    }, [metrics.noteMetrics, playSuccessSound, playMissSound]);
 
     return (
         <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
@@ -296,6 +317,8 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                 </div>
             )}
 
+            {/* Transition Overlay */}
+            <SongFinishedOverlay show={gameState === "finished"} />
         </div>
     );
 }

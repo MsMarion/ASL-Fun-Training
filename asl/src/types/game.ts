@@ -30,4 +30,5 @@ export interface GameState {
   latestPrediction: { letter: string; confidence: number } | null;
   latency: number;
   debugLog: DebugLogEntry[];
+  gameStatus: "idle" | "playing" | "finished";
 }

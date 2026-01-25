@@ -66,6 +66,7 @@ export function useGameLoop(beatmap: Beatmap): {
     latestPrediction: null,
     latency: 0,
     debugLog: [],
+    gameStatus: "idle", // 'idle' | 'playing' | 'finished'
   });
 
   const animFrameRef = useRef<number>(0);
@@ -123,6 +124,7 @@ export function useGameLoop(beatmap: Beatmap): {
       comboMultiplier: 1,
       latestPrediction: null,
       latency: 0,
+      gameStatus: "idle",
     }));
   }, []);
 
@@ -197,10 +199,13 @@ export function useGameLoop(beatmap: Beatmap): {
         effectiveStartTimeSec = startTimeRef.current / 1000;
       }
 
-      // Restart loop when beatmap ends
-      if (elapsed > beatmap.totalDuration) {
-        resetLoop();
-        animFrameRef.current = requestAnimationFrame(tick);
+      // Game Finished
+      const isAudioFinished = audioRef.current?.ended ?? false;
+      if (elapsed > beatmap.totalDuration || isAudioFinished) {
+        setState(prev => ({ ...prev, gameStatus: "finished" }));
+        if (audioRef.current) audioRef.current.pause();
+        // Do not reset loop, let it sit in finished state
+        cancelAnimationFrame(animFrameRef.current);
         return;
       }
 

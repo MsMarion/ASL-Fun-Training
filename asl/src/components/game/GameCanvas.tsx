@@ -18,6 +18,7 @@ import { ScreenFlash } from "./ScreenFlash";
 import { EffectsToggle } from "./EffectsToggle";
 import { SynthwaveBackground } from "./SynthwaveBackground";
 import { DebugLogPanel } from "./DebugLogPanel";
+import { SongFinishedOverlay } from "./SongFinishedOverlay";
 
 interface GameCanvasProps {
   beatmap: Beatmap;
@@ -187,6 +188,9 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
 
       {/* Debug Log Panel */}
       <DebugLogPanel entries={state.debugLog} currentTime={state.currentTime} />
+      
+      {/* Game Over Transition */}
+      <SongFinishedOverlay show={state.gameStatus === "finished"} />
     </div>
   );
 }
