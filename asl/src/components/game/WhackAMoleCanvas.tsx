@@ -9,6 +9,11 @@ import { WebcamFeed } from "./WebcamFeed";
 import { useWebcam } from "~/hooks/useWebcam";
 import { useSignDetection } from "~/hooks/useSignDetection";
 import { useEffect, useState, useRef } from "react";
+import { FloatingScore } from "./FloatingScore";
+import { ScreenFlash } from "./ScreenFlash";
+import { FloatingSuccessText } from "./FloatingSuccessText";
+
+const SUCCESS_MESSAGES = ["GREAT!", "PERFECT!", "AMAZING!", "AWESOME!", "NICE!"];
 
 export function WhackAMoleCanvas() {
     const {
@@ -17,6 +22,7 @@ export function WhackAMoleCanvas() {
         score,
         countdown,
         metrics,
+        lastHit,
         startGame,
         stopGame,
         handleInteraction,
@@ -39,6 +45,46 @@ export function WhackAMoleCanvas() {
     const holdStartRef = useRef<number | null>(null);
 
     const latestPrediction = predictions[predictions.length - 1] ?? null;
+
+    // Visual feedback state
+    const [showFlash, setShowFlash] = useState(false);
+    const [recentSuccessLetter, setRecentSuccessLetter] = useState<string | null>(null);
+    const [successTextTrigger, setSuccessTextTrigger] = useState<{ text: string; timestamp: number } | null>(null);
+    const prevTotalCorrectRef = useRef(0);
+    const prevTargetLetterRef = useRef<string | null>(null);
+
+    // Capture the letter before it changes
+    useEffect(() => {
+        if (targetLetter) {
+            prevTargetLetterRef.current = targetLetter;
+        }
+    }, [targetLetter]);
+
+    // Trigger visual feedback when score changes
+    useEffect(() => {
+        if (metrics.totalCorrect > prevTotalCorrectRef.current) {
+            setShowFlash(true);
+            // Capture the letter that was just matched
+            setRecentSuccessLetter(prevTargetLetterRef.current);
+
+            // Determine the success message
+            const isStreak = metrics.totalCorrect > 0 && metrics.totalCorrect % 5 === 0;
+            const messageText = isStreak
+                ? "🔥 ON FIRE! 🔥"
+                : SUCCESS_MESSAGES[metrics.totalCorrect % 5] ?? "GREAT!";
+            setSuccessTextTrigger({ text: messageText, timestamp: Date.now() });
+
+            // Reset flash after a short delay
+            const flashTimer = setTimeout(() => setShowFlash(false), 100);
+            // Reset recent success letter after celebrations
+            const successTimer = setTimeout(() => setRecentSuccessLetter(null), 1000);
+            return () => {
+                clearTimeout(flashTimer);
+                clearTimeout(successTimer);
+            };
+        }
+        prevTotalCorrectRef.current = metrics.totalCorrect;
+    }, [metrics.totalCorrect]);
 
     // AI Game Logic Loop
     useEffect(() => {
@@ -89,6 +135,11 @@ export function WhackAMoleCanvas() {
         <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
             <SynthwaveBackground />
 
+            {/* Success Visual Effects */}
+            <FloatingScore trigger={lastHit} />
+            <ScreenFlash trigger={showFlash} />
+            <FloatingSuccessText trigger={successTextTrigger} />
+
             {/* Top Bar: Webcam & HUD */}
             <div className="relative z-10 flex items-start justify-between p-4">
                 <WebcamFeed
@@ -138,6 +189,8 @@ export function WhackAMoleCanvas() {
                         targetLetter={targetLetter}
                         onInteract={handleInteraction}
                         holdProgress={holdProgress}
+                        recentSuccess={recentSuccessLetter}
+                        successCount={metrics.totalCorrect}
                     />
                 </div>
             </div>
