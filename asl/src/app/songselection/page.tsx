@@ -1,12 +1,10 @@
 "use client";
 
 
+// UnifiedBackground moved to layout
 import { Navbar } from "@/app/_components/navbar";
 import { trpc } from "@/trpc/client";
 import { SongCarousel } from "@/app/_components/song-carousel";
-import { UnifiedBackground } from "@/app/_components/UnifiedBackground";
-
-
 
 // --- Main Component ---
 export default function SongSelection() {
@@ -14,8 +12,6 @@ export default function SongSelection() {
 
   return (
     <div className="min-h-screen overflow-hidden relative">
-      <UnifiedBackground />
-
       <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-screen">
         <Navbar />
 

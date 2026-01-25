@@ -29,7 +29,7 @@ export function BackgroundMusic() {
         const playAudio = async () => {
             if (audioRef.current && !isPlaying && !isMuted) {
                 try {
-                    audioRef.current.volume = 0.4;
+                    audioRef.current.volume = 0.1;
                     await audioRef.current.play();
                     setIsPlaying(true);
                 } catch (err) {
