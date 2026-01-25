@@ -20,18 +20,15 @@ interface SongCarouselProps {
 
 export function SongCarousel({ songs = [] }: SongCarouselProps) {
   const router = useRouter();
-  // Use a virtual index that can go negative or positive indefinitely
-  const [index, setIndex] = useState(-7); // Start "off-screen" or far back for intro
+  const [index, setIndex] = useState(-7);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [flippedCard, setFlippedCard] = useState<string | null>(null);
 
-  // Intro Animation Effect
   useEffect(() => {
-    // Start shuffle immediately
     const startShuffle = () => {
       let current = -7;
       const target = 0;
 
-      // Start the rotation/shuffle
       const interval = setInterval(() => {
         if (current < target) {
           current++;
@@ -40,9 +37,8 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
         } else {
           clearInterval(interval);
         }
-      }, 80); // Fast flip speed
+      }, 80);
 
-      // Trigger fade-in *slightly* after rotation starts so it appears while moving
       setTimeout(() => {
         setIsLoaded(true);
       }, 100);
@@ -51,7 +47,6 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
     startShuffle();
   }, []);
 
-  // Audio Context to synthesize a realistic "card flip" sound (Hybrid: Noise + Oscillator)
   const playCardFlipSound = () => {
     try {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -60,13 +55,12 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
       const ctx = new AudioContext();
       const t = ctx.currentTime;
 
-      // --- Part 1: The "Round" Body (Oscillator) ---
       const osc = ctx.createOscillator();
       const oscGain = ctx.createGain();
 
-      osc.type = "sine"; // Sine is the "roundest" wave
-      osc.frequency.setValueAtTime(120, t); // Start at low-mid (120Hz)
-      osc.frequency.exponentialRampToValueAtTime(40, t + 0.1); // Drop pitch quickly (thump)
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(120, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
 
       oscGain.gain.setValueAtTime(0, t);
       oscGain.gain.linearRampToValueAtTime(0.5, t + 0.01);
@@ -77,8 +71,6 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
       osc.start(t);
       osc.stop(t + 0.1);
 
-      // --- Part 2: The "Card" Texture (Filtered Noise) ---
-      // Create a short buffer of white noise
       const duration = 0.1;
       const sampleRate = ctx.sampleRate;
       const bufferSize = sampleRate * duration;
@@ -92,16 +84,14 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
 
-      // Filter chain: Bandpass to focus the "swish"
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.value = 500; // Center around low-mids for warmth
-      filter.Q.value = 1; // Wide-ish bandwidth
+      filter.frequency.value = 500;
+      filter.Q.value = 1;
 
-      // Amplitude Envelope for the texture
       const noiseGain = ctx.createGain();
       noiseGain.gain.setValueAtTime(0, t);
-      noiseGain.gain.linearRampToValueAtTime(0.5, t + 0.01); // Boosted "whoosh" volume
+      noiseGain.gain.linearRampToValueAtTime(0.5, t + 0.01);
       noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
 
       noise.connect(filter);
@@ -163,31 +153,52 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
   const navigate = (direction: number) => {
     if (songs.length === 0) return;
     playCardFlipSound();
+    setFlippedCard(null); // Reset flip when navigating
     setIndex((prev) => prev + direction);
   };
 
-  const handleSelectSong = (songId: string) => {
-    router.push(`/game/${songId}`);
+  const handleCardClick = (songId: string, isCenter: boolean, offset: number) => {
+    if (isCenter) {
+      setFlippedCard(flippedCard === songId ? null : songId);
+      playCardFlipSound();
+    } else {
+      navigate(offset);
+    }
+
+    
   };
 
-  // Render a window of items around the current virtual index
+  const handleModeSelect = (songId: string, mode: string) => {
+    if(mode == "aslrevolution") {
+      router.push(`/game/${songId}`);
+
+    } else if(mode == "signhero") {
+      router.push(`/game/testing/${songId}`);
+
+    } else if(mode == "training") {
+      router.push(`/game/training/${songId}`);
+
+
+    }
+
+  };
+
   const getVisibleSongs = () => {
     if (!songs.length) return [];
 
-    const visibleCount = 5; // Must be odd to have a center
-    const range = Math.floor(visibleCount / 2); // 2
+    const visibleCount = 5;
+    const range = Math.floor(visibleCount / 2);
 
     const items = [];
     for (let i = -range; i <= range; i++) {
       const virtualIndex = index + i;
-      // Modulo logic for array access handling negative numbers correctly
       let arrayIndex = virtualIndex % songs.length;
       if (arrayIndex < 0) arrayIndex += songs.length;
 
       items.push({
         song: songs[arrayIndex],
         virtualIndex: virtualIndex,
-        offset: i // relative to center
+        offset: i
       });
     }
     return items;
@@ -195,21 +206,19 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
 
   const visibleItems = getVisibleSongs();
 
-  // 3D Geometry Parameters
   const getVariant = (offset: number) => {
     const absOffset = Math.abs(offset);
 
-    // Config for "Rotary" Feel
-    const X_SPACING = 280; // Increased spacing for wider cards
+    const X_SPACING = 280;
     const Z_DEPTH = -300;
     const ROTATION = 35;
 
     const x = offset * X_SPACING;
     const z = Math.abs(offset) * Z_DEPTH;
-    const rotateY = offset * -ROTATION; // Faces center
+    const rotateY = offset * -ROTATION;
 
     const scale = 1 - (absOffset * 0.15);
-    const opacity = 1 - (absOffset * 0.3); // Fade out distant
+    const opacity = 1 - (absOffset * 0.3);
     const zIndex = 100 - absOffset;
 
     return {
@@ -224,11 +233,6 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
 
   return (
     <div className={`relative w-full overflow-hidden flex flex-col items-center justify-center py-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-
-      {/* 
-         Perspective container. 
-         Using a wrapper to establish the 3D space.
-       */}
       <div
         className="relative flex items-center justify-center w-full max-w-7xl h-[600px]"
         style={{ perspective: "1000px" }}
@@ -256,26 +260,26 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
           </>
         )}
 
-        {/* 3D Scene */}
         <div className="relative w-full h-full flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
           <AnimatePresence initial={false}>
             {visibleItems.map(({ song, virtualIndex, offset }) => {
               const variant = getVariant(offset);
               const isCenter = offset === 0;
+              const isFlipped = flippedCard === song.id;
 
               return (
                 <motion.div
-                  key={virtualIndex} // Stable key based on virtual timeline
+                  key={virtualIndex}
                   initial={false}
                   animate={{
                     x: variant.x,
                     z: variant.z,
-                    rotateY: variant.rotateY,
+                    rotateY: variant.rotateY + (isFlipped ? 180 : 0),
                     scale: variant.scale,
                     opacity: variant.opacity,
                     zIndex: variant.zIndex,
                   }}
-                  exit={{ opacity: 0, scale: 0 }} // If it leaves the window
+                  exit={{ opacity: 0, scale: 0 }}
                   transition={{
                     type: "spring",
                     stiffness: 200,
@@ -286,14 +290,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                   style={{
                     transformStyle: "preserve-3d",
                   }}
-                  onClick={() => {
-                    if (isCenter) handleSelectSong(song.id);
-                    else {
-                      // Allow clicking side items to navigate to them
-                      const diff = offset;
-                      navigate(diff);
-                    }
-                  }}
+                  onClick={() => handleCardClick(song.id, isCenter, offset)}
                   onMouseEnter={() => {
                     if (isCenter) handleMouseEnter(song);
                   }}
@@ -301,65 +298,144 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
                     if (isCenter) handleMouseLeave();
                   }}
                 >
-                  <div
-                    className={`
-                       relative h-full w-full rounded-2xl overflow-hidden
-                       bg-gradient-to-b from-purple-600 via-purple-700 to-purple-900
-                       border-4 ${isCenter ? "border-cyan-400 shadow-[0_0_40px_rgba(45,226,230,0.5)]" : "border-purple-500"}
-                       flex flex-col shadow-2xl
-                       transition-all duration-300
-                     `}
-                  >
-                    {/* Top Section: Art */}
-                    <div className="h-[55%] w-full bg-purple-900 flex items-center justify-center overflow-hidden">
-                      {song.thumbnailUrl || song.thumbnailName ? (
-                        <img
-                          src={
-                            song.thumbnailUrl || 
-                            (song.thumbnailName ? `https://generated-bucket-name.nyc3.digitaloceanspaces.com/${song.thumbnailName}` : "")
-                            // Fallback logic requires env vars which might not be exposed safely here without NEXT_PUBLIC
-                            // But since we can't easily get env vars here securely if they aren't public, 
-                            // we rely on thumbnailUrl being present from DB (which is best practice) 
-                            // OR we construct the path if we know the bucket pattern.
-                            // The best fix is to use the full URL if available.
-                          }
-                          alt={song.songName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  {/* Card Container with 3D flip */}
+                  <div className="relative w-full h-full" style={{ transformStyle: "preserve-3d" }}>
+                    
+                    {/* FRONT SIDE */}
+                    <div
+                      className={`
+                        absolute inset-0 w-full h-full rounded-2xl overflow-hidden
+                        bg-gradient-to-b from-purple-600 via-purple-700 to-purple-900
+                        border-4 ${isCenter ? "border-cyan-400 shadow-[0_0_40px_rgba(45,226,230,0.5)]" : "border-purple-500"}
+                        flex flex-col shadow-2xl
+                        transition-all duration-300
+                      `}
+                      style={{
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(0deg)"
+                      }}
+                    >
+                      {/* Thumbnail Section */}
+                      <div className="h-[55%] w-full bg-[#0d0221] flex items-center justify-center overflow-hidden relative">
+                        {song.thumbnailUrl ? (
+                          <img
+                            src={`${song.thumbnailUrl}`}
+                            alt={song.songName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-[#2de2e6] text-6xl animate-pulse">♪</div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#540d6e]/50 to-transparent"></div>
+                      </div>
+
+                      {/* Info Section */}
+                      <div className="h-[30%] bg-[#2e2157]/90 p-4 border-t-2 border-[#920075]">
+                        <h3 className="text-white font-bold text-lg truncate">
+                          {song.songName}
+                        </h3>
+                        <p className="text-[#2de2e6] text-sm truncate mt-1">
+                          {song.albumName || "Unknown Artist"}
+                        </p>
+                      </div>
+
+                      {/* Select Section */}
+                      <div className="h-[15%] bg-gradient-to-r from-[#2de2e6] to-[#920075] flex items-center justify-center border-t-2 border-[#2de2e6]">
+                        {isCenter && (
+                          <span className="text-white font-bold tracking-wide">
+                            ► SELECT
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* BACK SIDE - Game Modes */}
+                    <div
+                      className={`
+                        absolute inset-0 w-full h-full rounded-2xl overflow-hidden
+                        bg-gradient-to-b from-[#540d6e] via-[#2e2157] to-[#0d0221]
+                        border-4 ${isCenter ? "border-cyan-400 shadow-[0_0_40px_rgba(45,226,230,0.5)]" : "border-purple-500"}
+                        flex flex-col shadow-2xl p-6
+                      `}
+                      style={{
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)"
+                      }}
+                    >
+                      <h2 className="text-white text-2xl font-bold text-center mb-6 mt-4" style={{
+                        textShadow: "0 0 20px rgba(45,226,230,0.5)"
+                      }}>
+                        SELECT MODE
+                      </h2>
+
+                      <div className="flex-1 flex flex-col gap-4 justify-center">
+                        {/* Guitar Hero Mode */}
+                        <motion.button
+                          whileHover={{ scale: 1.05, x: 5 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleModeSelect(song.id, "signhero");
                           }}
-                        />
-                      ) : (
-                        <div className="text-purple-400 text-6xl">♪</div>
-                      )}
-                      {/* Fallback icon if image fails */}
-                      <div className="hidden text-purple-400 text-6xl">♪</div>
-                    </div>
+                          className="hover:scale-105 cursor-pointer relative h-24 rounded-xl bg-gradient-to-r from-[#920075] to-[#540d6e] border-2 border-[#2de2e6] overflow-hidden group"
+                          style={{
+                            boxShadow: "0 0 20px rgba(45,226,230,0.3)"
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-[#2de2e6]/0 group-hover:bg-[#2de2e6]/10 transition-all"></div>
+                          <div className="relative z-10 flex items-center justify-center h-full">
+                            <span className="text-white text-xl font-bold">SIGN HERO</span>
+                          </div>
+                        </motion.button>
 
-                    {/* Info Section */}
-                    <div className="h-[30%] bg-purple-900/80 p-4 border-t-2 border-purple-500">
-                      <h3 className="text-white font-bold text-lg truncate">
-                        {song.songName}
-                      </h3>
-                      <p className="text-purple-300 text-sm truncate mt-1">
-                        {song.albumName || "Unknown Artist"}
-                      </p>
-                    </div>
+                        {/* Just Dance Mode */}
+                        <motion.button
+                          whileHover={{ scale: 1.05, x: 5 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleModeSelect(song.id, "aslrevolution");
+                          }}
+                          className=" hover:scale-105 cursor-pointer relative h-24 rounded-xl bg-gradient-to-r from-[#920075] to-[#540d6e] border-2 border-[#2de2e6] overflow-hidden group"
+                          style={{
+                            boxShadow: "0 0 20px rgba(45,226,230,0.3)"
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-[#2de2e6]/0 group-hover:bg-[#2de2e6]/10 transition-all"></div>
+                          <div className="relative z-10 flex items-center justify-center h-full">
+                            <span className="text-white text-xl font-bold">ASL REVOLUTION</span>
+                          </div>
+                        </motion.button>
 
-                    {/* Play Section */}
-                    <div className="h-[15%] bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center border-t-2 border-cyan-400">
-                      {isCenter && (
-                        <span className="text-white font-bold tracking-wide">
-                          ▶ PLAY
-                        </span>
-                      )}
+                        {/* Training Mode */}
+                        <motion.button
+                          whileHover={{ scale: 1.05, x: 5 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleModeSelect(song.id, "training");
+                          }}
+                          className=" hover:scale-105 cursor-pointer relative h-24 rounded-xl bg-gradient-to-r from-[#920075] to-[#540d6e] border-2 border-[#2de2e6] overflow-hidden group"
+                          style={{
+                            boxShadow: "0 0 20px rgba(45,226,230,0.3)"
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-[#2de2e6]/0 group-hover:bg-[#2de2e6]/10 transition-all"></div>
+                          <div className="relative z-10 flex items-center justify-center h-full">
+                            <span className="text-white text-xl font-bold">TRAINING</span>
+                          </div>
+                        </motion.button>
+                      </div>
+
+                      <div className="text-center text-[#2de2e6] text-sm mt-4">
+                        Click card to flip back
+                      </div>
                     </div>
                   </div>
 
                   {/* Reflection */}
-                  {isCenter && (
-                    <div className="absolute top-full left-0 w-full h-[60px] bg-gradient-to-b from-cyan-400/20 to-transparent mask-image-b-fade opacity-50 scale-y-[-1] rounded-t-2xl blur-[2px]" />
+                  {isCenter && !isFlipped && (
+                    <div className="absolute top-full left-0 w-full h-[60px] bg-gradient-to-b from-[#2de2e6]/20 to-transparent opacity-50 scale-y-[-1] rounded-t-2xl blur-[2px]" />
                   )}
                 </motion.div>
               );
@@ -368,5 +444,5 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
         </div>
       </div>
     </div>
-  ); // End Return
+  );
 }
