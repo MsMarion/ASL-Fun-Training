@@ -40,6 +40,32 @@ export function useTestingGame(beatmap: Beatmap | null) {
   const PRE_WINDOW = 2.0; // 2 seconds before
   const POST_WINDOW = 1.0; // 1 second after
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize/Update Audio when beatmap changes
+  useEffect(() => {
+    if (beatmap?.audioUrl) {
+      if (audioRef.current) {
+         audioRef.current.pause();
+         audioRef.current.src = beatmap.audioUrl;
+      } else {
+         audioRef.current = new Audio(beatmap.audioUrl);
+      }
+      audioRef.current.volume = 0.5; // Reasonable volume for testing
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    }
+    
+    return () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+    }
+  }, [beatmap?.audioUrl]);
+
   // Start Game
   const startGame = useCallback(() => {
     if (!beatmap) return;
@@ -49,84 +75,14 @@ export function useTestingGame(beatmap: Beatmap | null) {
     setMetrics({ score: 0, hits: 0, misses: 0, earlyHits: 0, lateHits: 0 });
     processedNotesRef.current.clear();
     gameStartTimeRef.current = Date.now();
+    
+    // Play Audio
+    if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(e => console.warn("Failed to play audio", e));
+    }
   }, [beatmap]);
 
-  // Game Loop
-  useEffect(() => {
-    if (gameState !== "playing" || !beatmap) {
-        cancelAnimationFrame(animFrameRef.current);
-        return;
-    }
-
-    const loop = () => {
-        const now = Date.now();
-        const currentElapsed = (now - gameStartTimeRef.current) / 1000;
-        setElapsed(currentElapsed);
-
-        if (currentElapsed > beatmap.totalDuration) {
-            setGameState("finished");
-            return;
-        }
-
-        // Logic check for current notes
-        beatmap.notes.forEach((note, index) => {
-            // Skip if already processed
-            if (processedNotesRef.current.has(index)) return;
-
-            const windowStart = note.time - PRE_WINDOW;
-            const windowEnd = note.time + POST_WINDOW;
-
-            // Check Miss (Time expired)
-            if (currentElapsed > windowEnd) {
-                processedNotesRef.current.add(index);
-                setMetrics(prev => ({ ...prev, misses: prev.misses + 1 }));
-                return;
-            }
-
-            // Check Hit (Inside window)
-            if (currentElapsed >= windowStart && currentElapsed <= windowEnd) {
-                // Check prediction
-                const isCorrect = latestPrediction && 
-                                  latestPrediction.letter === note.letter && 
-                                  latestPrediction.confidence >= 0.5;
-
-                if (isCorrect) {
-                     processedNotesRef.current.add(index);
-                     
-                     // Scoring Logic
-                     let points = 0;
-                     let isEarly = false;
-                     
-                     if (currentElapsed <= note.time) {
-                         // Early (+100)
-                         points = 100;
-                         isEarly = true;
-                     } else {
-                         // Late (+75)
-                         points = 75;
-                         isEarly = false;
-                     }
-
-                     setScore(s => s + points);
-                     setMetrics(prev => ({
-                         ...prev,
-                         score: prev.score + points,
-                         hits: prev.hits + 1,
-                         earlyHits: isEarly ? prev.earlyHits + 1 : prev.earlyHits,
-                         lateHits: !isEarly ? prev.lateHits + 1 : prev.lateHits
-                     }));
-                }
-            }
-        });
-
-        animFrameRef.current = requestAnimationFrame(loop);
-    };
-
-    animFrameRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animFrameRef.current);
-  }, [gameState, beatmap, latestPrediction]); // Dependency on latestPrediction is tricky for loop, but we read ref usually. 
-  // However, since we are using requestAnimationFrame, we need to be careful about closure staleness.
-  // Actually, `latestPrediction` inside `loop` will be stale if we don't depend on it or use a ref.
   // Let's use a Ref for latestPrediction to avoid re-creating the loop constantly.
   
   const predictionRef = useRef(latestPrediction);
@@ -134,15 +90,34 @@ export function useTestingGame(beatmap: Beatmap | null) {
 
   // Re-write loop to use refs
   useEffect(() => {
-    if (gameState !== "playing" || !beatmap) return;
+    if (gameState !== "playing" || !beatmap) {
+        if (audioRef.current) audioRef.current.pause();
+        return;
+    }
 
     const gameLoop = () => {
         const now = Date.now();
-        const currentElapsed = (now - gameStartTimeRef.current) / 1000;
+        let currentElapsed = 0;
+
+        // Sync with Audio if available
+        if (audioRef.current) {
+            currentElapsed = audioRef.current.currentTime;
+            
+            // Safety: If audio ends but loop is weird, rely on duration
+            if (audioRef.current.ended) {
+                 setGameState("finished");
+                 return;
+            }
+        } else {
+            // Fallback to Date.now()
+            currentElapsed = (now - gameStartTimeRef.current) / 1000;
+        }
+
         setElapsed(currentElapsed);
 
         if (currentElapsed > beatmap.totalDuration) {
             setGameState("finished");
+            if (audioRef.current) audioRef.current.pause();
             return;
         }
 
@@ -197,7 +172,9 @@ export function useTestingGame(beatmap: Beatmap | null) {
     };
 
     animFrameRef.current = requestAnimationFrame(gameLoop);
-    return () => cancelAnimationFrame(animFrameRef.current);
+    return () => {
+        cancelAnimationFrame(animFrameRef.current);
+    }
   }, [gameState, beatmap]); // No dependency on predictionRef, correct.
 
   return {

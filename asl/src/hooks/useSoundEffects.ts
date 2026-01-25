@@ -242,9 +242,18 @@ export function useSoundEffects() {
         playNote(1318.51, "sine", 0.6, 0.2, 0.1); // E6
     }, [initAudio]);
 
+    const playMissSound = useCallback(() => {
+        initAudio();
+        // Discordant / Failure sound
+        playNote(155.56, "sawtooth", 0.4, 0.0, 0.15); // Eb3
+        playNote(146.83, "sawtooth", 0.4, 0.1, 0.15); // D3 (clash)
+        playNote(98.00, "square", 0.6, 0.2, 0.2); // G2 (low punch)
+    }, [initAudio]);
+
     return {
         playSuccessSound,
         playStreakSound,
+        playMissSound,
         playBackgroundMusic,
         stopBackgroundMusic,
         initAudio
