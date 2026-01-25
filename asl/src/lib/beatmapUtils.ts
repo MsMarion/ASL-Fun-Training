@@ -25,6 +25,7 @@ export function songToBeatmap(song: Song): Beatmap {
     title: song.songName,
     notes,
     totalDuration,
+    audioUrl: song.audioUrl,
   };
 }
 
