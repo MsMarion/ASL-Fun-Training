@@ -21,6 +21,10 @@ const FEEDBACK_DURATION_MS = 800;
  * Main game loop hook that integrates webcam, sign detection, and game logic.
  * Replaces useMockGameLoop with real CV integration.
  */
+/**
+ * Main game loop hook that integrates webcam, sign detection, and game logic.
+ * Supports both Audio-driven and Timer-driven (fallback) game loops.
+ */
 export function useGameLoop(beatmap: Beatmap): {
   state: GameState;
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -38,6 +42,9 @@ export function useGameLoop(beatmap: Beatmap): {
     handDetected,
     latency,
   } = useSignDetection(captureFrame, webcamReady, true);
+
+  // Audio Reference
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Game state
   const [state, setState] = useState<GameState>({
@@ -62,17 +69,44 @@ export function useGameLoop(beatmap: Beatmap): {
   });
 
   const animFrameRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
+  const startTimeRef = useRef<number>(0); // Fallback timer start (perf.now)
   const pausedTimeRef = useRef<number>(0);
   const wasPausedRef = useRef<boolean>(false);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const processedPredictionsRef = useRef<Set<number>>(new Set());
+
+  // Initialize Audio
+  useEffect(() => {
+    if (beatmap.audioUrl) {
+      // Create audio object
+      const audio = new Audio(beatmap.audioUrl);
+      audio.volume = 0.6; // Default volume
+      
+      // Attempt to play immediately (might be blocked by browser policy until interaction)
+      // We rely on the game loop to manage play/pause state based on connection
+      audioRef.current = audio;
+
+      return () => {
+        audio.pause();
+        audio.src = "";
+        audioRef.current = null;
+      };
+    } else {
+      audioRef.current = null;
+    }
+  }, [beatmap.audioUrl]);
 
   const resetLoop = useCallback(() => {
     startTimeRef.current = performance.now();
     pausedTimeRef.current = 0;
     wasPausedRef.current = false;
     processedPredictionsRef.current.clear();
+
+    // Reset Audio
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.warn("Audio play failed (autoplay policy?):", e));
+    }
 
     setState((prev) => ({
       ...prev,
@@ -110,7 +144,13 @@ export function useGameLoop(beatmap: Beatmap): {
 
   // Main game loop
   useEffect(() => {
+    // Initialize fallback timer
     startTimeRef.current = performance.now();
+    
+    // Initial Audio Start
+    if (audioRef.current && isConnected) {
+       audioRef.current.play().catch(e => console.warn("Audio autoplay blocked:", e));
+    }
 
     const tick = (now: number) => {
       // Pause game clock during disconnection
@@ -118,6 +158,8 @@ export function useGameLoop(beatmap: Beatmap): {
         if (!wasPausedRef.current) {
           pausedTimeRef.current = now;
           wasPausedRef.current = true;
+          // Pause Audio
+          audioRef.current?.pause();
         }
         animFrameRef.current = requestAnimationFrame(tick);
         return;
@@ -126,11 +168,34 @@ export function useGameLoop(beatmap: Beatmap): {
       // Resume from pause
       if (wasPausedRef.current) {
         const pauseDuration = now - pausedTimeRef.current;
-        startTimeRef.current += pauseDuration;
+        startTimeRef.current += pauseDuration; // Shift fallback start time
         wasPausedRef.current = false;
+        
+        // Resume Audio
+        if (audioRef.current) {
+            audioRef.current.play().catch(e => console.error("Audio resume failed:", e));
+        }
       }
 
-      const elapsed = (now - startTimeRef.current) / 1000;
+      // Determine Current Game Time
+      let elapsed: number;
+      let effectiveStartTimeSec: number;
+
+      if (audioRef.current) {
+        // Source of Truth: Audio Time
+        elapsed = audioRef.current.currentTime;
+        
+        // Calculate effective start time (in Seconds) for syncing predictions
+        // prediction.clientTimestamp (Sec) - effectiveStartTime (Sec) = relativeTime (Sec)
+        // relativeTime should match elapsed.
+        // Therefore: prediction.clientTimestamp - effectiveStart = elapsed
+        // effectiveStart = prediction.clientTimestamp(NOW) - elapsed
+        effectiveStartTimeSec = (now / 1000) - elapsed;
+      } else {
+        // Source of Truth: Performance Timer
+        elapsed = (now - startTimeRef.current) / 1000;
+        effectiveStartTimeSec = startTimeRef.current / 1000;
+      }
 
       // Restart loop when beatmap ends
       if (elapsed > beatmap.totalDuration) {
@@ -151,29 +216,23 @@ export function useGameLoop(beatmap: Beatmap): {
         const earlyStart = activeNote.time - TRACKING_WINDOW;
         const deadline = activeNote.time + LATE_GRACE;
 
-        // 1. Search for a VALID HIT in the history (Best Candidate)
+        // 1. Search for a VALID HIT in the history
+        // Note: effectiveStartTimeSec MUST be in SECONDS
         const bestMatch = findBestPrediction(
           latestPredictionsRef.current,
           activeNote,
           earlyStart,
           deadline,
-          startTimeRef.current,
+          effectiveStartTimeSec, 
           processedPredictionsRef.current
         );
 
-        // 2. Also get the absolute latest unconsumed prediction for fallback feedback (e.g. "Wrong Sign")
+        // 2. Also get the absolute latest unconsumed prediction for fallback feedback
         const latestUnconsumed = latestPredictionsRef.current
           .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
           .at(-1) || null;
 
-        // DEBUG: Log prediction timing
-        if (bestMatch) {
-             console.log(`[DEBUG] HIT FOUND! Letter: ${bestMatch.letter}, Conf: ${(bestMatch.confidence * 100).toFixed(0)}%`);
-        } else if (latestUnconsumed) {
-             // console.log(`[DEBUG] Pending... Latest: ${latestUnconsumed.letter}`);
-        }
-
-        // Evaluate note - Prioritize bestMatch (Success) over latestUnconsumed (Current State)
+        // Evaluate note
         const judgement = evaluateNote(activeNote, bestMatch ?? latestUnconsumed, elapsed, prev.streak);
 
         // Debug: Get latest prediction
@@ -181,41 +240,25 @@ export function useGameLoop(beatmap: Beatmap): {
           ? latestPredictionsRef.current[latestPredictionsRef.current.length - 1] ?? null
           : null;
 
-        // Helper to update state with debug info
-        const withDebug = (s: any) => ({ ...s, latestPrediction: latestPred });
-
         if (judgement.type === "hit") {
-          // Consume the prediction so it can't be used for the next note
+          // HIT Logic
           if (latestUnconsumed) {
             processedPredictionsRef.current.add(latestUnconsumed.clientTimestamp);
           }
 
-          // Success!
           const newStreak = prev.streak + 1;
           const newScore = prev.score + judgement.points;
           const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
+          let feedbackText = "HIT!" + ` (${judgement.sawLetter})`;
 
-
-          let feedbackText: string = "HIT!" + ` (${judgement.sawLetter})`;
-          // Removed Perfect/Great/OK distinction
-
-
-          // Check for streak milestones
+          // Streak Milestone
           let streakMilestone: number | null = null;
           if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
             streakMilestone = newStreak;
-            // Clear milestone after 1s
-            setTimeout(() => {
-              setState((s) => ({ ...s, streakMilestone: null }));
-            }, 1000);
+            setTimeout(() => setState((s) => ({ ...s, streakMilestone: null })), 1000);
           }
 
-          // Clear previous feedback timeout
-          if (feedbackTimeoutRef.current) {
-            clearTimeout(feedbackTimeoutRef.current);
-          }
-
-          // Set feedback timeout
+          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
           feedbackTimeoutRef.current = setTimeout(() => {
             setState((s) => ({
               ...s,
@@ -234,7 +277,7 @@ export function useGameLoop(beatmap: Beatmap): {
             confidence: latestUnconsumed?.confidence,
           };
 
-          // Calculate NEXT note immediately for seamless tracking
+          // Seamless transition to next note
           const nextIndex = activeIndex + 1;
           const nextNote = beatmap.notes[nextIndex];
           const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
@@ -243,8 +286,8 @@ export function useGameLoop(beatmap: Beatmap): {
           return {
             ...prev,
             currentTime: elapsed,
-            currentNote: nextNoteVisible ? nextNote : null, // Switch to next note immediately if visible
-            noteState: "idle", // Reset to idle for the new note
+            currentNote: nextNoteVisible ? nextNote : null,
+            noteState: "idle",
             feedbackText,
             feedbackLetter: activeNote.letter,
             score: newScore,
@@ -257,24 +300,14 @@ export function useGameLoop(beatmap: Beatmap): {
             debugLog: [...prev.debugLog.slice(-20), hitLogEntry],
           };
         } else if (judgement.type === "miss") {
-          // Missed deadline
+          // MISS Logic
           const newLives = Math.max(prev.lives - 1, 0);
-
           let missedFeedback = "MISS!";
-          if (judgement.reason === "WRONG SIGN") {
-            missedFeedback = `MISS (Wrong Letter: ${judgement.sawLetter})`;
-          } else if (judgement.reason === "LOW CONFIDENCE") {
-            missedFeedback = `MISS (Low Confidence: ${judgement.sawLetter})`;
-          } else if (judgement.reason === "TOO LATE") {
-            missedFeedback = `MISS (Too Late: ${judgement.sawLetter})`;
-          }
+          if (judgement.reason === "WRONG SIGN") missedFeedback = `MISS (Wrong: ${judgement.sawLetter})`;
+          else if (judgement.reason === "LOW CONFIDENCE") missedFeedback = `MISS (Low Confidence)`;
+          else if (judgement.reason === "TOO LATE") missedFeedback = `MISS (Too Late)`;
 
-          // Clear previous feedback timeout
-          if (feedbackTimeoutRef.current) {
-            clearTimeout(feedbackTimeoutRef.current);
-          }
-
-          // Set feedback timeout
+          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
           feedbackTimeoutRef.current = setTimeout(() => {
             setState((s) => ({
               ...s,
@@ -292,7 +325,6 @@ export function useGameLoop(beatmap: Beatmap): {
             confidence: latestUnconsumed?.confidence,
           };
 
-          // Calculate NEXT note immediately
           const nextIndex = activeIndex + 1;
           const nextNote = beatmap.notes[nextIndex];
           const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
@@ -315,10 +347,8 @@ export function useGameLoop(beatmap: Beatmap): {
           };
         }
 
-        // Still pending
-        // Only show currentNote in target window when we are within the TRACKING window (Green Zone)
+        // PENDING Logic
         const trackingStart = activeNote.time - TRACKING_WINDOW;
-        
         return {
           ...prev,
           currentTime: elapsed,
@@ -336,6 +366,10 @@ export function useGameLoop(beatmap: Beatmap): {
       cancelAnimationFrame(animFrameRef.current);
       if (feedbackTimeoutRef.current) {
         clearTimeout(feedbackTimeoutRef.current);
+      }
+      // Pause audio on unmount/effect cleanup
+      if (audioRef.current) {
+          audioRef.current.pause();
       }
     };
   }, [beatmap, isConnected, resetLoop]); // Removed predictions from deps
