@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +19,35 @@ interface SongCarouselProps {
 export function SongCarousel({ songs = [] }: SongCarouselProps) {
   const router = useRouter();
   // Use a virtual index that can go negative or positive indefinitely
-  // giving each 'slot' in the timeline a unique ID.
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(-7); // Start "off-screen" or far back for intro
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Intro Animation Effect
+  useEffect(() => {
+    // Start shuffle immediately
+    const startShuffle = () => {
+      let current = -7;
+      const target = 0;
+
+      // Start the rotation/shuffle
+      const interval = setInterval(() => {
+        if (current < target) {
+          current++;
+          setIndex(current);
+          playCardFlipSound();
+        } else {
+          clearInterval(interval);
+        }
+      }, 80); // Fast flip speed
+
+      // Trigger fade-in *slightly* after rotation starts so it appears while moving
+      setTimeout(() => {
+        setIsLoaded(true);
+      }, 100);
+    };
+
+    startShuffle();
+  }, []);
 
   // Audio Context to synthesize a realistic "card flip" sound (Hybrid: Noise + Oscillator)
   const playCardFlipSound = () => {
@@ -148,7 +175,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
   };
 
   return (
-    <div className="relative w-full overflow-hidden flex flex-col items-center justify-center py-20">
+    <div className={`relative w-full overflow-hidden flex flex-col items-center justify-center py-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
 
       {/* 
          Perspective container. 
