@@ -3,14 +3,14 @@
 **A real-time American Sign Language (ASL) learning platform combining rhythm-based gaming with AI-powered hand sign recognition.**
 
 <p align="center">
-  <img src="Base test/image.png" alt="ASL Training Demo" width="600"/>
+  <img src="signhero.png" alt="SignHero" width="600"/>
 </p>
 
 ---
 
 ## 🌟 Overview
 
-ASL Fun Training is a full-stack application that teaches ASL fingerspelling through interactive gameplay. The system uses a webcam to detect hand signs in real-time via a trained machine learning model, then challenges players to sign along to beatmaps synced with music—like Guitar Hero, but with sign language.
+SignHero is a full-stack application that teaches ASL fingerspelling through interactive gameplay. The system uses a webcam to detect hand signs in real-time via a trained machine learning model, then challenges players to sign along to beatmaps synced with music—like Guitar Hero, but with sign language.
 
 | Component | Description |
 |-----------|-------------|
