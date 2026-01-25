@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Geist, Monoton, Anta } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { BackgroundMusic } from "./_components/BackgroundMusic";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -28,12 +29,16 @@ const anta = Anta({
   variable: "--font-anta",
 });
 
+import { UnifiedBackground } from "./_components/UnifiedBackground";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable} ${monoton.variable} ${anta.variable}`}>
       <body className="font-[family-name:var(--font-anta)]">
+        <UnifiedBackground />
+        <BackgroundMusic />
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>

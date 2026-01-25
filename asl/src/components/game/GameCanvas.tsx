@@ -9,6 +9,7 @@ import { Scoreboard } from "./Scoreboard";
 import { TargetWindow } from "./TargetWindow";
 import { NoteHighway } from "./NoteHighway";
 import { HitFeedback } from "./HitFeedback";
+import { LATE_GRACE, TRACKING_WINDOW } from "~/lib/gameScoring";
 import { LyricsBar } from "./LyricsBar";
 import { ParticleOverlay, type ParticleOverlayRef } from "./ParticleOverlay";
 import { ScreenFlash } from "./ScreenFlash";
