@@ -12,14 +12,11 @@ Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arca
 
 | Feature | Preview |
 |---------|----------|
-| **Song Game** | ![Song Game](screenshots/song_game.gif) |
-| **Training Mode** | ![Training Mode](screenshots/training_mode.gif) |
-| **Testing Mode** | ![Testing Mode](screenshots/testing_mode.gif) |
-| **Whack-A-Sign** | ![Whack-A-Sign](screenshots/whackamole.gif) |
-| **Sign Detection** | ![Sign Detection](screenshots/sign_detection.gif) |
-| **Visual Effects** | ![Visual Effects](screenshots/effects.gif) |
+| **JustDance Mode** | ![Song Game](screenshots/justdance.png) |
+| **Training Mode** | ![Training Mode](screenshots/training.png) |
+| **SignHero Mode** | ![Testing Mode](screenshots/guitarhero.png) |
+| **Whack-A-Sign** | ![Whack-A-Sign](screenshots/whack.png) |
 
-> 💡 **Tip:** Place your screenshots/GIFs in the `screenshots/` folder and update the paths above.
 
 ---
 
@@ -29,9 +26,9 @@ Learn ASL fingerspelling through rhythm-based gameplay, practice modes, and arca
 
 | Mode | Description |
 |------|-------------|
-| **Song Game** | A rhythm game where players sign along to beatmaps synced with music. Guitar Hero-style note highway with real-time scoring, combos, and visual effects. |
+| **Just Dance Game** | A rhythm game where players sign along to beatmaps synced with music. JustDance-style note highway with real-time scoring, combos, and visual effects. |
 | **Training Mode** | Guided practice where each sign is displayed one-at-a-time with visual hints and a 10-second auto-skip timer. Perfect for learning at your own pace. |
-| **Testing Mode** | A timed challenge to measure proficiency. Tracks Perfect/Good/Miss hits, accuracy, and max combo with detailed results. |
+| **SignHero Mode** | A timed challenge to measure proficiency. Tracks Perfect/Good/Miss hits, accuracy, and max combo with detailed results. Like GuitarHero |
 | **Whack-A-Sign** | An arcade-style reflex game. A grid of letters appears, and players must quickly sign or tap the highlighted target. Features streaks and celebrations. |
 
 ### 🤖 AI-Powered Sign Detection
