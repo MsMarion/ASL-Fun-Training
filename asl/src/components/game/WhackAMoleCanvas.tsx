@@ -12,6 +12,7 @@ import { useEffect, useState, useRef } from "react";
 import { FloatingScore } from "./FloatingScore";
 import { ScreenFlash } from "./ScreenFlash";
 import { FloatingSuccessText } from "./FloatingSuccessText";
+import { useSoundEffects } from "~/hooks/useSoundEffects";
 
 const SUCCESS_MESSAGES = ["GREAT!", "PERFECT!", "AMAZING!", "AWESOME!", "NICE!"];
 
@@ -29,6 +30,17 @@ export function WhackAMoleCanvas() {
         availableLetters,
         timeLeft
     } = useWhackAMoleGame();
+
+    const {
+        playSuccessSound,
+        playStreakSound,
+        playBackgroundMusic,
+        stopBackgroundMusic,
+        initAudio
+    } = useSoundEffects();
+
+    const [isMuted, setIsMuted] = useState(false);
+    const backgroundMusicStartedRef = useRef(false);
 
     const router = useRouter();
 
@@ -73,6 +85,13 @@ export function WhackAMoleCanvas() {
                 ? "🔥 ON FIRE! 🔥"
                 : SUCCESS_MESSAGES[metrics.totalCorrect % 5] ?? "GREAT!";
             setSuccessTextTrigger({ text: messageText, timestamp: Date.now() });
+
+            // Play sound
+            if (isStreak) {
+                playStreakSound();
+            } else {
+                playSuccessSound();
+            }
 
             // Reset flash after a short delay
             const flashTimer = setTimeout(() => setShowFlash(false), 100);
@@ -124,12 +143,31 @@ export function WhackAMoleCanvas() {
         }
     }, [gameState, targetLetter, latestPrediction, handleInteraction, predictions /* re-run on every new prediction update */]);
 
-    // Auto-redirect when game finishes
+    // Auto-redirect when game finishes and stop music
     useEffect(() => {
         if (gameState === "finished") {
+            stopBackgroundMusic();
             router.push(`/leaderboard?score=${score}`);
         }
-    }, [gameState, score, router]);
+    }, [gameState, score, router, stopBackgroundMusic]);
+
+    // Handle music mute toggle
+    useEffect(() => {
+        if (isMuted) {
+            stopBackgroundMusic();
+            backgroundMusicStartedRef.current = false;
+        } else if (gameState === "playing" && !backgroundMusicStartedRef.current) {
+            playBackgroundMusic();
+            backgroundMusicStartedRef.current = true;
+        }
+    }, [isMuted, gameState, playBackgroundMusic, stopBackgroundMusic]);
+
+    // Cleanup music on unmount
+    useEffect(() => {
+        return () => {
+            stopBackgroundMusic();
+        };
+    }, [stopBackgroundMusic]);
 
     return (
         <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
@@ -142,14 +180,25 @@ export function WhackAMoleCanvas() {
 
             {/* Top Bar: Webcam & HUD */}
             <div className="relative z-10 flex items-start justify-between p-4">
-                <WebcamFeed
-                    videoRef={videoRef}
-                    canvasRef={canvasRef}
-                    isReady={isReady}
-                    error={error}
-                    isConnected={isConnected}
-                    handDetected={handDetected}
-                />
+                {/* Score & Controls */}
+                <div className="flex flex-col gap-4">
+                    <WebcamFeed
+                        videoRef={videoRef}
+                        canvasRef={canvasRef}
+                        isReady={isReady}
+                        error={error}
+                        isConnected={isConnected}
+                        handDetected={handDetected}
+                    />
+
+                    <button
+                        onClick={() => setIsMuted(!isMuted)}
+                        className="bg-black/40 hover:bg-black/60 backdrop-blur text-white/80 p-2 rounded-lg border border-white/10 transition-colors flex items-center gap-2 w-fit"
+                    >
+                        <span>{isMuted ? "🔇" : "🔊"}</span>
+                        <span className="text-sm font-bold">{isMuted ? "UNMUTE MUSIC" : "MUTE MUSIC"}</span>
+                    </button>
+                </div>
 
                 <div className="flex flex-col items-end gap-2 bg-black/40 p-4 rounded-xl border border-white/10 backdrop-blur-md">
                     <div className={`text-5xl font-bold font-mono ${timeLeft <= 10 ? "text-red-500 animate-pulse" : "text-white"}`}>
@@ -238,7 +287,14 @@ export function WhackAMoleCanvas() {
                         </span>
                     </p>
                     <button
-                        onClick={startGame}
+                        onClick={() => {
+                            initAudio();
+                            if (!isMuted) {
+                                playBackgroundMusic();
+                                backgroundMusicStartedRef.current = true;
+                            }
+                            startGame();
+                        }}
                         className="px-12 py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(192,38,211,0.5)]"
                     >
                         START TRAINING
