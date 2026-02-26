@@ -146,7 +146,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/kaisprunger/ASL-Fun-Training/asl/generated/prisma",
+      "value": "C:\\Users\\Deoxon\\Desktop\\Swampy\\ASL-Fun-Training\\asl\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -155,12 +155,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/kaisprunger/ASL-Fun-Training/asl/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\Deoxon\\Desktop\\Swampy\\ASL-Fun-Training\\asl\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
