@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { type ParticleEngine } from "~/lib/particleEngine";
-import { type GameState } from "./useGameLoop";
+import { type GameState } from "~/types/game";
 
 interface UseVisualEffectsOptions {
   gameState: GameState;

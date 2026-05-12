@@ -1,24 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
   font-family: subheading-font;
   src: url(/fonts/Anta-Regular.ttf);
-
 }
 
 @font-face {
   font-family: display-font;
   src: url(/fonts/Monoton-Regular.ttf);
-
 }
 
-
 :root {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
   --magenta: #920075;
@@ -62,7 +59,8 @@
 
 /* Highway neon outline symbols */
 .sign-highway {
-  filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6)) drop-shadow(0 0 10px rgba(217, 70, 239, 0.3));
+  filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6))
+    drop-shadow(0 0 10px rgba(217, 70, 239, 0.3));
 }
 
 /* Primary symbol states */
@@ -79,30 +77,34 @@
 }
 
 @keyframes idle-breathe {
-
   0%,
   100% {
-    filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.5)) drop-shadow(0 0 60px rgba(192, 132, 252, 0.25));
+    filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.5))
+      drop-shadow(0 0 60px rgba(192, 132, 252, 0.25));
   }
 
   50% {
-    filter: drop-shadow(0 0 35px rgba(192, 132, 252, 0.7)) drop-shadow(0 0 90px rgba(192, 132, 252, 0.4));
+    filter: drop-shadow(0 0 35px rgba(192, 132, 252, 0.7))
+      drop-shadow(0 0 90px rgba(192, 132, 252, 0.4));
   }
 }
 
 @keyframes success-pulse {
   0% {
-    filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.8)) drop-shadow(0 0 60px rgba(74, 222, 128, 0.4));
+    filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.8))
+      drop-shadow(0 0 60px rgba(74, 222, 128, 0.4));
     transform: scale(1);
   }
 
   40% {
-    filter: drop-shadow(0 0 50px rgba(74, 222, 128, 1)) drop-shadow(0 0 120px rgba(74, 222, 128, 0.7));
+    filter: drop-shadow(0 0 50px rgba(74, 222, 128, 1))
+      drop-shadow(0 0 120px rgba(74, 222, 128, 0.7));
     transform: scale(1.08);
   }
 
   100% {
-    filter: drop-shadow(0 0 25px rgba(74, 222, 128, 0.6)) drop-shadow(0 0 70px rgba(74, 222, 128, 0.3));
+    filter: drop-shadow(0 0 25px rgba(74, 222, 128, 0.6))
+      drop-shadow(0 0 70px rgba(74, 222, 128, 0.3));
     transform: scale(1);
   }
 }
@@ -110,7 +112,8 @@
 @keyframes miss-shake {
   0% {
     transform: translateX(0);
-    filter: drop-shadow(0 0 30px rgba(248, 113, 113, 0.9)) drop-shadow(0 0 80px rgba(248, 113, 113, 0.5));
+    filter: drop-shadow(0 0 30px rgba(248, 113, 113, 0.9))
+      drop-shadow(0 0 80px rgba(248, 113, 113, 0.5));
   }
 
   20% {
@@ -131,19 +134,22 @@
 
   100% {
     transform: translateX(0);
-    filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.6)) drop-shadow(0 0 60px rgba(248, 113, 113, 0.3));
+    filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.6))
+      drop-shadow(0 0 60px rgba(248, 113, 113, 0.3));
   }
 }
 
 /* Feedback text glow */
 .sign-feedback-text {
-  text-shadow: 0 0 10px currentColor, 0 0 30px currentColor;
+  text-shadow:
+    0 0 10px currentColor,
+    0 0 30px currentColor;
 }
 
 /* Game screen grid background */
 .game-grid {
-  background-image: linear-gradient(rgba(139, 92, 246, 0.08) 1px,
-      transparent 1px),
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
   background-size: 40px 40px;
   perspective: 800px;
@@ -151,8 +157,8 @@
 
 /* Animated perspective grid overlay */
 .game-grid-animate {
-  background-image: linear-gradient(rgba(139, 92, 246, 0.05) 1px,
-      transparent 1px),
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: grid-drift 8s linear infinite;
@@ -273,15 +279,21 @@
 /* Hit zone pulse when note approaching */
 @keyframes hit-zone-pulse {
   0% {
-    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+    box-shadow:
+      0 0 10px rgba(217, 70, 239, 0.6),
+      0 0 20px rgba(217, 70, 239, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 20px rgba(217, 70, 239, 0.9), 0 0 40px rgba(217, 70, 239, 0.5);
+    box-shadow:
+      0 0 20px rgba(217, 70, 239, 0.9),
+      0 0 40px rgba(217, 70, 239, 0.5);
   }
 
   100% {
-    box-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
+    box-shadow:
+      0 0 10px rgba(217, 70, 239, 0.6),
+      0 0 20px rgba(217, 70, 239, 0.3);
   }
 }
 
@@ -318,17 +330,23 @@
 /* Fire text shadow for high streaks */
 @keyframes streak-fire {
   0% {
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+    text-shadow:
+      0 0 10px rgba(251, 191, 36, 0.8),
+      0 0 20px rgba(251, 191, 36, 0.6),
       0 0 30px rgba(251, 191, 36, 0.4);
   }
 
   50% {
-    text-shadow: 0 0 15px rgba(251, 191, 36, 1), 0 0 30px rgba(251, 191, 36, 0.8),
+    text-shadow:
+      0 0 15px rgba(251, 191, 36, 1),
+      0 0 30px rgba(251, 191, 36, 0.8),
       0 0 45px rgba(251, 191, 36, 0.6);
   }
 
   100% {
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.6),
+    text-shadow:
+      0 0 10px rgba(251, 191, 36, 0.8),
+      0 0 20px rgba(251, 191, 36, 0.6),
       0 0 30px rgba(251, 191, 36, 0.4);
   }
 }
@@ -497,7 +515,6 @@
 
 /* Screen shake animation */
 @keyframes shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -525,26 +542,65 @@
 
 /* Streak glow animation for note highway */
 @keyframes streak-glow-pulse {
-
   0%,
   100% {
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), 0 0 30px rgba(168, 85, 247, 0.3), inset 0 0 15px rgba(168, 85, 247, 0.1);
+    box-shadow:
+      0 0 15px rgba(168, 85, 247, 0.6),
+      0 0 30px rgba(168, 85, 247, 0.3),
+      inset 0 0 15px rgba(168, 85, 247, 0.1);
   }
 
   50% {
-    box-shadow: 0 0 25px rgba(168, 85, 247, 0.9), 0 0 50px rgba(168, 85, 247, 0.5), inset 0 0 25px rgba(168, 85, 247, 0.2);
+    box-shadow:
+      0 0 25px rgba(168, 85, 247, 0.9),
+      0 0 50px rgba(168, 85, 247, 0.5),
+      inset 0 0 25px rgba(168, 85, 247, 0.2);
   }
 }
 
 /* High streak fire glow */
 @keyframes streak-fire-glow {
-
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(251, 146, 60, 0.7), 0 0 40px rgba(251, 146, 60, 0.4), 0 0 60px rgba(239, 68, 68, 0.3), inset 0 0 20px rgba(251, 146, 60, 0.15);
+    box-shadow:
+      0 0 20px rgba(251, 146, 60, 0.7),
+      0 0 40px rgba(251, 146, 60, 0.4),
+      0 0 60px rgba(239, 68, 68, 0.3),
+      inset 0 0 20px rgba(251, 146, 60, 0.15);
   }
 
   50% {
-    box-shadow: 0 0 35px rgba(251, 146, 60, 1), 0 0 70px rgba(251, 146, 60, 0.6), 0 0 100px rgba(239, 68, 68, 0.5), inset 0 0 35px rgba(251, 146, 60, 0.25);
+    box-shadow:
+      0 0 35px rgba(251, 146, 60, 1),
+      0 0 70px rgba(251, 146, 60, 0.6),
+      0 0 100px rgba(239, 68, 68, 0.5),
+      inset 0 0 35px rgba(251, 146, 60, 0.25);
   }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(84, 13, 110, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--magenta), var(--cyan));
+  border-radius: 10px;
+  border: 2px solid rgba(13, 2, 33, 0.8);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan);
+  box-shadow: 0 0 15px var(--cyan);
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.custom-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: thin;  /* Firefox */
+  scrollbar-color: var(--magenta) transparent;
 }

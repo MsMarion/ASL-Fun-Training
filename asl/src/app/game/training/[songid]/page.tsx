@@ -21,7 +21,7 @@ export default function TrainingPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
+      <div className="flex h-full w-full items-center justify-center bg-slate-950">
         <div className="text-center animate-pulse">
            <div className="text-xl font-mono text-cyan-400">
             Loading Training Module...
@@ -33,7 +33,7 @@ export default function TrainingPage() {
 
   if (error || !song) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
+      <div className="flex h-full w-full items-center justify-center bg-slate-950">
         <div className="text-center">
            <div className="text-xl font-mono text-red-400">
             Error loading song data
@@ -46,7 +46,7 @@ export default function TrainingPage() {
 
   if (!isValid || !beatmap) {
       return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
+      <div className="flex h-full w-full items-center justify-center bg-slate-950">
         <div className="text-center">
            <div className="text-xl font-mono text-red-400">
             Invalid beatmap

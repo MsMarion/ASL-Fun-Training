@@ -1,0 +1,3 @@
+asl/.env.cloud_backup
+asl/minio_data/
+asl/mongodb_data/

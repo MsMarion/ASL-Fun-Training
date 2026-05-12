@@ -17,9 +17,9 @@ export default function TestingPage() {
   const beatmap = song ? songToBeatmap(song) : null;
   const isValid = beatmap ? validateBeatmap(beatmap) : false;
 
-  if (isLoading) return <div className="h-screen w-screen bg-black flex items-center justify-center text-white">Loading...</div>;
-  if (error || !song) return <div className="h-screen w-screen bg-black flex items-center justify-center text-red-500">Error loading song</div>;
-  if (!isValid || !beatmap) return <div className="h-screen w-screen bg-black flex items-center justify-center text-red-500">Invalid Beatmap</div>;
+  if (isLoading) return <div className="h-full w-full bg-black flex items-center justify-center text-white">Loading...</div>;
+  if (error || !song) return <div className="h-full w-full bg-black flex items-center justify-center text-red-500">Error loading song</div>;
+  if (!isValid || !beatmap) return <div className="h-full w-full bg-black flex items-center justify-center text-red-500">Invalid Beatmap</div>;
 
   return <TestingCanvas beatmap={beatmap} />;
 }

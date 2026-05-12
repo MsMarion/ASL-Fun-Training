@@ -35,7 +35,7 @@ export default function EffectsDemoPage() {
 
   // Wire up visual effects
   useVisualEffects({
-    gameState: state,
+    gameState: state as any,
     particleEngine: particleOverlayRef.current?.engine ?? null,
     targetWindowCenter,
     enabled: effectsEnabled,
@@ -80,7 +80,7 @@ export default function EffectsDemoPage() {
 
   return (
     <div
-      className="game-grid relative flex h-screen w-screen flex-col overflow-hidden"
+      className="game-grid relative flex h-full w-full flex-col overflow-hidden"
       style={{ background: bgColor, transition: "background 0.5s ease-out" }}
     >
       {/* Particle overlay */}
@@ -155,7 +155,7 @@ export default function EffectsDemoPage() {
 
       {/* Bottom: Highway + Lyrics */}
       <div className="relative z-10 flex flex-col gap-2 p-4">
-        <NoteHighway notes={state.notes} currentTime={state.currentTime} />
+        <NoteHighway notes={state.notes} currentTime={state.currentTime} activeNoteIndex={state.activeNoteIndex ?? 0} />
         <LyricsBar word={WORD} currentLetterIndex={adjustedIdx} />
       </div>
 

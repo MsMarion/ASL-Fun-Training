@@ -116,7 +116,7 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
     }, [metrics.noteMetrics, playSuccessSound, playMissSound]);
 
     return (
-        <div className="relative min-h-screen w-screen overflow-hidden text-white font-sans">
+        <div className="relative min-h-full w-full overflow-hidden text-white font-sans">
             <SynthwaveBackground />
 
             {/* Visual Effects */}

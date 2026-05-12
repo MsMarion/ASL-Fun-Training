@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '~/trpc/react';
@@ -124,7 +124,7 @@ const LeaderboardPage = () => {
     : 0;
 
   return (
-    <div ref={containerRef} className="h-screen w-screen relative overflow-hidden bg-[#0d0221]">
+    <div ref={containerRef} className="h-full w-full relative overflow-hidden bg-[#0d0221]">
       {/* Stars Background */}
       <div className="absolute inset-0 z-0" style={{ transform: `translate(${smoothPos.x * -0.5}px, ${smoothPos.y * -0.5}px)` }}>
         {stars.map((star) => (
@@ -409,4 +409,10 @@ const LeaderboardPage = () => {
   );
 };
 
-export default LeaderboardPage;
+export default function LeaderboardPageWrapper() {
+  return (
+    <Suspense fallback={<div className="h-full w-full relative overflow-hidden bg-[#0d0221]"></div>}>
+      <LeaderboardPage />
+    </Suspense>
+  );
+}

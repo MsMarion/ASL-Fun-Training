@@ -33,8 +33,28 @@ export async function POST(request: Request) {
             const arrayBuffer = await file.arrayBuffer();
             audioBuffer = Buffer.from(arrayBuffer);
         } else if (videoId) {
-            console.log("Downloading audio for video:", videoId);
-            audioBuffer = await downloadAudioBuffer(videoId);
+            console.log("📍 Pulling audio from local MinIO for AI analysis:", videoId);
+            // We know the file is already in MinIO thanks to the Bulletproof fetch
+            // We'll try to find it with the standard extensions
+            const { getFile } = await import("~/lib/s3");
+            const possibleExtensions = ["webm", "m4a", "mp3"];
+            let buffer: Buffer | null = null;
+            
+            for (const ext of possibleExtensions) {
+                buffer = await getFile(`audio/${videoId}.${ext}`);
+                if (buffer) {
+                    console.log(`✅ Found local audio: audio/${videoId}.${ext}`);
+                    break;
+                }
+            }
+
+            if (!buffer) {
+                // Fallback to the old method only if not found locally
+                console.log("⚠️ Local audio not found, falling back to YouTube download...");
+                audioBuffer = await downloadAudioBuffer(videoId);
+            } else {
+                audioBuffer = buffer;
+            }
         } else {
             return NextResponse.json(
                 { success: false, error: "No audio file or video ID provided" },
@@ -47,18 +67,19 @@ export async function POST(request: Request) {
         const audioBase64 = audioBuffer.toString("base64");
 
         const prompt = `
-            Analyze this audio file and select key words from the lyrics that are spaced approximately 2-3 seconds apart.
+            Analyze this audio file and select key words from the lyrics that are spaced approximately 2-4 seconds apart.
+            Focus on strong, rhythmic nouns and verbs that would make for good ASL signs.
             Do NOT transcribe every single word.
-            Pick significant words that fairly represent the flow of the song, but ensure there is a gap of roughly 2 to 3 seconds between each selected word's start time.
-
+            Ensure the selected words represent the main melody and flow of the song.
+            
             Return a JSON array where each object has:
             - "word": The word spoken (string)
             - "start_time": The start time of the word in seconds (number)
             
             Strictly follow this JSON schema:
             [
-              { "word": "Hello", "start_time": 0.5 },
-              { "word": "world", "start_time": 3.2 }
+              { "word": "Power", "start_time": 0.5 },
+              { "word": "Dream", "start_time": 3.2 }
             ]
             
             Ensure coverage of the entire song duration.

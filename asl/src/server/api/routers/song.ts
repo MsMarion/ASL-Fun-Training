@@ -6,6 +6,7 @@ import {
 } from "../trpc";
 
 import { z } from "zod";
+import { getPublicUrl } from "~/lib/s3";
 
 const createSongSchema = z.object({
   songName: z.string().min(1, "Song name is required").max(200, "Song name too long"),
@@ -30,7 +31,11 @@ export const songRouter = createTRPCRouter({
           createdAt: "desc",
         },
       });
-      return songs;
+      return songs.map(song => ({
+        ...song,
+        thumbnailUrl: song.thumbnailUrl ? (song.thumbnailUrl.startsWith("http") || song.thumbnailUrl.startsWith("/") ? song.thumbnailUrl : getPublicUrl(song.thumbnailUrl)) : null,
+        audioUrl: song.audioUrl ? (song.audioUrl.startsWith("http") || song.audioUrl.startsWith("/") ? song.audioUrl : getPublicUrl(song.audioUrl)) : null,
+      }));
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -49,7 +54,11 @@ export const songRouter = createTRPCRouter({
           createdAt: "desc",
         },
       });
-      return songs;
+      return songs.map(song => ({
+        ...song,
+        thumbnailUrl: song.thumbnailUrl ? (song.thumbnailUrl.startsWith("http") || song.thumbnailUrl.startsWith("/") ? song.thumbnailUrl : getPublicUrl(song.thumbnailUrl)) : null,
+        audioUrl: song.audioUrl ? (song.audioUrl.startsWith("http") || song.audioUrl.startsWith("/") ? song.audioUrl : getPublicUrl(song.audioUrl)) : null,
+      }));
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -68,7 +77,11 @@ export const songRouter = createTRPCRouter({
           createdAt: "desc",
         },
       });
-      return songs;
+      return songs.map(song => ({
+        ...song,
+        thumbnailUrl: song.thumbnailUrl ? (song.thumbnailUrl.startsWith("http") || song.thumbnailUrl.startsWith("/") ? song.thumbnailUrl : getPublicUrl(song.thumbnailUrl)) : null,
+        audioUrl: song.audioUrl ? (song.audioUrl.startsWith("http") || song.audioUrl.startsWith("/") ? song.audioUrl : getPublicUrl(song.audioUrl)) : null,
+      }));
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -97,7 +110,11 @@ export const songRouter = createTRPCRouter({
           song.interactions.sort((a: { timeElapsed: number }, b: { timeElapsed: number }) => a.timeElapsed - b.timeElapsed);
         }
 
-        return song;
+        return {
+          ...song,
+          thumbnailUrl: song.thumbnailUrl ? (song.thumbnailUrl.startsWith("http") || song.thumbnailUrl.startsWith("/") ? song.thumbnailUrl : getPublicUrl(song.thumbnailUrl)) : null,
+          audioUrl: song.audioUrl ? (song.audioUrl.startsWith("http") || song.audioUrl.startsWith("/") ? song.audioUrl : getPublicUrl(song.audioUrl)) : null,
+        };
       } catch (error) {
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({

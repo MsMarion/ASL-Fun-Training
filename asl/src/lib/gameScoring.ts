@@ -26,6 +26,7 @@ export interface SignPrediction {
   confidence: number;
   clientTimestamp: number;
   handDetected: boolean;
+  isKeyboard?: boolean;
 }
 
 export type JudgementResult =

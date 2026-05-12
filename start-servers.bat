@@ -47,7 +47,7 @@ if %ERRORLEVEL% EQU 0 (
 
 :SERVER_STARTED
 echo ML API server started in new window
-echo Endpoint: http://localhost:8000
+echo Endpoint: http://localhost:4001
 
 REM Wait a bit for the server to start
 timeout /t 5 /nobreak >nul
@@ -70,7 +70,7 @@ if not exist ".env" (
 )
 
 echo Starting Next.js dev server...
-start "Next.js Game" cmd /k "pnpm dev"
+start "Next.js Game" cmd /k "pnpm dev --port 4000"
 
 cd ..
 
@@ -79,9 +79,9 @@ echo ============================================
 echo All servers running!
 echo ============================================
 echo.
-echo Game:      http://localhost:3000
-echo ML API:    http://localhost:8000
-echo WebSocket: ws://localhost:8000/ws/predict
+echo Game:      http://localhost:4000
+echo ML API:    http://localhost:4001
+echo WebSocket: ws://localhost:4001/ws/predict
 echo.
 echo Close the server windows to stop the servers
 echo.

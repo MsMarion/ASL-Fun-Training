@@ -21,6 +21,7 @@ model Song {
   thumbnailUrl  String?
   audioUrl      String?
   interactions  Interaction[]
+  scores        LeaderboardEntry[]
   createdAt     DateTime      @default(now())
   v             Int           @default(0) @map("__v")
 }
@@ -29,10 +30,25 @@ model LeaderboardEntry {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   score     Int
-  rank      Int
-  playerId  String?  // Add playerId to track unique players
+  accuracy  Float    @default(0)
+  songId    String   @db.ObjectId
+  song      Song     @relation(fields: [songId], references: [id])
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   v         Int      @default(0) @map("__v")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?   @unique
+  displayName   String?   // The name shown on scorecards
+  email         String?   @unique
+  password      String?   // Hashed password
+  geminiApiKey  String?   // User's custom Gemini API key
+  image         String?
+  scores        LeaderboardEntry[]
+  createdAt     DateTime  @default(now())
 }
 
 model Player {

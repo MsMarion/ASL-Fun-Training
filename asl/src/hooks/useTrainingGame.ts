@@ -88,7 +88,7 @@ export function useTrainingGame(beatmap: Beatmap | null, isInstantMode: boolean 
       // Check for correct interaction
       const pred = latestPrediction;
       const isCorrect = pred &&
-        pred.letter === currentNote.letter &&
+        pred.letter.toLowerCase() === currentNote.letter.toLowerCase() &&
         pred.confidence >= 0.5;
 
       // 1. Check for Skip (Time Limit)

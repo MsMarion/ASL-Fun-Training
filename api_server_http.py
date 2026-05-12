@@ -162,6 +162,8 @@ async def predict_frame(file: UploadFile = File(...), client_timestamp: float = 
             if current_conf > resources.confidence_threshold:
                 detected_letter = LabelMapper.index_to_label(predicted_class.item())
                 confidence = current_conf
+                # Log for verification
+                logger.info(f"DETECTED: {detected_letter} (Conf: {confidence:.2f})")
             else:
                 detected_letter = "None"
                 confidence = current_conf
@@ -177,4 +179,4 @@ async def predict_frame(file: UploadFile = File(...), client_timestamp: float = 
 if __name__ == "__main__":
     import uvicorn
     # Clean up old processes if needed manually
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=4001)

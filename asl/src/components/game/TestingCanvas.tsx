@@ -145,7 +145,7 @@ export function TestingCanvas({ beatmap }: TestingCanvasProps) {
     }, [metrics, lastMetrics, playSuccessSound, playMissSound, initAudio, streak]);
 
     return (
-        <div className={`relative h-screen w-screen overflow-hidden text-white font-sans ${isShaking ? 'animate-shake' : ''}`}>
+        <div className={`relative h-full w-full overflow-hidden text-white font-sans ${isShaking ? 'animate-shake' : ''}`}>
             <SynthwaveBackground />
 
             {/* Visual Effects */}

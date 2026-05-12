@@ -9,18 +9,24 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "~/env";
 
-// Initialize S3 client for DigitalOcean Spaces
+// Initialize S3 client based on STORAGE_MODE
+const isLocal = env.STORAGE_MODE === "local";
+
+const endpoint = isLocal 
+    ? `http://${env.LOCAL_STORAGE_ENDPOINT || "localhost:9000"}`
+    : (env.DO_SPACES_ENDPOINT ? `https://${env.DO_SPACES_ENDPOINT}` : undefined);
+
 const s3Client = new S3Client({
-    endpoint: env.DO_SPACES_ENDPOINT ? `https://${env.DO_SPACES_ENDPOINT}` : undefined,
-    region: env.DO_SPACES_REGION ?? "nyc3",
-    credentials: env.DO_SPACES_KEY && env.DO_SPACES_SECRET ? {
-        accessKeyId: env.DO_SPACES_KEY,
-        secretAccessKey: env.DO_SPACES_SECRET,
-    } : undefined,
-    forcePathStyle: false, // Use virtual-hosted-style URLs
+    endpoint,
+    region: isLocal ? "us-east-1" : (env.DO_SPACES_REGION ?? "nyc3"),
+    credentials: {
+        accessKeyId: isLocal ? (env.LOCAL_STORAGE_KEY || "admin") : (env.DO_SPACES_KEY || ""),
+        secretAccessKey: isLocal ? (env.LOCAL_STORAGE_SECRET || "password") : (env.DO_SPACES_SECRET || ""),
+    },
+    forcePathStyle: isLocal, // Required for MinIO
 });
 
-const BUCKET = env.DO_SPACES_BUCKET ?? "";
+const BUCKET = isLocal ? (env.LOCAL_STORAGE_BUCKET || "signhero") : (env.DO_SPACES_BUCKET || "");
 
 export interface UploadResult {
     success: boolean;
@@ -246,19 +252,22 @@ export async function getPresignedDownloadUrl(
 }
 
 /**
- * Get the public URL for a file (only works if file is public)
+ * Get the public URL for a file
  */
 export function getPublicUrl(key: string): string {
-    // DigitalOcean Spaces public URL format
-    // https://{bucket}.{region}.digitaloceanspaces.com/{key}
-    // or with CDN: https://{bucket}.{region}.cdn.digitaloceanspaces.com/{key}
+    if (isLocal) {
+        return `http://${env.LOCAL_STORAGE_ENDPOINT || "localhost:9000"}/${BUCKET}/${key}`;
+    }
     return `https://${BUCKET}.${env.DO_SPACES_REGION}.digitaloceanspaces.com/${key}`;
 }
 
 /**
- * Get the CDN URL for a file (if CDN is enabled on the Space)
+ * Get the CDN URL for a file
  */
 export function getCdnUrl(key: string): string {
+    if (isLocal) {
+        return `http://${env.LOCAL_STORAGE_ENDPOINT || "localhost:9000"}/${BUCKET}/${key}`;
+    }
     return `https://${BUCKET}.${env.DO_SPACES_REGION}.cdn.digitaloceanspaces.com/${key}`;
 }
 

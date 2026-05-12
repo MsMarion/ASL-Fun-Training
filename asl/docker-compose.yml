@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Database Service (Upgraded to Replica Set for Prisma compatibility)
+  mongodb:
+    image: mongo:latest
+    container_name: signhero-mongodb
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "4002:27017"
+    volumes:
+      - ./mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=signhero
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh --port 27017 --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # S3 Compatible Storage Service
+  minio:
+    image: minio/minio:latest
+    container_name: signhero-minio
+    ports:
+      - "4003:9000" # API Port
+      - "4004:9001" # Dashboard Port
+    volumes:
+      - ./minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+    command: server /data --console-address ":4004"
+
+  # End of services
+

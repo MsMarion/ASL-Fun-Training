@@ -40,11 +40,19 @@ export function useAIInteraction({
     }
 
     const isCorrect = latestPrediction &&
-      latestPrediction.letter === targetLetter &&
+      latestPrediction.letter.toLowerCase() === targetLetter.toLowerCase() &&
       latestPrediction.confidence >= 0.5;
 
     if (isCorrect) {
-      // Start or continue hold
+      // If it's a physical keyboard fallback press, instantly confirm without hold delay!
+      if (latestPrediction.isKeyboard) {
+        onCorrect(targetLetter);
+        holdStartRef.current = null;
+        setHoldProgress(0);
+        return;
+      }
+
+      // Start or continue hold for webcam predictions
       if (!holdStartRef.current) {
         holdStartRef.current = Date.now();
       } else {

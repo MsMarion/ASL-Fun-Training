@@ -11,11 +11,11 @@ export default function SongSelection() {
   const { data: curatedSongs, isLoading, error } = trpc.song.getOfficialSongs.useQuery();
 
   return (
-    <div className="min-h-screen overflow-hidden relative">
-      <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-screen">
+    <div className="min-h-full overflow-hidden relative">
+      <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-full">
         <Navbar />
 
-        <div className="z-100 relative w-3/4 h-[900px] border-b-1 border-r-1 border-l-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 rounded-3xl shadow-2xl flex flex-col"
+        <div className="z-100 relative w-3/4 h-[800px] border-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 mb-8 rounded-3xl shadow-2xl flex flex-col"
           style={{
             background: "linear-gradient(to bottom, rgba(58,0,102,0.8), rgba(146,0,117,0.8), rgba(58,0,102,0.8))"
           }}>
@@ -32,29 +32,27 @@ export default function SongSelection() {
             </p>
           </div>
 
-          <div className="flex-1 flex items-center justify-center w-full">
-            {isLoading && (
-              <div className="text-center text-white text-xl animate-bounce">
-                Loading songs...
-              </div>
-            )}
+          {isLoading && (
+            <div className="text-center text-white text-xl animate-bounce py-20">
+              Loading songs...
+            </div>
+          )}
 
-            {error && (
-              <div className="text-center text-red-300 text-xl">
-                Error: {error.message}
-              </div>
-            )}
+          {error && (
+            <div className="text-center text-red-300 text-xl py-20">
+              Error: {error.message}
+            </div>
+          )}
 
-            {curatedSongs && curatedSongs.length > 0 && (
-              <SongCarousel songs={curatedSongs} />
-            )}
+          {curatedSongs && curatedSongs.length > 0 && (
+            <SongCarousel songs={curatedSongs as any} />
+          )}
 
-            {!isLoading && (!curatedSongs || curatedSongs.length === 0) && (
-              <div className="text-center text-white text-xl">
-                No curated songs found in database
-              </div>
-            )}
-          </div>
+          {!isLoading && (!curatedSongs || curatedSongs.length === 0) && (
+            <div className="text-center text-white text-xl py-20">
+              No curated songs found in database
+            </div>
+          )}
         </div>
       </div>
 

@@ -102,10 +102,23 @@ exports.Prisma.LeaderboardEntryScalarFieldEnum = {
   id: 'id',
   name: 'name',
   score: 'score',
-  rank: 'rank',
-  playerId: 'playerId',
+  accuracy: 'accuracy',
+  gameMode: 'gameMode',
+  songId: 'songId',
+  userId: 'userId',
   createdAt: 'createdAt',
   v: 'v'
+};
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  displayName: 'displayName',
+  email: 'email',
+  password: 'password',
+  geminiApiKey: 'geminiApiKey',
+  image: 'image',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.PlayerScalarFieldEnum = {
@@ -133,6 +146,7 @@ exports.Prisma.QueryMode = {
 exports.Prisma.ModelName = {
   Song: 'Song',
   LeaderboardEntry: 'LeaderboardEntry',
+  User: 'User',
   Player: 'Player'
 };
 /**
@@ -174,7 +188,6 @@ const config = {
     "db"
   ],
   "activeProvider": "mongodb",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -183,13 +196,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ADD MODELS HERE\nmodel Song {\n  id            String        @id @default(auto()) @map(\"_id\") @db.ObjectId\n  songName      String\n  isCommunity   Boolean\n  albumName     String?\n  thumbnailName String?\n  thumbnailUrl  String?\n  audioUrl      String?\n  interactions  Interaction[]\n  createdAt     DateTime      @default(now())\n  v             Int           @default(0) @map(\"__v\")\n}\n\nmodel LeaderboardEntry {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String\n  score     Int\n  rank      Int\n  playerId  String? // Add playerId to track unique players\n  createdAt DateTime @default(now())\n  v         Int      @default(0) @map(\"__v\")\n}\n\nmodel Player {\n  id              String          @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name            String\n  score           Int\n  avgReactionTime Float\n  mistakesMade    Int\n  correctHits     Int\n  commonMistakes  CommonMistake[]\n  createdAt       DateTime        @default(now())\n  v               Int             @default(0) @map(\"__v\")\n}\n\ntype Interaction {\n  key         String\n  timeElapsed Float\n}\n\ntype CommonMistake {\n  key1 String // Letter they showed\n  key2 String // Letter that was expected\n  hits Int // Number of times this mistake occurred\n}\n",
-  "inlineSchemaHash": "ddbcdc536dbe26eb9ad59ab6e96f0e3fc8644f0410686bd0125454299b66d2bd",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ADD MODELS HERE\nmodel Song {\n  id            String             @id @default(auto()) @map(\"_id\") @db.ObjectId\n  songName      String\n  isCommunity   Boolean\n  albumName     String?\n  thumbnailName String?\n  thumbnailUrl  String?\n  audioUrl      String?\n  interactions  Interaction[]\n  scores        LeaderboardEntry[]\n  createdAt     DateTime           @default(now())\n  v             Int                @default(0) @map(\"__v\")\n}\n\nmodel LeaderboardEntry {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name      String // Hero Name\n  score     Int\n  accuracy  Float    @default(0)\n  gameMode  String   @default(\"RHYTHM\") // e.g., \"RHYTHM\", \"WHACK\", \"TRAINING\"\n  songId    String?  @db.ObjectId\n  song      Song?    @relation(fields: [songId], references: [id])\n  userId    String?  @db.ObjectId\n  user      User?    @relation(fields: [userId], references: [id])\n  createdAt DateTime @default(now())\n  v         Int      @default(0) @map(\"__v\")\n}\n\nmodel User {\n  id           String             @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name         String?            @unique\n  displayName  String? // The name shown on scorecards\n  email        String?            @unique\n  password     String? // Hashed password\n  geminiApiKey String? // User's custom Gemini API key\n  image        String?\n  scores       LeaderboardEntry[]\n  createdAt    DateTime           @default(now())\n}\n\nmodel Player {\n  id              String          @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name            String\n  score           Int\n  avgReactionTime Float\n  mistakesMade    Int\n  correctHits     Int\n  commonMistakes  CommonMistake[]\n  createdAt       DateTime        @default(now())\n  v               Int             @default(0) @map(\"__v\")\n}\n\ntype Interaction {\n  key         String\n  timeElapsed Float\n}\n\ntype CommonMistake {\n  key1 String // Letter they showed\n  key2 String // Letter that was expected\n  hits Int // Number of times this mistake occurred\n}\n",
+  "inlineSchemaHash": "5ad7b301ee49f005f8dedbd09ad0136a23f7596cd0dc499b0a408b06c3476ec2",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Song\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"songName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isCommunity\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"albumName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"audioUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"interactions\",\"kind\":\"object\",\"type\":\"Interaction\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"LeaderboardEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rank\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"playerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"Player\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"avgReactionTime\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"mistakesMade\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"correctHits\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"commonMistakes\",\"kind\":\"object\",\"type\":\"CommonMistake\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Song\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"songName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isCommunity\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"albumName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnailUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"audioUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"interactions\",\"kind\":\"object\",\"type\":\"Interaction\"},{\"name\":\"scores\",\"kind\":\"object\",\"type\":\"LeaderboardEntry\",\"relationName\":\"LeaderboardEntryToSong\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"LeaderboardEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"accuracy\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"gameMode\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"songId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"song\",\"kind\":\"object\",\"type\":\"Song\",\"relationName\":\"LeaderboardEntryToSong\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"LeaderboardEntryToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null},\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"displayName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"geminiApiKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"scores\",\"kind\":\"object\",\"type\":\"LeaderboardEntry\",\"relationName\":\"LeaderboardEntryToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Player\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"_id\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"score\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"avgReactionTime\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"mistakesMade\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"correctHits\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"commonMistakes\",\"kind\":\"object\",\"type\":\"CommonMistake\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"v\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"__v\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

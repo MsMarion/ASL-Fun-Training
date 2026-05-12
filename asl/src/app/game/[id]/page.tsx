@@ -24,7 +24,7 @@ export default function GamePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "#0d0820" }}>
+      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
         <div className="text-center">
           <div className="mb-4 text-4xl">🎵</div>
           <div className="text-xl font-mono" style={{ color: "#e0e7ff" }}>
@@ -37,7 +37,7 @@ export default function GamePage() {
 
   if (error) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "#0d0820" }}>
+      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
         <div className="text-center">
           <div className="mb-4 text-4xl">⚠️</div>
           <div className="text-xl font-mono text-red-400">
@@ -53,7 +53,7 @@ export default function GamePage() {
 
   if (!isValid) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "#0d0820" }}>
+      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
         <div className="text-center">
           <div className="mb-4 text-4xl">⚠️</div>
           <div className="text-xl font-mono text-red-400">

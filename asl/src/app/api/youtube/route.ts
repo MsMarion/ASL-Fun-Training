@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { extractVideoId, getYtDlpMetadata, getAudioStream } from "~/lib/youtube";
+import { bulletproofYoutubeImport } from "~/lib/youtube-bridge";
 
-// POST - Get video info and return videoId for streaming
+// POST - Get video info, download audio, and upload to MinIO
 export async function POST(request: Request) {
     try {
         const { url } = await request.json();
@@ -13,27 +13,17 @@ export async function POST(request: Request) {
             );
         }
 
-        const videoId = extractVideoId(url);
-        if (!videoId) {
+        console.log("🎬 Initializing Bulletproof Import for:", url);
+        const result = await bulletproofYoutubeImport(url);
+
+        if (!result.success) {
             return NextResponse.json(
-                { success: false, error: "Invalid YouTube URL" },
-                { status: 400 }
+                { success: false, error: result.error },
+                { status: 500 }
             );
         }
 
-        console.log("Processing video:", videoId);
-
-        // Get video metadata using yt-dlp
-        const metadata = await getYtDlpMetadata(videoId);
-        
-        console.log("Video title:", metadata.title);
-
-        return NextResponse.json({
-            success: true,
-            videoId,
-            title: metadata.title,
-            duration: metadata.duration,
-        });
+        return NextResponse.json(result);
 
     } catch (error) {
         console.error("YouTube API Error:", error);
@@ -62,37 +52,37 @@ export async function GET(request: Request) {
 
         // Create a ReadableStream from yt-dlp stdout
         const stream = new ReadableStream({
-            start(controller) {
-                const { process: ytDlp, stream: stdOut } = getAudioStream(videoId);
+            async start(controller) {
+                try {
+                    const { process: ytDlp, stream: stdOut } = await getAudioStream(videoId);
 
-                stdOut.on("data", (chunk) => {
-                    controller.enqueue(chunk);
-                });
+                    stdOut.on("data", (chunk: any) => {
+                        controller.enqueue(chunk);
+                    });
 
-                stdOut.on("end", () => {
-                    controller.close();
-                });
+                    stdOut.on("end", () => {
+                        controller.close();
+                    });
 
-                ytDlp.stderr.on("data", (data: any) => {
-                    // Log stderr but don't fail immediately unless process exits with error
-                    // yt-dlp prints progress to stderr
-                    const msg = data.toString();
-                    if (!msg.includes("[download]") && !msg.includes("[youtube]")) {
-                        console.error("yt-dlp stderr:", msg);
-                    }
-                });
+                    ytDlp.stderr.on("data", (data: any) => {
+                        const msg = data.toString();
+                        if (!msg.includes("[download]") && !msg.includes("[youtube]")) {
+                            console.error("yt-dlp stderr:", msg);
+                        }
+                    });
 
-                ytDlp.on("error", (err: any) => {
+                    ytDlp.on("error", (err: any) => {
+                        controller.error(err);
+                    });
+
+                    ytDlp.on("close", (code: number) => {
+                        if (code !== 0) {
+                            console.error(`yt-dlp exited with code ${code}`);
+                        }
+                    });
+                } catch (err) {
                     controller.error(err);
-                });
-
-                ytDlp.on("close", (code: number) => {
-                    if (code !== 0) {
-                        console.error(`yt-dlp exited with code ${code}`);
-                        // If we haven't closed yet, we could error, but stream might be partially sent.
-                        // Controller close is handled in stdout.end
-                    }
-                });
+                }
             }
         });
 

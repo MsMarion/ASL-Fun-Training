@@ -130,10 +130,23 @@ exports.Prisma.LeaderboardEntryScalarFieldEnum = {
   id: 'id',
   name: 'name',
   score: 'score',
-  rank: 'rank',
-  playerId: 'playerId',
+  accuracy: 'accuracy',
+  gameMode: 'gameMode',
+  songId: 'songId',
+  userId: 'userId',
   createdAt: 'createdAt',
   v: 'v'
+};
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  displayName: 'displayName',
+  email: 'email',
+  password: 'password',
+  geminiApiKey: 'geminiApiKey',
+  image: 'image',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.PlayerScalarFieldEnum = {
@@ -161,6 +174,7 @@ exports.Prisma.QueryMode = {
 exports.Prisma.ModelName = {
   Song: 'Song',
   LeaderboardEntry: 'LeaderboardEntry',
+  User: 'User',
   Player: 'Player'
 };
 

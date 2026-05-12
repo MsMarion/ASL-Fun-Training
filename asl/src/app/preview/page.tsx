@@ -10,7 +10,7 @@ export default function PreviewPage() {
   const [primaryState, setPrimaryState] = useState<SignState>("idle");
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e] p-8 text-white">
+    <div className="min-h-full bg-[#0f0a1e] p-8 text-white">
       <h1 className="mb-6 text-2xl font-bold">ASL Symbol Preview</h1>
 
       {/* Letter selector */}

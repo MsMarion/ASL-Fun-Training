@@ -8,7 +8,7 @@ export default function Home() {
   const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#0d0221]">
+    <div className="relative w-full h-full overflow-hidden bg-[#0d0221]">
       <SynthwaveBackground />
 
       {/* Main Content */}

@@ -67,7 +67,7 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
 
   return (
     <div
-      className="game-grid relative flex h-screen w-screen flex-col overflow-hidden"
+      className="game-grid relative flex h-full w-full flex-col overflow-hidden"
       style={{ background: bgColor, transition: "background 0.5s ease-out" }}
     >
       {/* Particle overlay */}

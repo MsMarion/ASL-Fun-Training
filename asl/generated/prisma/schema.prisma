@@ -13,7 +13,7 @@ datasource db {
 
 // ADD MODELS HERE
 model Song {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
   songName      String
   isCommunity   Boolean
   albumName     String?
@@ -21,18 +21,32 @@ model Song {
   thumbnailUrl  String?
   audioUrl      String?
   interactions  Interaction[]
-  createdAt     DateTime      @default(now())
-  v             Int           @default(0) @map("__v")
+  scores        LeaderboardEntry[]
+  createdAt     DateTime           @default(now())
+  v             Int                @default(0) @map("__v")
 }
 
 model LeaderboardEntry {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   score     Int
-  rank      Int
-  playerId  String? // Add playerId to track unique players
+  accuracy  Float    @default(0)
+  songId    String   @db.ObjectId
+  song      Song     @relation(fields: [songId], references: [id])
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   v         Int      @default(0) @map("__v")
+}
+
+model User {
+  id        String             @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?            @unique
+  email     String?            @unique
+  password  String? // Hashed password
+  image     String?
+  scores    LeaderboardEntry[]
+  createdAt DateTime           @default(now())
 }
 
 model Player {

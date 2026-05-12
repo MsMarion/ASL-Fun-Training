@@ -34,6 +34,11 @@ export type Song = $Result.DefaultSelection<Prisma.$SongPayload>
  */
 export type LeaderboardEntry = $Result.DefaultSelection<Prisma.$LeaderboardEntryPayload>
 /**
+ * Model User
+ * 
+ */
+export type User = $Result.DefaultSelection<Prisma.$UserPayload>
+/**
  * Model Player
  * 
  */
@@ -143,6 +148,16 @@ export class PrismaClient<
     * ```
     */
   get leaderboardEntry(): Prisma.LeaderboardEntryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.user`: Exposes CRUD operations for the **User** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Users
+    * const users = await prisma.user.findMany()
+    * ```
+    */
+  get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.player`: Exposes CRUD operations for the **Player** model.
@@ -596,6 +611,7 @@ export namespace Prisma {
   export const ModelName: {
     Song: 'Song',
     LeaderboardEntry: 'LeaderboardEntry',
+    User: 'User',
     Player: 'Player'
   };
 
@@ -615,7 +631,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "song" | "leaderboardEntry" | "player"
+      modelProps: "song" | "leaderboardEntry" | "user" | "player"
       txIsolationLevel: never
     }
     model: {
@@ -764,6 +780,80 @@ export namespace Prisma {
           count: {
             args: Prisma.LeaderboardEntryCountArgs<ExtArgs>
             result: $Utils.Optional<LeaderboardEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      User: {
+        payload: Prisma.$UserPayload<ExtArgs>
+        fields: Prisma.UserFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          findFirst: {
+            args: Prisma.UserFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          findMany: {
+            args: Prisma.UserFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
+          }
+          create: {
+            args: Prisma.UserCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          createMany: {
+            args: Prisma.UserCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.UserDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          update: {
+            args: Prisma.UserUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.UserUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          aggregate: {
+            args: Prisma.UserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUser>
+          }
+          groupBy: {
+            args: Prisma.UserGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.UserFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.UserAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          count: {
+            args: Prisma.UserCountArgs<ExtArgs>
+            result: $Utils.Optional<UserCountAggregateOutputType> | number
           }
         }
       }
@@ -922,6 +1012,7 @@ export namespace Prisma {
   export type GlobalOmitConfig = {
     song?: SongOmit
     leaderboardEntry?: LeaderboardEntryOmit
+    user?: UserOmit
     player?: PlayerOmit
   }
 
@@ -997,6 +1088,67 @@ export namespace Prisma {
    * Count Types
    */
 
+
+  /**
+   * Count Type SongCountOutputType
+   */
+
+  export type SongCountOutputType = {
+    scores: number
+  }
+
+  export type SongCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    scores?: boolean | SongCountOutputTypeCountScoresArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SongCountOutputType without action
+   */
+  export type SongCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SongCountOutputType
+     */
+    select?: SongCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SongCountOutputType without action
+   */
+  export type SongCountOutputTypeCountScoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LeaderboardEntryWhereInput
+  }
+
+
+  /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    scores: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    scores?: boolean | UserCountOutputTypeCountScoresArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountScoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LeaderboardEntryWhereInput
+  }
 
 
   /**
@@ -1364,6 +1516,8 @@ export namespace Prisma {
     interactions?: boolean | InteractionDefaultArgs<ExtArgs>
     createdAt?: boolean
     v?: boolean
+    scores?: boolean | Song$scoresArgs<ExtArgs>
+    _count?: boolean | SongCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["song"]>
 
 
@@ -1381,11 +1535,16 @@ export namespace Prisma {
   }
 
   export type SongOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songName" | "isCommunity" | "albumName" | "thumbnailName" | "thumbnailUrl" | "audioUrl" | "interactions" | "createdAt" | "v", ExtArgs["result"]["song"]>
-  export type SongInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type SongInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    scores?: boolean | Song$scoresArgs<ExtArgs>
+    _count?: boolean | SongCountOutputTypeDefaultArgs<ExtArgs>
+  }
 
   export type $SongPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Song"
-    objects: {}
+    objects: {
+      scores: Prisma.$LeaderboardEntryPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       songName: string
@@ -1761,6 +1920,7 @@ export namespace Prisma {
    */
   export interface Prisma__SongClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    scores<T extends Song$scoresArgs<ExtArgs> = {}>(args?: Subset<T, Song$scoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2169,6 +2329,30 @@ export namespace Prisma {
   }
 
   /**
+   * Song.scores
+   */
+  export type Song$scoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    where?: LeaderboardEntryWhereInput
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    cursor?: LeaderboardEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LeaderboardEntryScalarFieldEnum | LeaderboardEntryScalarFieldEnum[]
+  }
+
+  /**
    * Song without action
    */
   export type SongDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2201,13 +2385,13 @@ export namespace Prisma {
 
   export type LeaderboardEntryAvgAggregateOutputType = {
     score: number | null
-    rank: number | null
+    accuracy: number | null
     v: number | null
   }
 
   export type LeaderboardEntrySumAggregateOutputType = {
     score: number | null
-    rank: number | null
+    accuracy: number | null
     v: number | null
   }
 
@@ -2215,8 +2399,10 @@ export namespace Prisma {
     id: string | null
     name: string | null
     score: number | null
-    rank: number | null
-    playerId: string | null
+    accuracy: number | null
+    gameMode: string | null
+    songId: string | null
+    userId: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2225,8 +2411,10 @@ export namespace Prisma {
     id: string | null
     name: string | null
     score: number | null
-    rank: number | null
-    playerId: string | null
+    accuracy: number | null
+    gameMode: string | null
+    songId: string | null
+    userId: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2235,8 +2423,10 @@ export namespace Prisma {
     id: number
     name: number
     score: number
-    rank: number
-    playerId: number
+    accuracy: number
+    gameMode: number
+    songId: number
+    userId: number
     createdAt: number
     v: number
     _all: number
@@ -2245,13 +2435,13 @@ export namespace Prisma {
 
   export type LeaderboardEntryAvgAggregateInputType = {
     score?: true
-    rank?: true
+    accuracy?: true
     v?: true
   }
 
   export type LeaderboardEntrySumAggregateInputType = {
     score?: true
-    rank?: true
+    accuracy?: true
     v?: true
   }
 
@@ -2259,8 +2449,10 @@ export namespace Prisma {
     id?: true
     name?: true
     score?: true
-    rank?: true
-    playerId?: true
+    accuracy?: true
+    gameMode?: true
+    songId?: true
+    userId?: true
     createdAt?: true
     v?: true
   }
@@ -2269,8 +2461,10 @@ export namespace Prisma {
     id?: true
     name?: true
     score?: true
-    rank?: true
-    playerId?: true
+    accuracy?: true
+    gameMode?: true
+    songId?: true
+    userId?: true
     createdAt?: true
     v?: true
   }
@@ -2279,8 +2473,10 @@ export namespace Prisma {
     id?: true
     name?: true
     score?: true
-    rank?: true
-    playerId?: true
+    accuracy?: true
+    gameMode?: true
+    songId?: true
+    userId?: true
     createdAt?: true
     v?: true
     _all?: true
@@ -2376,8 +2572,10 @@ export namespace Prisma {
     id: string
     name: string
     score: number
-    rank: number
-    playerId: string | null
+    accuracy: number
+    gameMode: string
+    songId: string | null
+    userId: string | null
     createdAt: Date
     v: number
     _count: LeaderboardEntryCountAggregateOutputType | null
@@ -2405,10 +2603,14 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     score?: boolean
-    rank?: boolean
-    playerId?: boolean
+    accuracy?: boolean
+    gameMode?: boolean
+    songId?: boolean
+    userId?: boolean
     createdAt?: boolean
     v?: boolean
+    song?: boolean | LeaderboardEntry$songArgs<ExtArgs>
+    user?: boolean | LeaderboardEntry$userArgs<ExtArgs>
   }, ExtArgs["result"]["leaderboardEntry"]>
 
 
@@ -2417,23 +2619,34 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     score?: boolean
-    rank?: boolean
-    playerId?: boolean
+    accuracy?: boolean
+    gameMode?: boolean
+    songId?: boolean
+    userId?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "rank" | "playerId" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
+  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "accuracy" | "gameMode" | "songId" | "userId" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
+  export type LeaderboardEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    song?: boolean | LeaderboardEntry$songArgs<ExtArgs>
+    user?: boolean | LeaderboardEntry$userArgs<ExtArgs>
+  }
 
   export type $LeaderboardEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LeaderboardEntry"
-    objects: {}
+    objects: {
+      song: Prisma.$SongPayload<ExtArgs> | null
+      user: Prisma.$UserPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       score: number
-      rank: number
-      playerId: string | null
+      accuracy: number
+      gameMode: string
+      songId: string | null
+      userId: string | null
       createdAt: Date
       v: number
     }, ExtArgs["result"]["leaderboardEntry"]>
@@ -2799,6 +3012,8 @@ export namespace Prisma {
    */
   export interface Prisma__LeaderboardEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    song<T extends LeaderboardEntry$songArgs<ExtArgs> = {}>(args?: Subset<T, LeaderboardEntry$songArgs<ExtArgs>>): Prisma__SongClient<$Result.GetResult<Prisma.$SongPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    user<T extends LeaderboardEntry$userArgs<ExtArgs> = {}>(args?: Subset<T, LeaderboardEntry$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2831,8 +3046,10 @@ export namespace Prisma {
     readonly id: FieldRef<"LeaderboardEntry", 'String'>
     readonly name: FieldRef<"LeaderboardEntry", 'String'>
     readonly score: FieldRef<"LeaderboardEntry", 'Int'>
-    readonly rank: FieldRef<"LeaderboardEntry", 'Int'>
-    readonly playerId: FieldRef<"LeaderboardEntry", 'String'>
+    readonly accuracy: FieldRef<"LeaderboardEntry", 'Float'>
+    readonly gameMode: FieldRef<"LeaderboardEntry", 'String'>
+    readonly songId: FieldRef<"LeaderboardEntry", 'String'>
+    readonly userId: FieldRef<"LeaderboardEntry", 'String'>
     readonly createdAt: FieldRef<"LeaderboardEntry", 'DateTime'>
     readonly v: FieldRef<"LeaderboardEntry", 'Int'>
   }
@@ -2852,6 +3069,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * Filter, which LeaderboardEntry to fetch.
      */
     where: LeaderboardEntryWhereUniqueInput
@@ -2870,6 +3091,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * Filter, which LeaderboardEntry to fetch.
      */
     where: LeaderboardEntryWhereUniqueInput
@@ -2887,6 +3112,10 @@ export namespace Prisma {
      * Omit specific fields from the LeaderboardEntry
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
     /**
      * Filter, which LeaderboardEntry to fetch.
      */
@@ -2936,6 +3165,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * Filter, which LeaderboardEntry to fetch.
      */
     where?: LeaderboardEntryWhereInput
@@ -2984,6 +3217,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * Filter, which LeaderboardEntries to fetch.
      */
     where?: LeaderboardEntryWhereInput
@@ -3027,6 +3264,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * The data needed to create a LeaderboardEntry.
      */
     data: XOR<LeaderboardEntryCreateInput, LeaderboardEntryUncheckedCreateInput>
@@ -3054,6 +3295,10 @@ export namespace Prisma {
      * Omit specific fields from the LeaderboardEntry
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
     /**
      * The data needed to update a LeaderboardEntry.
      */
@@ -3095,6 +3340,10 @@ export namespace Prisma {
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    /**
      * The filter to search for the LeaderboardEntry to update in case it exists.
      */
     where: LeaderboardEntryWhereUniqueInput
@@ -3120,6 +3369,10 @@ export namespace Prisma {
      * Omit specific fields from the LeaderboardEntry
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
     /**
      * Filter which LeaderboardEntry to delete.
      */
@@ -3169,6 +3422,44 @@ export namespace Prisma {
   }
 
   /**
+   * LeaderboardEntry.song
+   */
+  export type LeaderboardEntry$songArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Song
+     */
+    select?: SongSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Song
+     */
+    omit?: SongOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SongInclude<ExtArgs> | null
+    where?: SongWhereInput
+  }
+
+  /**
+   * LeaderboardEntry.user
+   */
+  export type LeaderboardEntry$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
    * LeaderboardEntry without action
    */
   export type LeaderboardEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3180,6 +3471,1048 @@ export namespace Prisma {
      * Omit specific fields from the LeaderboardEntry
      */
     omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model User
+   */
+
+  export type AggregateUser = {
+    _count: UserCountAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    displayName: string | null
+    email: string | null
+    password: string | null
+    geminiApiKey: string | null
+    image: string | null
+    createdAt: Date | null
+  }
+
+  export type UserMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    displayName: string | null
+    email: string | null
+    password: string | null
+    geminiApiKey: string | null
+    image: string | null
+    createdAt: Date | null
+  }
+
+  export type UserCountAggregateOutputType = {
+    id: number
+    name: number
+    displayName: number
+    email: number
+    password: number
+    geminiApiKey: number
+    image: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type UserMinAggregateInputType = {
+    id?: true
+    name?: true
+    displayName?: true
+    email?: true
+    password?: true
+    geminiApiKey?: true
+    image?: true
+    createdAt?: true
+  }
+
+  export type UserMaxAggregateInputType = {
+    id?: true
+    name?: true
+    displayName?: true
+    email?: true
+    password?: true
+    geminiApiKey?: true
+    image?: true
+    createdAt?: true
+  }
+
+  export type UserCountAggregateInputType = {
+    id?: true
+    name?: true
+    displayName?: true
+    email?: true
+    password?: true
+    geminiApiKey?: true
+    image?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type UserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which User to aggregate.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Users
+    **/
+    _count?: true | UserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type GetUserAggregateType<T extends UserAggregateArgs> = {
+        [P in keyof T & keyof AggregateUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUser[P]>
+      : GetScalarType<T[P], AggregateUser[P]>
+  }
+
+
+
+
+  export type UserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithAggregationInput | UserOrderByWithAggregationInput[]
+    by: UserScalarFieldEnum[] | UserScalarFieldEnum
+    having?: UserScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserCountAggregateInputType | true
+    _min?: UserMinAggregateInputType
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type UserGroupByOutputType = {
+    id: string
+    name: string | null
+    displayName: string | null
+    email: string | null
+    password: string | null
+    geminiApiKey: string | null
+    image: string | null
+    createdAt: Date
+    _count: UserCountAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserGroupByOutputType[P]>
+            : GetScalarType<T[P], UserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    displayName?: boolean
+    email?: boolean
+    password?: boolean
+    geminiApiKey?: boolean
+    image?: boolean
+    createdAt?: boolean
+    scores?: boolean | User$scoresArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["user"]>
+
+
+
+  export type UserSelectScalar = {
+    id?: boolean
+    name?: boolean
+    displayName?: boolean
+    email?: boolean
+    password?: boolean
+    geminiApiKey?: boolean
+    image?: boolean
+    createdAt?: boolean
+  }
+
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "displayName" | "email" | "password" | "geminiApiKey" | "image" | "createdAt", ExtArgs["result"]["user"]>
+  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    scores?: boolean | User$scoresArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "User"
+    objects: {
+      scores: Prisma.$LeaderboardEntryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string | null
+      displayName: string | null
+      email: string | null
+      password: string | null
+      geminiApiKey: string | null
+      image: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["user"]>
+    composites: {}
+  }
+
+  type UserGetPayload<S extends boolean | null | undefined | UserDefaultArgs> = $Result.GetResult<Prisma.$UserPayload, S>
+
+  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserCountAggregateInputType | true
+    }
+
+  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
+    /**
+     * Find zero or one User that matches the filter.
+     * @param {UserFindUniqueArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one User that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserFindUniqueOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindFirstArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindFirstOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Users that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Users
+     * const users = await prisma.user.findMany()
+     * 
+     * // Get first 10 Users
+     * const users = await prisma.user.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a User.
+     * @param {UserCreateArgs} args - Arguments to create a User.
+     * @example
+     * // Create one User
+     * const User = await prisma.user.create({
+     *   data: {
+     *     // ... data to create a User
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Users.
+     * @param {UserCreateManyArgs} args - Arguments to create many Users.
+     * @example
+     * // Create many Users
+     * const user = await prisma.user.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserCreateManyArgs>(args?: SelectSubset<T, UserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a User.
+     * @param {UserDeleteArgs} args - Arguments to delete one User.
+     * @example
+     * // Delete one User
+     * const User = await prisma.user.delete({
+     *   where: {
+     *     // ... filter to delete one User
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one User.
+     * @param {UserUpdateArgs} args - Arguments to update one User.
+     * @example
+     * // Update one User
+     * const user = await prisma.user.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Users.
+     * @param {UserDeleteManyArgs} args - Arguments to filter Users to delete.
+     * @example
+     * // Delete a few Users
+     * const { count } = await prisma.user.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserDeleteManyArgs>(args?: SelectSubset<T, UserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one User.
+     * @param {UserUpsertArgs} args - Arguments to update or create a User.
+     * @example
+     * // Update or create a User
+     * const user = await prisma.user.upsert({
+     *   create: {
+     *     // ... data to create a User
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the User we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Users that matches the filter.
+     * @param {UserFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const user = await prisma.user.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: UserFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a User.
+     * @param {UserAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const user = await prisma.user.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: UserAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
+
+
+    /**
+     * Count the number of Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserCountArgs} args - Arguments to filter Users to count.
+     * @example
+     * // Count the number of Users
+     * const count = await prisma.user.count({
+     *   where: {
+     *     // ... the filter for the Users we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserCountArgs>(
+      args?: Subset<T, UserCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserAggregateArgs>(args: Subset<T, UserAggregateArgs>): Prisma.PrismaPromise<GetUserAggregateType<T>>
+
+    /**
+     * Group by User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserGroupByArgs['orderBy'] }
+        : { orderBy?: UserGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the User model
+   */
+  readonly fields: UserFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for User.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    scores<T extends User$scoresArgs<ExtArgs> = {}>(args?: Subset<T, User$scoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeaderboardEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the User model
+   */
+  interface UserFieldRefs {
+    readonly id: FieldRef<"User", 'String'>
+    readonly name: FieldRef<"User", 'String'>
+    readonly displayName: FieldRef<"User", 'String'>
+    readonly email: FieldRef<"User", 'String'>
+    readonly password: FieldRef<"User", 'String'>
+    readonly geminiApiKey: FieldRef<"User", 'String'>
+    readonly image: FieldRef<"User", 'String'>
+    readonly createdAt: FieldRef<"User", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * User findUnique
+   */
+  export type UserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User findUniqueOrThrow
+   */
+  export type UserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User findFirst
+   */
+  export type UserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User findFirstOrThrow
+   */
+  export type UserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User findMany
+   */
+  export type UserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which Users to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User create
+   */
+  export type UserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The data needed to create a User.
+     */
+    data?: XOR<UserCreateInput, UserUncheckedCreateInput>
+  }
+
+  /**
+   * User createMany
+   */
+  export type UserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Users.
+     */
+    data: UserCreateManyInput | UserCreateManyInput[]
+  }
+
+  /**
+   * User update
+   */
+  export type UserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The data needed to update a User.
+     */
+    data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    /**
+     * Choose, which User to update.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User updateMany
+   */
+  export type UserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Users.
+     */
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
+    /**
+     * Filter which Users to update
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * User upsert
+   */
+  export type UserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The filter to search for the User to update in case it exists.
+     */
+    where: UserWhereUniqueInput
+    /**
+     * In case the User found by the `where` argument doesn't exist, create a new User with this data.
+     */
+    create: XOR<UserCreateInput, UserUncheckedCreateInput>
+    /**
+     * In case the User was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+  }
+
+  /**
+   * User delete
+   */
+  export type UserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter which User to delete.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User deleteMany
+   */
+  export type UserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Users to delete
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * User findRaw
+   */
+  export type UserFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * User aggregateRaw
+   */
+  export type UserAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * User.scores
+   */
+  export type User$scoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeaderboardEntry
+     */
+    select?: LeaderboardEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeaderboardEntry
+     */
+    omit?: LeaderboardEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeaderboardEntryInclude<ExtArgs> | null
+    where?: LeaderboardEntryWhereInput
+    orderBy?: LeaderboardEntryOrderByWithRelationInput | LeaderboardEntryOrderByWithRelationInput[]
+    cursor?: LeaderboardEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LeaderboardEntryScalarFieldEnum | LeaderboardEntryScalarFieldEnum[]
+  }
+
+  /**
+   * User without action
+   */
+  export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
   }
 
 
@@ -4265,13 +5598,29 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     score: 'score',
-    rank: 'rank',
-    playerId: 'playerId',
+    accuracy: 'accuracy',
+    gameMode: 'gameMode',
+    songId: 'songId',
+    userId: 'userId',
     createdAt: 'createdAt',
     v: 'v'
   };
 
   export type LeaderboardEntryScalarFieldEnum = (typeof LeaderboardEntryScalarFieldEnum)[keyof typeof LeaderboardEntryScalarFieldEnum]
+
+
+  export const UserScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    displayName: 'displayName',
+    email: 'email',
+    password: 'password',
+    geminiApiKey: 'geminiApiKey',
+    image: 'image',
+    createdAt: 'createdAt'
+  };
+
+  export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
   export const PlayerScalarFieldEnum: {
@@ -4389,6 +5738,7 @@ export namespace Prisma {
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
     v?: IntFilter<"Song"> | number
+    scores?: LeaderboardEntryListRelationFilter
   }
 
   export type SongOrderByWithRelationInput = {
@@ -4402,6 +5752,7 @@ export namespace Prisma {
     interactions?: InteractionOrderByCompositeAggregateInput
     createdAt?: SortOrder
     v?: SortOrder
+    scores?: LeaderboardEntryOrderByRelationAggregateInput
   }
 
   export type SongWhereUniqueInput = Prisma.AtLeast<{
@@ -4418,6 +5769,7 @@ export namespace Prisma {
     interactions?: InteractionCompositeListFilter | InteractionObjectEqualityInput[]
     createdAt?: DateTimeFilter<"Song"> | Date | string
     v?: IntFilter<"Song"> | number
+    scores?: LeaderboardEntryListRelationFilter
   }, "id">
 
   export type SongOrderByWithAggregationInput = {
@@ -4459,20 +5811,28 @@ export namespace Prisma {
     id?: StringFilter<"LeaderboardEntry"> | string
     name?: StringFilter<"LeaderboardEntry"> | string
     score?: IntFilter<"LeaderboardEntry"> | number
-    rank?: IntFilter<"LeaderboardEntry"> | number
-    playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    accuracy?: FloatFilter<"LeaderboardEntry"> | number
+    gameMode?: StringFilter<"LeaderboardEntry"> | string
+    songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
+    song?: XOR<SongNullableScalarRelationFilter, SongWhereInput> | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }
 
   export type LeaderboardEntryOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     score?: SortOrder
-    rank?: SortOrder
-    playerId?: SortOrder
+    accuracy?: SortOrder
+    gameMode?: SortOrder
+    songId?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
+    song?: SongOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
   }
 
   export type LeaderboardEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -4482,18 +5842,24 @@ export namespace Prisma {
     NOT?: LeaderboardEntryWhereInput | LeaderboardEntryWhereInput[]
     name?: StringFilter<"LeaderboardEntry"> | string
     score?: IntFilter<"LeaderboardEntry"> | number
-    rank?: IntFilter<"LeaderboardEntry"> | number
-    playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    accuracy?: FloatFilter<"LeaderboardEntry"> | number
+    gameMode?: StringFilter<"LeaderboardEntry"> | string
+    songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
+    song?: XOR<SongNullableScalarRelationFilter, SongWhereInput> | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }, "id">
 
   export type LeaderboardEntryOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     score?: SortOrder
-    rank?: SortOrder
-    playerId?: SortOrder
+    accuracy?: SortOrder
+    gameMode?: SortOrder
+    songId?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     _count?: LeaderboardEntryCountOrderByAggregateInput
@@ -4510,10 +5876,82 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
     name?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
     score?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
-    rank?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
-    playerId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
+    accuracy?: FloatWithAggregatesFilter<"LeaderboardEntry"> | number
+    gameMode?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
+    songId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
+    userId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LeaderboardEntry"> | Date | string
     v?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
+  }
+
+  export type UserWhereInput = {
+    AND?: UserWhereInput | UserWhereInput[]
+    OR?: UserWhereInput[]
+    NOT?: UserWhereInput | UserWhereInput[]
+    id?: StringFilter<"User"> | string
+    name?: StringNullableFilter<"User"> | string | null
+    displayName?: StringNullableFilter<"User"> | string | null
+    email?: StringNullableFilter<"User"> | string | null
+    password?: StringNullableFilter<"User"> | string | null
+    geminiApiKey?: StringNullableFilter<"User"> | string | null
+    image?: StringNullableFilter<"User"> | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    scores?: LeaderboardEntryListRelationFilter
+  }
+
+  export type UserOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    displayName?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    geminiApiKey?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+    scores?: LeaderboardEntryOrderByRelationAggregateInput
+  }
+
+  export type UserWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    email?: string
+    AND?: UserWhereInput | UserWhereInput[]
+    OR?: UserWhereInput[]
+    NOT?: UserWhereInput | UserWhereInput[]
+    displayName?: StringNullableFilter<"User"> | string | null
+    password?: StringNullableFilter<"User"> | string | null
+    geminiApiKey?: StringNullableFilter<"User"> | string | null
+    image?: StringNullableFilter<"User"> | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    scores?: LeaderboardEntryListRelationFilter
+  }, "id" | "name" | "email">
+
+  export type UserOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    displayName?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    geminiApiKey?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+    _count?: UserCountOrderByAggregateInput
+    _max?: UserMaxOrderByAggregateInput
+    _min?: UserMinOrderByAggregateInput
+  }
+
+  export type UserScalarWhereWithAggregatesInput = {
+    AND?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
+    OR?: UserScalarWhereWithAggregatesInput[]
+    NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"User"> | string
+    name?: StringNullableWithAggregatesFilter<"User"> | string | null
+    displayName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    email?: StringNullableWithAggregatesFilter<"User"> | string | null
+    password?: StringNullableWithAggregatesFilter<"User"> | string | null
+    geminiApiKey?: StringNullableWithAggregatesFilter<"User"> | string | null
+    image?: StringNullableWithAggregatesFilter<"User"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
   export type PlayerWhereInput = {
@@ -4599,6 +6037,7 @@ export namespace Prisma {
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
     v?: number
+    scores?: LeaderboardEntryCreateNestedManyWithoutSongInput
   }
 
   export type SongUncheckedCreateInput = {
@@ -4612,6 +6051,7 @@ export namespace Prisma {
     interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: Date | string
     v?: number
+    scores?: LeaderboardEntryUncheckedCreateNestedManyWithoutSongInput
   }
 
   export type SongUpdateInput = {
@@ -4624,6 +6064,7 @@ export namespace Prisma {
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
+    scores?: LeaderboardEntryUpdateManyWithoutSongNestedInput
   }
 
   export type SongUncheckedUpdateInput = {
@@ -4636,6 +6077,7 @@ export namespace Prisma {
     interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
+    scores?: LeaderboardEntryUncheckedUpdateManyWithoutSongNestedInput
   }
 
   export type SongCreateManyInput = {
@@ -4679,18 +6121,22 @@ export namespace Prisma {
     id?: string
     name: string
     score: number
-    rank: number
-    playerId?: string | null
+    accuracy?: number
+    gameMode?: string
     createdAt?: Date | string
     v?: number
+    song?: SongCreateNestedOneWithoutScoresInput
+    user?: UserCreateNestedOneWithoutScoresInput
   }
 
   export type LeaderboardEntryUncheckedCreateInput = {
     id?: string
     name: string
     score: number
-    rank: number
-    playerId?: string | null
+    accuracy?: number
+    gameMode?: string
+    songId?: string | null
+    userId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -4698,17 +6144,21 @@ export namespace Prisma {
   export type LeaderboardEntryUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
-    rank?: IntFieldUpdateOperationsInput | number
-    playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
+    song?: SongUpdateOneWithoutScoresNestedInput
+    user?: UserUpdateOneWithoutScoresNestedInput
   }
 
   export type LeaderboardEntryUncheckedUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
-    rank?: IntFieldUpdateOperationsInput | number
-    playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    songId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4717,8 +6167,10 @@ export namespace Prisma {
     id?: string
     name: string
     score: number
-    rank: number
-    playerId?: string | null
+    accuracy?: number
+    gameMode?: string
+    songId?: string | null
+    userId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -4726,8 +6178,8 @@ export namespace Prisma {
   export type LeaderboardEntryUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
-    rank?: IntFieldUpdateOperationsInput | number
-    playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -4735,10 +6187,89 @@ export namespace Prisma {
   export type LeaderboardEntryUncheckedUpdateManyInput = {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
-    rank?: IntFieldUpdateOperationsInput | number
-    playerId?: NullableStringFieldUpdateOperationsInput | string | null
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    songId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type UserCreateInput = {
+    id?: string
+    name?: string | null
+    displayName?: string | null
+    email?: string | null
+    password?: string | null
+    geminiApiKey?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    scores?: LeaderboardEntryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateInput = {
+    id?: string
+    name?: string | null
+    displayName?: string | null
+    email?: string | null
+    password?: string | null
+    geminiApiKey?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    scores?: LeaderboardEntryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUpdateInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    scores?: LeaderboardEntryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    scores?: LeaderboardEntryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateManyInput = {
+    id?: string
+    name?: string | null
+    displayName?: string | null
+    email?: string | null
+    password?: string | null
+    geminiApiKey?: string | null
+    image?: string | null
+    createdAt?: Date | string
+  }
+
+  export type UserUpdateManyMutationInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUncheckedUpdateManyInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PlayerCreateInput = {
@@ -4893,7 +6424,17 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type LeaderboardEntryListRelationFilter = {
+    every?: LeaderboardEntryWhereInput
+    some?: LeaderboardEntryWhereInput
+    none?: LeaderboardEntryWhereInput
+  }
+
   export type InteractionOrderByCompositeAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type LeaderboardEntryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -5016,48 +6557,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type LeaderboardEntryCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    score?: SortOrder
-    rank?: SortOrder
-    playerId?: SortOrder
-    createdAt?: SortOrder
-    v?: SortOrder
-  }
-
-  export type LeaderboardEntryAvgOrderByAggregateInput = {
-    score?: SortOrder
-    rank?: SortOrder
-    v?: SortOrder
-  }
-
-  export type LeaderboardEntryMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    score?: SortOrder
-    rank?: SortOrder
-    playerId?: SortOrder
-    createdAt?: SortOrder
-    v?: SortOrder
-  }
-
-  export type LeaderboardEntryMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    score?: SortOrder
-    rank?: SortOrder
-    playerId?: SortOrder
-    createdAt?: SortOrder
-    v?: SortOrder
-  }
-
-  export type LeaderboardEntrySumOrderByAggregateInput = {
-    score?: SortOrder
-    rank?: SortOrder
-    v?: SortOrder
-  }
-
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -5067,6 +6566,113 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type SongNullableScalarRelationFilter = {
+    is?: SongWhereInput | null
+    isNot?: SongWhereInput | null
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type LeaderboardEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    accuracy?: SortOrder
+    gameMode?: SortOrder
+    songId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryAvgOrderByAggregateInput = {
+    score?: SortOrder
+    accuracy?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    accuracy?: SortOrder
+    gameMode?: SortOrder
+    songId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    score?: SortOrder
+    accuracy?: SortOrder
+    gameMode?: SortOrder
+    songId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    v?: SortOrder
+  }
+
+  export type LeaderboardEntrySumOrderByAggregateInput = {
+    score?: SortOrder
+    accuracy?: SortOrder
+    v?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type UserCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    displayName?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    geminiApiKey?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    displayName?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    geminiApiKey?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    displayName?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    geminiApiKey?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type CommonMistakeCompositeListFilter = {
@@ -5137,22 +6743,6 @@ export namespace Prisma {
     v?: SortOrder
   }
 
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
-  }
-
   export type InteractionListCreateEnvelopeInput = {
     set?: InteractionCreateInput | InteractionCreateInput[]
   }
@@ -5160,6 +6750,20 @@ export namespace Prisma {
   export type InteractionCreateInput = {
     key: string
     timeElapsed: number
+  }
+
+  export type LeaderboardEntryCreateNestedManyWithoutSongInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput> | LeaderboardEntryCreateWithoutSongInput[] | LeaderboardEntryUncheckedCreateWithoutSongInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutSongInput | LeaderboardEntryCreateOrConnectWithoutSongInput[]
+    createMany?: LeaderboardEntryCreateManySongInputEnvelope
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+  }
+
+  export type LeaderboardEntryUncheckedCreateNestedManyWithoutSongInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput> | LeaderboardEntryCreateWithoutSongInput[] | LeaderboardEntryUncheckedCreateWithoutSongInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutSongInput | LeaderboardEntryCreateOrConnectWithoutSongInput[]
+    createMany?: LeaderboardEntryCreateManySongInputEnvelope
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -5194,14 +6798,44 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type CommonMistakeListCreateEnvelopeInput = {
-    set?: CommonMistakeCreateInput | CommonMistakeCreateInput[]
+  export type LeaderboardEntryUpdateManyWithoutSongNestedInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput> | LeaderboardEntryCreateWithoutSongInput[] | LeaderboardEntryUncheckedCreateWithoutSongInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutSongInput | LeaderboardEntryCreateOrConnectWithoutSongInput[]
+    upsert?: LeaderboardEntryUpsertWithWhereUniqueWithoutSongInput | LeaderboardEntryUpsertWithWhereUniqueWithoutSongInput[]
+    createMany?: LeaderboardEntryCreateManySongInputEnvelope
+    set?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    disconnect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    delete?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    update?: LeaderboardEntryUpdateWithWhereUniqueWithoutSongInput | LeaderboardEntryUpdateWithWhereUniqueWithoutSongInput[]
+    updateMany?: LeaderboardEntryUpdateManyWithWhereWithoutSongInput | LeaderboardEntryUpdateManyWithWhereWithoutSongInput[]
+    deleteMany?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
   }
 
-  export type CommonMistakeCreateInput = {
-    key1: string
-    key2: string
-    hits: number
+  export type LeaderboardEntryUncheckedUpdateManyWithoutSongNestedInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput> | LeaderboardEntryCreateWithoutSongInput[] | LeaderboardEntryUncheckedCreateWithoutSongInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutSongInput | LeaderboardEntryCreateOrConnectWithoutSongInput[]
+    upsert?: LeaderboardEntryUpsertWithWhereUniqueWithoutSongInput | LeaderboardEntryUpsertWithWhereUniqueWithoutSongInput[]
+    createMany?: LeaderboardEntryCreateManySongInputEnvelope
+    set?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    disconnect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    delete?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    update?: LeaderboardEntryUpdateWithWhereUniqueWithoutSongInput | LeaderboardEntryUpdateWithWhereUniqueWithoutSongInput[]
+    updateMany?: LeaderboardEntryUpdateManyWithWhereWithoutSongInput | LeaderboardEntryUpdateManyWithWhereWithoutSongInput[]
+    deleteMany?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
+  }
+
+  export type SongCreateNestedOneWithoutScoresInput = {
+    create?: XOR<SongCreateWithoutScoresInput, SongUncheckedCreateWithoutScoresInput>
+    connectOrCreate?: SongCreateOrConnectWithoutScoresInput
+    connect?: SongWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutScoresInput = {
+    create?: XOR<UserCreateWithoutScoresInput, UserUncheckedCreateWithoutScoresInput>
+    connectOrCreate?: UserCreateOrConnectWithoutScoresInput
+    connect?: UserWhereUniqueInput
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -5210,6 +6844,78 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type SongUpdateOneWithoutScoresNestedInput = {
+    create?: XOR<SongCreateWithoutScoresInput, SongUncheckedCreateWithoutScoresInput>
+    connectOrCreate?: SongCreateOrConnectWithoutScoresInput
+    upsert?: SongUpsertWithoutScoresInput
+    disconnect?: boolean
+    delete?: SongWhereInput | boolean
+    connect?: SongWhereUniqueInput
+    update?: XOR<XOR<SongUpdateToOneWithWhereWithoutScoresInput, SongUpdateWithoutScoresInput>, SongUncheckedUpdateWithoutScoresInput>
+  }
+
+  export type UserUpdateOneWithoutScoresNestedInput = {
+    create?: XOR<UserCreateWithoutScoresInput, UserUncheckedCreateWithoutScoresInput>
+    connectOrCreate?: UserCreateOrConnectWithoutScoresInput
+    upsert?: UserUpsertWithoutScoresInput
+    disconnect?: boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutScoresInput, UserUpdateWithoutScoresInput>, UserUncheckedUpdateWithoutScoresInput>
+  }
+
+  export type LeaderboardEntryCreateNestedManyWithoutUserInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput> | LeaderboardEntryCreateWithoutUserInput[] | LeaderboardEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutUserInput | LeaderboardEntryCreateOrConnectWithoutUserInput[]
+    createMany?: LeaderboardEntryCreateManyUserInputEnvelope
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+  }
+
+  export type LeaderboardEntryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput> | LeaderboardEntryCreateWithoutUserInput[] | LeaderboardEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutUserInput | LeaderboardEntryCreateOrConnectWithoutUserInput[]
+    createMany?: LeaderboardEntryCreateManyUserInputEnvelope
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+  }
+
+  export type LeaderboardEntryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput> | LeaderboardEntryCreateWithoutUserInput[] | LeaderboardEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutUserInput | LeaderboardEntryCreateOrConnectWithoutUserInput[]
+    upsert?: LeaderboardEntryUpsertWithWhereUniqueWithoutUserInput | LeaderboardEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: LeaderboardEntryCreateManyUserInputEnvelope
+    set?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    disconnect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    delete?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    update?: LeaderboardEntryUpdateWithWhereUniqueWithoutUserInput | LeaderboardEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: LeaderboardEntryUpdateManyWithWhereWithoutUserInput | LeaderboardEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
+  }
+
+  export type LeaderboardEntryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput> | LeaderboardEntryCreateWithoutUserInput[] | LeaderboardEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LeaderboardEntryCreateOrConnectWithoutUserInput | LeaderboardEntryCreateOrConnectWithoutUserInput[]
+    upsert?: LeaderboardEntryUpsertWithWhereUniqueWithoutUserInput | LeaderboardEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: LeaderboardEntryCreateManyUserInputEnvelope
+    set?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    disconnect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    delete?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    connect?: LeaderboardEntryWhereUniqueInput | LeaderboardEntryWhereUniqueInput[]
+    update?: LeaderboardEntryUpdateWithWhereUniqueWithoutUserInput | LeaderboardEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: LeaderboardEntryUpdateManyWithWhereWithoutUserInput | LeaderboardEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
+  }
+
+  export type CommonMistakeListCreateEnvelopeInput = {
+    set?: CommonMistakeCreateInput | CommonMistakeCreateInput[]
+  }
+
+  export type CommonMistakeCreateInput = {
+    key1: string
+    key2: string
+    hits: number
   }
 
   export type CommonMistakeListUpdateEnvelopeInput = {
@@ -5379,15 +7085,6 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type CommonMistakeWhereInput = {
-    AND?: CommonMistakeWhereInput | CommonMistakeWhereInput[]
-    OR?: CommonMistakeWhereInput[]
-    NOT?: CommonMistakeWhereInput | CommonMistakeWhereInput[]
-    key1?: StringFilter<"CommonMistake"> | string
-    key2?: StringFilter<"CommonMistake"> | string
-    hits?: IntFilter<"CommonMistake"> | number
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -5404,6 +7101,46 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type CommonMistakeWhereInput = {
+    AND?: CommonMistakeWhereInput | CommonMistakeWhereInput[]
+    OR?: CommonMistakeWhereInput[]
+    NOT?: CommonMistakeWhereInput | CommonMistakeWhereInput[]
+    key1?: StringFilter<"CommonMistake"> | string
+    key2?: StringFilter<"CommonMistake"> | string
+    hits?: IntFilter<"CommonMistake"> | number
+  }
+
+  export type LeaderboardEntryCreateWithoutSongInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    createdAt?: Date | string
+    v?: number
+    user?: UserCreateNestedOneWithoutScoresInput
+  }
+
+  export type LeaderboardEntryUncheckedCreateWithoutSongInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    userId?: string | null
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryCreateOrConnectWithoutSongInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    create: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput>
+  }
+
+  export type LeaderboardEntryCreateManySongInputEnvelope = {
+    data: LeaderboardEntryCreateManySongInput | LeaderboardEntryCreateManySongInput[]
+  }
+
   export type InteractionUpdateManyInput = {
     where: InteractionWhereInput
     data: InteractionUpdateInput
@@ -5411,6 +7148,208 @@ export namespace Prisma {
 
   export type InteractionDeleteManyInput = {
     where: InteractionWhereInput
+  }
+
+  export type LeaderboardEntryUpsertWithWhereUniqueWithoutSongInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    update: XOR<LeaderboardEntryUpdateWithoutSongInput, LeaderboardEntryUncheckedUpdateWithoutSongInput>
+    create: XOR<LeaderboardEntryCreateWithoutSongInput, LeaderboardEntryUncheckedCreateWithoutSongInput>
+  }
+
+  export type LeaderboardEntryUpdateWithWhereUniqueWithoutSongInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    data: XOR<LeaderboardEntryUpdateWithoutSongInput, LeaderboardEntryUncheckedUpdateWithoutSongInput>
+  }
+
+  export type LeaderboardEntryUpdateManyWithWhereWithoutSongInput = {
+    where: LeaderboardEntryScalarWhereInput
+    data: XOR<LeaderboardEntryUpdateManyMutationInput, LeaderboardEntryUncheckedUpdateManyWithoutSongInput>
+  }
+
+  export type LeaderboardEntryScalarWhereInput = {
+    AND?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
+    OR?: LeaderboardEntryScalarWhereInput[]
+    NOT?: LeaderboardEntryScalarWhereInput | LeaderboardEntryScalarWhereInput[]
+    id?: StringFilter<"LeaderboardEntry"> | string
+    name?: StringFilter<"LeaderboardEntry"> | string
+    score?: IntFilter<"LeaderboardEntry"> | number
+    accuracy?: FloatFilter<"LeaderboardEntry"> | number
+    gameMode?: StringFilter<"LeaderboardEntry"> | string
+    songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
+    v?: IntFilter<"LeaderboardEntry"> | number
+  }
+
+  export type SongCreateWithoutScoresInput = {
+    id?: string
+    songName: string
+    isCommunity: boolean
+    albumName?: string | null
+    thumbnailName?: string | null
+    thumbnailUrl?: string | null
+    audioUrl?: string | null
+    interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type SongUncheckedCreateWithoutScoresInput = {
+    id?: string
+    songName: string
+    isCommunity: boolean
+    albumName?: string | null
+    thumbnailName?: string | null
+    thumbnailUrl?: string | null
+    audioUrl?: string | null
+    interactions?: XOR<InteractionListCreateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type SongCreateOrConnectWithoutScoresInput = {
+    where: SongWhereUniqueInput
+    create: XOR<SongCreateWithoutScoresInput, SongUncheckedCreateWithoutScoresInput>
+  }
+
+  export type UserCreateWithoutScoresInput = {
+    id?: string
+    name?: string | null
+    displayName?: string | null
+    email?: string | null
+    password?: string | null
+    geminiApiKey?: string | null
+    image?: string | null
+    createdAt?: Date | string
+  }
+
+  export type UserUncheckedCreateWithoutScoresInput = {
+    id?: string
+    name?: string | null
+    displayName?: string | null
+    email?: string | null
+    password?: string | null
+    geminiApiKey?: string | null
+    image?: string | null
+    createdAt?: Date | string
+  }
+
+  export type UserCreateOrConnectWithoutScoresInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutScoresInput, UserUncheckedCreateWithoutScoresInput>
+  }
+
+  export type SongUpsertWithoutScoresInput = {
+    update: XOR<SongUpdateWithoutScoresInput, SongUncheckedUpdateWithoutScoresInput>
+    create: XOR<SongCreateWithoutScoresInput, SongUncheckedCreateWithoutScoresInput>
+    where?: SongWhereInput
+  }
+
+  export type SongUpdateToOneWithWhereWithoutScoresInput = {
+    where?: SongWhereInput
+    data: XOR<SongUpdateWithoutScoresInput, SongUncheckedUpdateWithoutScoresInput>
+  }
+
+  export type SongUpdateWithoutScoresInput = {
+    songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
+    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type SongUncheckedUpdateWithoutScoresInput = {
+    songName?: StringFieldUpdateOperationsInput | string
+    isCommunity?: BoolFieldUpdateOperationsInput | boolean
+    albumName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailName?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    interactions?: XOR<InteractionListUpdateEnvelopeInput, InteractionCreateInput> | InteractionCreateInput[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type UserUpsertWithoutScoresInput = {
+    update: XOR<UserUpdateWithoutScoresInput, UserUncheckedUpdateWithoutScoresInput>
+    create: XOR<UserCreateWithoutScoresInput, UserUncheckedCreateWithoutScoresInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutScoresInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutScoresInput, UserUncheckedUpdateWithoutScoresInput>
+  }
+
+  export type UserUpdateWithoutScoresInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUncheckedUpdateWithoutScoresInput = {
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    geminiApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LeaderboardEntryCreateWithoutUserInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    createdAt?: Date | string
+    v?: number
+    song?: SongCreateNestedOneWithoutScoresInput
+  }
+
+  export type LeaderboardEntryUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    songId?: string | null
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryCreateOrConnectWithoutUserInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    create: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type LeaderboardEntryCreateManyUserInputEnvelope = {
+    data: LeaderboardEntryCreateManyUserInput | LeaderboardEntryCreateManyUserInput[]
+  }
+
+  export type LeaderboardEntryUpsertWithWhereUniqueWithoutUserInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    update: XOR<LeaderboardEntryUpdateWithoutUserInput, LeaderboardEntryUncheckedUpdateWithoutUserInput>
+    create: XOR<LeaderboardEntryCreateWithoutUserInput, LeaderboardEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type LeaderboardEntryUpdateWithWhereUniqueWithoutUserInput = {
+    where: LeaderboardEntryWhereUniqueInput
+    data: XOR<LeaderboardEntryUpdateWithoutUserInput, LeaderboardEntryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type LeaderboardEntryUpdateManyWithWhereWithoutUserInput = {
+    where: LeaderboardEntryScalarWhereInput
+    data: XOR<LeaderboardEntryUpdateManyMutationInput, LeaderboardEntryUncheckedUpdateManyWithoutUserInput>
   }
 
   export type CommonMistakeUpdateManyInput = {
@@ -5422,9 +7361,91 @@ export namespace Prisma {
     where: CommonMistakeWhereInput
   }
 
+  export type LeaderboardEntryCreateManySongInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    userId?: string | null
+    createdAt?: Date | string
+    v?: number
+  }
+
   export type InteractionUpdateInput = {
     key?: StringFieldUpdateOperationsInput | string
     timeElapsed?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryUpdateWithoutSongInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutScoresNestedInput
+  }
+
+  export type LeaderboardEntryUncheckedUpdateWithoutSongInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryUncheckedUpdateManyWithoutSongInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryCreateManyUserInput = {
+    id?: string
+    name: string
+    score: number
+    accuracy?: number
+    gameMode?: string
+    songId?: string | null
+    createdAt?: Date | string
+    v?: number
+  }
+
+  export type LeaderboardEntryUpdateWithoutUserInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+    song?: SongUpdateOneWithoutScoresNestedInput
+  }
+
+  export type LeaderboardEntryUncheckedUpdateWithoutUserInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    songId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type LeaderboardEntryUncheckedUpdateManyWithoutUserInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    accuracy?: FloatFieldUpdateOperationsInput | number
+    gameMode?: StringFieldUpdateOperationsInput | string
+    songId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    v?: IntFieldUpdateOperationsInput | number
   }
 
   export type CommonMistakeUpdateInput = {

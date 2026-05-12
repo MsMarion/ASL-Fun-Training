@@ -8,15 +8,33 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    STORAGE_MODE: z.enum(["local", "cloud"]).default("local"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
     // DigitalOcean Spaces (S3-compatible)
     DO_SPACES_KEY: z.string().optional(),
     DO_SPACES_SECRET: z.string().optional(),
-    DO_SPACES_ENDPOINT: z.string().optional(), // e.g., "nyc3.digitaloceanspaces.com"
+    DO_SPACES_ENDPOINT: z.string().optional(),
     DO_SPACES_BUCKET: z.string().optional(),
     DO_SPACES_REGION: z.string().default("nyc3"),
+
+    // Local MinIO
+    LOCAL_STORAGE_KEY: z.string().optional(),
+    LOCAL_STORAGE_SECRET: z.string().optional(),
+    LOCAL_STORAGE_ENDPOINT: z.string().optional(),
+    LOCAL_STORAGE_BUCKET: z.string().optional(),
+    NEXTAUTH_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
+    NEXTAUTH_URL: z.preprocess(
+      // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
+      // Since NextAuth.js automatically uses the VERCEL_URL if present.
+      (str) => process.env.VERCEL_URL ?? str,
+      // VERCEL_URL doesn't include `https` so it can't be a opt. url().
+      process.env.VERCEL_URL ? z.string() : z.string().url()
+    ),
   },
 
   /**
@@ -34,12 +52,19 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
+    STORAGE_MODE: process.env.STORAGE_MODE,
     NODE_ENV: process.env.NODE_ENV,
     DO_SPACES_KEY: process.env.DO_SPACES_KEY,
     DO_SPACES_SECRET: process.env.DO_SPACES_SECRET,
     DO_SPACES_ENDPOINT: process.env.DO_SPACES_ENDPOINT,
     DO_SPACES_BUCKET: process.env.DO_SPACES_BUCKET,
     DO_SPACES_REGION: process.env.DO_SPACES_REGION,
+    LOCAL_STORAGE_KEY: process.env.LOCAL_STORAGE_KEY,
+    LOCAL_STORAGE_SECRET: process.env.LOCAL_STORAGE_SECRET,
+    LOCAL_STORAGE_ENDPOINT: process.env.LOCAL_STORAGE_ENDPOINT,
+    LOCAL_STORAGE_BUCKET: process.env.LOCAL_STORAGE_BUCKET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

@@ -1,26 +1,18 @@
 "use client";
 
-
 import { Navbar } from "@/app/_components/navbar";
 import { trpc } from "@/trpc/client";
 import { SongCarousel } from "@/app/_components/song-carousel";
-import { UnifiedBackground } from "@/app/_components/UnifiedBackground";
-
-
-
-
 
 export default function CommunityPage() {
   const { data: communitySongs, isLoading, error } = trpc.song.getCommunitySongs.useQuery();
 
   return (
-    <div className="min-h-screen overflow-hidden relative">
-      <UnifiedBackground />
-
-      <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-screen">
+    <div className="min-h-full overflow-hidden relative">
+      <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-full">
         <Navbar />
 
-        <div className="z-100 relative w-3/4 border-b-1 border-r-1 border-l-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 rounded-3xl shadow-2xl"
+        <div className="z-100 relative w-3/4 h-[800px] border-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 mb-8 rounded-3xl shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
           style={{
             background: "linear-gradient(to bottom, rgba(58,0,102,0.8), rgba(146,0,117,0.8), rgba(58,0,102,0.8))"
           }}>
@@ -50,7 +42,7 @@ export default function CommunityPage() {
           )}
 
           {communitySongs && communitySongs.length > 0 && (
-            <SongCarousel songs={communitySongs} />
+            <SongCarousel songs={communitySongs as any} />
           )}
 
           {!isLoading && (!communitySongs || communitySongs.length === 0) && (

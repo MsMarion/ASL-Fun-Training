@@ -138,7 +138,7 @@ export function useTestingGame(beatmap: Beatmap | null) {
 
             if (currentElapsed >= windowStart && currentElapsed <= windowEnd) {
                 const isCorrect = pred && 
-                                  pred.letter === note.letter && 
+                                  pred.letter.toLowerCase() === note.letter.toLowerCase() && 
                                   pred.confidence >= 0.5;
 
                 if (isCorrect) {

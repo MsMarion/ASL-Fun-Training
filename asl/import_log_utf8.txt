@@ -1,0 +1,31 @@
+﻿node.exe : npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of 
+npm.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...version of npm.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+Error [TransformError]: Transform failed with 1 error:
+C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\import-song.ts:58:10: ERROR: The symbol "actualAudioPath" has 
+already been declared
+    at failureErrorWithLog 
+(C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\node_modules\esbuild\lib\main.js:1748:15)
+    at C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\node_modules\esbuild\lib\main.js:1017:50
+    at responseCallbacks.<computed> 
+(C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\node_modules\esbuild\lib\main.js:884:9)
+    at handleIncomingPacket 
+(C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\node_modules\esbuild\lib\main.js:939:12)
+    at Socket.readFromStdout 
+(C:\Users\Deoxon\Desktop\Swampy\ASL-Fun-Training\asl\node_modules\esbuild\lib\main.js:862:7)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+Node.js v24.11.1

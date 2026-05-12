@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
+import { User as UserIcon, LogIn, LogOut } from "lucide-react";
 
 type Route = {
   readonly title: string;
@@ -11,21 +13,22 @@ type Route = {
 };
 
 const routes: readonly Route[] = [
-  { title: "COMMUNITY SONGS", href: "/community" },
+  { title: "WHACK-A-SIGN", href: "/whack" },
   { title: "OFFICIAL SONGS", href: "/songselection" },
+  { title: "COMMUNITY", href: "/community" },
   { title: "DEV MODE", href: "/devmode" },
 ] as const;
 
 const getRoute = (index: number): Route => {
-  // Handle negative indices correctly in JS/TS
   const wrappedIndex = ((index % routes.length) + routes.length) % routes.length;
   const route = routes[wrappedIndex];
-  if (!route) return routes[0]; // Fallback safety
+  if (!route) return routes[0]; 
   return route;
 };
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   // derived state based on pathname is safer than local storage sync
   const initialIndex = routes.findIndex(r => r.href === pathname);
@@ -239,6 +242,44 @@ const Navbar: React.FC = () => {
           </div>
         </button>
       </Link>
+
+      {/* User Profile Button */}
+      <div className="absolute right-12 top-1/2 -translate-y-1/2 flex items-center gap-4">
+        {session ? (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full pl-4 pr-1 py-1 backdrop-blur-md"
+          >
+            <Link href="/profile" className="flex items-center gap-2 group">
+              <span className="text-[10px] font-bold text-fuchsia-300 uppercase tracking-widest group-hover:text-cyan-400 transition-colors">
+                {session.user?.name}
+              </span>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-fuchsia-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <UserIcon size={12} className="text-white" />
+              </div>
+            </Link>
+            <button 
+              onClick={() => signOut()}
+              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-full transition-all text-red-400"
+              title="Sign Out"
+            >
+              <LogOut size={16} />
+            </button>
+          </motion.div>
+        ) : (
+          <Link href="/auth/signin">
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(45,226,230,0.5)" }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 bg-cyan-400/10 border border-cyan-400/40 px-6 py-2 rounded-full text-cyan-100 font-bold tracking-widest text-xs hover:bg-cyan-400/20 transition-all"
+            >
+              <LogIn size={14} />
+              LOGIN
+            </motion.button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

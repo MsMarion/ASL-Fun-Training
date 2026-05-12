@@ -34,7 +34,7 @@ export function useSignDetection(
     // Check connection/health
     async function checkHealth() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001";
         const res = await fetch(`${apiUrl}/`);
         if (res.ok) {
           setIsConnected(true);
@@ -65,6 +65,38 @@ export function useSignDetection(
     };
   }, [enabled, isWebcamReady, captureFrame]);
 
+  // Global Keyboard Fallback Listener (Press A-Z to trigger mock prediction across all modes)
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing inside an input or textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+        const keyLetter = e.key.toLowerCase();
+        const keyPrediction: SignPrediction = {
+          letter: keyLetter,
+          confidence: 1.0,
+          clientTimestamp: performance.now() / 1000,
+          handDetected: true,
+          isKeyboard: true,
+        };
+
+        setPredictions((prev) => {
+          const updated = [...prev, keyPrediction];
+          if (updated.length > MAX_PREDICTIONS) updated.shift();
+          return updated;
+        });
+        setHandDetected(true);
+        setIsConnected(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [enabled]);
+
   function startPolling() {
     if (pollIntervalRef.current !== null) return;
 
@@ -85,7 +117,7 @@ export function useSignDetection(
       const frameBlob = await captureFrame();
       if (!frameBlob) return;
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001";
       // console.log(`Sending frame to: ${apiUrl}`);
 
       const formData = new FormData();

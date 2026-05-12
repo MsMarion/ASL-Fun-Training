@@ -11,6 +11,7 @@ export async function POST(request: Request) {
                 songName,
                 albumName,
                 thumbnailName,
+                isCommunity: true,
                 interactions: interactions ?? [],
             },
         });
