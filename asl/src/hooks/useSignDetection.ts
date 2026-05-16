@@ -10,16 +10,14 @@ export interface UseSignDetectionReturn {
   latency: number;
 }
 
-const FRAME_RATE = 30; // fps
-const FRAME_INTERVAL = 1000 / FRAME_RATE;
 const MAX_PREDICTIONS = 30; // Ring buffer size
 
 /**
- * Hook for HTTP-based sign detection (Polling).
- * Manages frame capturing and sending to backend via POST.
+ * Hook for WebSocket-based sign detection with Client-Side MediaPipe.
+ * Manages local landmark extraction and streaming to Python micro-batcher.
  */
 export function useSignDetection(
-  captureFrame: () => Promise<Blob | null>,
+  videoRef: React.RefObject<HTMLVideoElement | null>,
   isWebcamReady: boolean,
   enabled = true,
 ): UseSignDetectionReturn {
@@ -28,49 +26,158 @@ export function useSignDetection(
   const [handDetected, setHandDetected] = useState(false);
   const [latency, setLatency] = useState(0);
 
-  const pollIntervalRef = useRef<number | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const handsRef = useRef<any | null>(null);
+  const animFrameRef = useRef<number>(0);
+  const isSendingRef = useRef<boolean>(false);
 
+  // Initialize WebSocket connection
   useEffect(() => {
-    // Check connection/health
-    async function checkHealth() {
+    if (!enabled) return;
+
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4001/ws/predict";
+    console.log(`Connecting WebSocket to: ${wsUrl}`);
+    
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("WebSocket connected successfully");
+      setIsConnected(true);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected");
+      setIsConnected(false);
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+      setIsConnected(false);
+    };
+
+    ws.onmessage = (event: MessageEvent) => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001";
-        const res = await fetch(`${apiUrl}/`);
-        if (res.ok) {
-          setIsConnected(true);
-        } else {
-          setIsConnected(false);
+        isSendingRef.current = false; // Acknowledge receipt (One-in-Flight)
+        const data = JSON.parse(event.data as string);
+
+        if (data.type === "ready" || data.type === "error") {
+          return;
+        }
+
+        if (data.letter !== undefined) {
+          const prediction: SignPrediction = {
+            letter: data.letter,
+            confidence: data.confidence,
+            clientTimestamp: data.clientTimestamp,
+            handDetected: data.handDetected,
+          };
+
+          const now = performance.now() / 1000;
+          setLatency((now - prediction.clientTimestamp) * 1000);
+
+          setPredictions((prev) => {
+            const updated = [...prev, prediction];
+            if (updated.length > MAX_PREDICTIONS) updated.shift();
+            return updated;
+          });
+          setHandDetected(prediction.handDetected);
         }
       } catch (e) {
-        setIsConnected(false);
+        console.error("Error parsing WS message:", e);
+      }
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+      setIsConnected(false);
+    };
+  }, [enabled]);
+
+  // Initialize MediaPipe Hands in browser
+  useEffect(() => {
+    if (typeof window === "undefined" || !enabled || !isWebcamReady || !videoRef.current) return;
+
+    let mounted = true;
+    let lastSendTime = 0;
+
+    async function initMediaPipe() {
+      try {
+        const { Hands } = await import("@mediapipe/hands");
+        const hands = new Hands({
+          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        });
+
+        hands.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+
+        hands.onResults((results: any) => {
+          if (!mounted) return;
+
+          const hasHand = Boolean(results.multiHandLandmarks && results.multiHandLandmarks.length > 0);
+
+          if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !isSendingRef.current) {
+            isSendingRef.current = true;
+            const clientTimestamp = performance.now() / 1000;
+            const payload = {
+              clientTimestamp,
+              handDetected: hasHand,
+              landmarks: hasHand ? results.multiHandLandmarks[0] : [],
+            };
+            wsRef.current.send(JSON.stringify(payload));
+          }
+        });
+
+        handsRef.current = hands;
+
+        const video = videoRef.current;
+        if (!video) return;
+
+        const detectFrame = async (now: number) => {
+          if (!mounted || !handsRef.current || !video) return;
+
+          if (now - lastSendTime >= 33) { // ~30 fps throttling
+            lastSendTime = now;
+            if (video.readyState >= 2 && !isSendingRef.current) {
+              try {
+                await handsRef.current.send({ image: video });
+              } catch (err) {
+                // Ignore transient frame send errors during page navigation
+              }
+            }
+          }
+          animFrameRef.current = requestAnimationFrame(detectFrame);
+        };
+
+        animFrameRef.current = requestAnimationFrame(detectFrame);
+
+      } catch (err) {
+        console.error("Failed to load MediaPipe Hands:", err);
       }
     }
 
-    // Initial check
-    void checkHealth();
-    const healthInterval = setInterval(checkHealth, 5000);
-    return () => clearInterval(healthInterval);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled || !isWebcamReady) {
-      stopPolling();
-      return;
-    }
-
-    startPolling();
+    void initMediaPipe();
 
     return () => {
-      stopPolling();
+      mounted = false;
+      cancelAnimationFrame(animFrameRef.current);
+      if (handsRef.current && typeof handsRef.current.close === "function") {
+        try { handsRef.current.close(); } catch (e) {}
+      }
+      handsRef.current = null;
     };
-  }, [enabled, isWebcamReady, captureFrame]);
+  }, [enabled, isWebcamReady, videoRef]);
 
-  // Global Keyboard Fallback Listener (Press A-Z to trigger mock prediction across all modes)
+  // Global Keyboard Fallback Listener
   useEffect(() => {
     if (!enabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing inside an input or textarea
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
@@ -89,82 +196,12 @@ export function useSignDetection(
           return updated;
         });
         setHandDetected(true);
-        setIsConnected(true);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [enabled]);
-
-  function startPolling() {
-    if (pollIntervalRef.current !== null) return;
-
-    pollIntervalRef.current = window.setInterval(() => {
-      void sendFrame();
-    }, FRAME_INTERVAL);
-  }
-
-  function stopPolling() {
-    if (pollIntervalRef.current !== null) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-    }
-  }
-
-  async function sendFrame() {
-    try {
-      const frameBlob = await captureFrame();
-      if (!frameBlob) return;
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4001";
-      // console.log(`Sending frame to: ${apiUrl}`);
-
-      const formData = new FormData();
-      formData.append("file", frameBlob, "frame.jpg");
-
-      const clientTimestamp = performance.now() / 1000;
-
-      const res = await fetch(`${apiUrl}/predict_frame?client_timestamp=${clientTimestamp}`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      // const prediction = (await res.json()) as SignPrediction;
-      // console.log("Received prediction:", prediction);
-
-      const prediction = (await res.json()) as SignPrediction;
-
-      // Calculate latency
-      const now = performance.now() / 1000;
-      const predictionLatency = now - prediction.clientTimestamp;
-      setLatency(predictionLatency * 1000);
-
-      // Add to ring buffer
-      setPredictions((prev) => {
-        const updated = [...prev, prediction];
-        if (updated.length > MAX_PREDICTIONS) {
-          updated.shift();
-        }
-        return updated;
-      });
-
-      // Update hand detection status
-      if (prediction.handDetected !== handDetected) {
-        console.log(`Hand status changed: ${prediction.handDetected ? "Detected" : "Lost"}`);
-      }
-      setHandDetected(prediction.handDetected);
-      setIsConnected(true);
-
-    } catch (err) {
-      console.error("Failed to send frame:", err);
-      // Optional: setIsConnected(false) on consecutive errors?
-    }
-  }
 
   return {
     predictions,
@@ -173,3 +210,4 @@ export function useSignDetection(
     latency,
   };
 }
+

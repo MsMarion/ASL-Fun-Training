@@ -25,6 +25,8 @@
         "@aws-sdk/s3-request-presigner": "^3.975.0",
         "@elevenlabs/elevenlabs-js": "^2.32.0",
         "@google/generative-ai": "^0.24.1",
+        "@mediapipe/camera_utils": "^0.3.1675466862",
+        "@mediapipe/hands": "^0.4.1675469240",
         "@prisma/client": "^6.19.2",
         "@radix-ui/react-slot": "^1.2.4",
         "@t3-oss/env-nextjs": "^0.12.0",

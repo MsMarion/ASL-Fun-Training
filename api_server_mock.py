@@ -74,37 +74,21 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            # Receive message (binary)
-            # Frontend sends: [8 bytes float64 timestamp] + [JPEG bytes]
-            data = await websocket.receive_bytes()
+            data = await websocket.receive_json()
+            client_timestamp = data.get("clientTimestamp", time.time())
+            hand_detected = data.get("handDetected", False)
             
-            # Parse timestamp (first 8 bytes)
-            if len(data) >= 8:
-                client_timestamp = struct.unpack('<d', data[:8])[0]
-                image_size = len(data) - 8
-                # logger.info(f"Received frame: {image_size} bytes, TS: {client_timestamp}")
-                
-                # Simulate processing delay
-                await asyncio.sleep(0.05) # 50ms inference time
-
-                # Generate mock prediction
-                # 80% chance of hand detection
-                hand_detected = random.random() > 0.2
-                
-                prediction = SignPrediction(
-                    letter=random.choice(SIGNS) if hand_detected else "None",
-                    confidence=random.uniform(0.7, 0.99) if hand_detected else 0.0,
-                    timestamp=time.time(),
-                    clientTimestamp=client_timestamp,
-                    handDetected=hand_detected
-                )
-                
-                # Send response (JSON bytes)
-                response_json = prediction.model_dump_json()
-                await websocket.send_bytes(response_json.encode('utf-8'))
-                
-            else:
-                logger.warning("Received data too short")
+            await asyncio.sleep(0.01) # fast 10ms delay
+            
+            prediction = SignPrediction(
+                letter=random.choice(["A", "B", "C", "D"]) if hand_detected else "None",
+                confidence=random.uniform(0.7, 0.99) if hand_detected else 0.0,
+                timestamp=time.time(),
+                clientTimestamp=client_timestamp,
+                handDetected=hand_detected
+            )
+            
+            await websocket.send_json(prediction.model_dump())
 
     except WebSocketDisconnect:
         logger.info("WebSocket disconnected")

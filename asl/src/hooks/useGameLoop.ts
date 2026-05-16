@@ -41,7 +41,7 @@ export function useGameLoop(beatmap: Beatmap): {
     isConnected,
     handDetected,
     latency,
-  } = useSignDetection(captureFrame, webcamReady, true);
+  } = useSignDetection(videoRef, webcamReady, true);
 
   // Audio Reference
   const audioRef = useRef<HTMLAudioElement | null>(null);
