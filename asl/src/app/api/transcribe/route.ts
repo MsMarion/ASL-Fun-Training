@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { downloadAudioBuffer } from "~/lib/youtube";
+import { env } from "~/env";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 // Configure the model
 const model = genAI ? genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
+    model: env.GEMINI_MODEL_ID || "gemini-2.5-flash",
     generationConfig: {
         responseMimeType: "application/json"
     }

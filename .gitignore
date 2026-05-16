@@ -1,3 +1,100 @@
-asl/.env.cloud_backup
+# ----------------------------------------------------------------------
+# 1. Database & Cloud Storage (Local Data)
+# ----------------------------------------------------------------------
 asl/minio_data/
 asl/mongodb_data/
+minio_data/
+mongodb_data/
+data/
+minio-bin/
+
+# ----------------------------------------------------------------------
+# 2. Environment Variables & Secrets
+# ----------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+asl/.env.cloud_backup
+settings.local.json
+
+# ----------------------------------------------------------------------
+# 3. Python & Machine Learning Artifacts
+# ----------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.manifest
+*.spec
+venv/
+.venv/
+PIP_CACHE_DIR/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.pth
+*.pt
+*.onnx
+
+# ----------------------------------------------------------------------
+# 4. YouTube Bridge Temporary Files
+# ----------------------------------------------------------------------
+temp_*
+*.webm
+*.mp3
+*.m4a
+*.wav
+*.mp4
+*.part
+*.ytdl
+
+# ----------------------------------------------------------------------
+# 5. Node.js & Next.js
+# ----------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.pnpm-store/
+asl/.next/
+asl/out/
+asl/build/
+asl/generated/
+*.tsbuildinfo
+
+# ----------------------------------------------------------------------
+# 6. OS & IDE Specific Files
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

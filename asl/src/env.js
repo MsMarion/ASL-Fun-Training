@@ -24,31 +24,36 @@ export const env = createEnv({
     LOCAL_STORAGE_SECRET: z.string().optional(),
     LOCAL_STORAGE_ENDPOINT: z.string().optional(),
     LOCAL_STORAGE_BUCKET: z.string().optional(),
+    
+    // AI Services & Python Bridge
+    GEMINI_API_KEY: z.string().optional(),
+    GEMINI_MODEL_ID: z.string().optional().default("gemini-2.5-flash"),
+    ELEVENLABS_API_KEY: z.string().optional(),
+    ELEVENLABS_VOICE_ID: z.string().optional().default("JBFqnCBsd6RMkjVDRZzb"),
+    ELEVENLABS_MODEL_ID: z.string().optional().default("eleven_multilingual_v2"),
+    PYTHON_PATH: z.string().optional().default("python"),
+
     NEXTAUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
     NEXTAUTH_URL: z.preprocess(
-      // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
-      // Since NextAuth.js automatically uses the VERCEL_URL if present.
       (str) => process.env.VERCEL_URL ?? str,
-      // VERCEL_URL doesn't include `https` so it can't be a opt. url().
       process.env.VERCEL_URL ? z.string() : z.string().url()
     ),
   },
 
   /**
-   * Specify your client-side environment variables schema here. This way you can ensure the app
-   * isn't built with invalid env vars. To expose them to the client, prefix them with
-   * `NEXT_PUBLIC_`.
+   * Specify your client-side environment variables schema here.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_GOOGLE_API_KEY: z.string().optional(),
+    NEXT_PUBLIC_API_URL: z.string().url().optional().default("http://localhost:4001"),
+    NEXT_PUBLIC_WS_URL: z.string().url().optional().default("ws://localhost:4001/ws/predict"),
   },
 
   /**
-   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
-   * middlewares) or client-side so we need to destruct manually.
+   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -63,9 +68,17 @@ export const env = createEnv({
     LOCAL_STORAGE_SECRET: process.env.LOCAL_STORAGE_SECRET,
     LOCAL_STORAGE_ENDPOINT: process.env.LOCAL_STORAGE_ENDPOINT,
     LOCAL_STORAGE_BUCKET: process.env.LOCAL_STORAGE_BUCKET,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_MODEL_ID: process.env.GEMINI_MODEL_ID,
+    ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
+    ELEVENLABS_VOICE_ID: process.env.ELEVENLABS_VOICE_ID,
+    ELEVENLABS_MODEL_ID: process.env.ELEVENLABS_MODEL_ID,
+    PYTHON_PATH: process.env.PYTHON_PATH,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    NEXT_PUBLIC_GOOGLE_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

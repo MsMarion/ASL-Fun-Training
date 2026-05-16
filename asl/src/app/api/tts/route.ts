@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import { env } from "~/env";
 
 const client = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY,
+  apiKey: env.ELEVENLABS_API_KEY,
 });
 
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
 
+    const voiceId = env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
+    const modelId = env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v2";
+
     const audioStream = await client.textToSpeech.convert(
-      "JBFqnCBsd6RMkjVDRZzb", // George voice ID
+      voiceId,
       {
         text: text || "Hello, world!",
-        modelId: "eleven_multilingual_v2",
+        modelId: modelId,
         outputFormat: "mp3_44100_128",
       }
     );
