@@ -82,13 +82,18 @@ class DetectionResources:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info(f"Using device: {self.device}")
         
-        model_path = os.path.join(BASE_DIR, 'data/weights/asl_crop_v4_1_mobilenet_weights.pth')
-        if not os.path.exists(model_path):
-             model_path = os.path.join(BASE_DIR, 'data/weights/asl_crop_v4_0_mobilenet_weights.pth')
+        self.model_path = os.path.join(BASE_DIR, 'data/weights/asl_crop_v4_1_mobilenet_weights.pth')
+        if not os.path.exists(self.model_path):
+             self.model_path = os.path.join(BASE_DIR, 'data/weights/asl_crop_v4_0_mobilenet_weights.pth')
 
-        logger.info(f"Loading model from: {model_path}")
-        self.model = load_model(model_path, self.device)
-        self.model.eval()
+        logger.info(f"Initializing model tracking for: {self.model_path}")
+        self.model = None
+        self.in_vram = False
+        self.last_activity_time = time.time()
+        self.vram_lock = asyncio.Lock()
+        
+        # Initial cold load
+        self.load_into_vram()
         
         # MediaPipe for fallback HTTP POST endpoint
         self.hands = mp.solutions.hands.Hands(
@@ -105,6 +110,35 @@ class DetectionResources:
         ])
         
         self.confidence_threshold = 0.5
+
+    def load_into_vram(self):
+        logger.info("⚡ [VRAM Watchdog] Loading PyTorch CNN weights into GPU VRAM...")
+        start = time.time()
+        self.model = load_model(self.model_path, self.device)
+        self.model.eval()
+        self.in_vram = True
+        logger.info(f"✅ [VRAM Watchdog] Model loaded successfully in {(time.time() - start)*1000:.2f}ms")
+
+    async def ensure_model_in_vram(self):
+        self.last_activity_time = time.time()
+        if self.in_vram and self.model is not None:
+            return
+            
+        async with self.vram_lock:
+            if self.in_vram and self.model is not None:
+                return
+            self.load_into_vram()
+
+    async def check_idle_eviction(self, timeout=60.0):
+        async with self.vram_lock:
+            if self.in_vram and (time.time() - self.last_activity_time > timeout):
+                logger.info(f"💤 [VRAM Watchdog] Zero traffic for {timeout}s. Offloading PyTorch model from GPU VRAM...")
+                del self.model
+                self.model = None
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                self.in_vram = False
+                logger.info("🗑️ [VRAM Watchdog] GPU VRAM cleared and returned to host pool successfully.")
 
 resources = None
 batch_queue = None
@@ -126,6 +160,8 @@ async def batch_processor():
         await asyncio.sleep(BATCH_TIMEOUT)
         
         if batch_queue.empty():
+            if resources:
+                await resources.check_idle_eviction(timeout=60.0)
             continue
             
         batch_items = []
@@ -160,6 +196,8 @@ async def batch_processor():
                 
             batch_orig = torch.stack(orig_tensors).to(resources.device)
             batch_mirror = torch.stack(mirror_tensors).to(resources.device)
+            
+            await resources.ensure_model_in_vram()
             
             with torch.no_grad():
                 orig_output = resources.model(batch_orig)
