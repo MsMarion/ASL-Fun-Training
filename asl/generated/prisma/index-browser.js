@@ -131,9 +131,9 @@ exports.Prisma.LeaderboardEntryScalarFieldEnum = {
   name: 'name',
   score: 'score',
   accuracy: 'accuracy',
-  gameMode: 'gameMode',
   songId: 'songId',
   userId: 'userId',
+  playerId: 'playerId',
   createdAt: 'createdAt',
   v: 'v'
 };

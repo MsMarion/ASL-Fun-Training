@@ -21,10 +21,10 @@ where conda >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo Found conda. Checking for environment...
     
-    REM Try asl-v_1
-    call conda activate asl-v_1 >nul 2>&1
+    REM Try asl-v_3
+    call conda activate asl-v_3 >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
-        echo Using 'asl-v_1' environment
+        echo Using 'asl-v_3' environment
         start "ML API Server" cmd /k "conda activate asl-v_3 && python api_server_http.py"
         goto :SERVER_STARTED
     )

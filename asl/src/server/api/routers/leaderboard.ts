@@ -64,7 +64,6 @@ export const leaderboardRouter = createTRPCRouter({
                     data: {
                         name: input.name.toUpperCase(),
                         score: input.score,
-                        rank: count + 1,
                         playerId: input.playerId,
                     },
                 });
@@ -123,13 +122,10 @@ export const leaderboardRouter = createTRPCRouter({
                     }
                 } else {
                     // New entry
-                    const count = await db.leaderboardEntry.count();
-                    
                     entry = await db.leaderboardEntry.create({
                         data: {
                             name: normalizedName,
                             score: input.score,
-                            rank: count + 1,
                             playerId: input.playerId,
                         },
                     });

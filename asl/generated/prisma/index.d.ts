@@ -2400,9 +2400,9 @@ export namespace Prisma {
     name: string | null
     score: number | null
     accuracy: number | null
-    gameMode: string | null
     songId: string | null
     userId: string | null
+    playerId: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2412,9 +2412,9 @@ export namespace Prisma {
     name: string | null
     score: number | null
     accuracy: number | null
-    gameMode: string | null
     songId: string | null
     userId: string | null
+    playerId: string | null
     createdAt: Date | null
     v: number | null
   }
@@ -2424,9 +2424,9 @@ export namespace Prisma {
     name: number
     score: number
     accuracy: number
-    gameMode: number
     songId: number
     userId: number
+    playerId: number
     createdAt: number
     v: number
     _all: number
@@ -2450,9 +2450,9 @@ export namespace Prisma {
     name?: true
     score?: true
     accuracy?: true
-    gameMode?: true
     songId?: true
     userId?: true
+    playerId?: true
     createdAt?: true
     v?: true
   }
@@ -2462,9 +2462,9 @@ export namespace Prisma {
     name?: true
     score?: true
     accuracy?: true
-    gameMode?: true
     songId?: true
     userId?: true
+    playerId?: true
     createdAt?: true
     v?: true
   }
@@ -2474,9 +2474,9 @@ export namespace Prisma {
     name?: true
     score?: true
     accuracy?: true
-    gameMode?: true
     songId?: true
     userId?: true
+    playerId?: true
     createdAt?: true
     v?: true
     _all?: true
@@ -2573,9 +2573,9 @@ export namespace Prisma {
     name: string
     score: number
     accuracy: number
-    gameMode: string
     songId: string | null
     userId: string | null
+    playerId: string | null
     createdAt: Date
     v: number
     _count: LeaderboardEntryCountAggregateOutputType | null
@@ -2604,9 +2604,9 @@ export namespace Prisma {
     name?: boolean
     score?: boolean
     accuracy?: boolean
-    gameMode?: boolean
     songId?: boolean
     userId?: boolean
+    playerId?: boolean
     createdAt?: boolean
     v?: boolean
     song?: boolean | LeaderboardEntry$songArgs<ExtArgs>
@@ -2620,14 +2620,14 @@ export namespace Prisma {
     name?: boolean
     score?: boolean
     accuracy?: boolean
-    gameMode?: boolean
     songId?: boolean
     userId?: boolean
+    playerId?: boolean
     createdAt?: boolean
     v?: boolean
   }
 
-  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "accuracy" | "gameMode" | "songId" | "userId" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
+  export type LeaderboardEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "score" | "accuracy" | "songId" | "userId" | "playerId" | "createdAt" | "v", ExtArgs["result"]["leaderboardEntry"]>
   export type LeaderboardEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     song?: boolean | LeaderboardEntry$songArgs<ExtArgs>
     user?: boolean | LeaderboardEntry$userArgs<ExtArgs>
@@ -2644,9 +2644,9 @@ export namespace Prisma {
       name: string
       score: number
       accuracy: number
-      gameMode: string
       songId: string | null
       userId: string | null
+      playerId: string | null
       createdAt: Date
       v: number
     }, ExtArgs["result"]["leaderboardEntry"]>
@@ -3047,9 +3047,9 @@ export namespace Prisma {
     readonly name: FieldRef<"LeaderboardEntry", 'String'>
     readonly score: FieldRef<"LeaderboardEntry", 'Int'>
     readonly accuracy: FieldRef<"LeaderboardEntry", 'Float'>
-    readonly gameMode: FieldRef<"LeaderboardEntry", 'String'>
     readonly songId: FieldRef<"LeaderboardEntry", 'String'>
     readonly userId: FieldRef<"LeaderboardEntry", 'String'>
+    readonly playerId: FieldRef<"LeaderboardEntry", 'String'>
     readonly createdAt: FieldRef<"LeaderboardEntry", 'DateTime'>
     readonly v: FieldRef<"LeaderboardEntry", 'Int'>
   }
@@ -5599,9 +5599,9 @@ export namespace Prisma {
     name: 'name',
     score: 'score',
     accuracy: 'accuracy',
-    gameMode: 'gameMode',
     songId: 'songId',
     userId: 'userId',
+    playerId: 'playerId',
     createdAt: 'createdAt',
     v: 'v'
   };
@@ -5812,9 +5812,9 @@ export namespace Prisma {
     name?: StringFilter<"LeaderboardEntry"> | string
     score?: IntFilter<"LeaderboardEntry"> | number
     accuracy?: FloatFilter<"LeaderboardEntry"> | number
-    gameMode?: StringFilter<"LeaderboardEntry"> | string
     songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
     song?: XOR<SongNullableScalarRelationFilter, SongWhereInput> | null
@@ -5826,9 +5826,9 @@ export namespace Prisma {
     name?: SortOrder
     score?: SortOrder
     accuracy?: SortOrder
-    gameMode?: SortOrder
     songId?: SortOrder
     userId?: SortOrder
+    playerId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     song?: SongOrderByWithRelationInput
@@ -5843,9 +5843,9 @@ export namespace Prisma {
     name?: StringFilter<"LeaderboardEntry"> | string
     score?: IntFilter<"LeaderboardEntry"> | number
     accuracy?: FloatFilter<"LeaderboardEntry"> | number
-    gameMode?: StringFilter<"LeaderboardEntry"> | string
     songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
     song?: XOR<SongNullableScalarRelationFilter, SongWhereInput> | null
@@ -5857,9 +5857,9 @@ export namespace Prisma {
     name?: SortOrder
     score?: SortOrder
     accuracy?: SortOrder
-    gameMode?: SortOrder
     songId?: SortOrder
     userId?: SortOrder
+    playerId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
     _count?: LeaderboardEntryCountOrderByAggregateInput
@@ -5877,9 +5877,9 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
     score?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
     accuracy?: FloatWithAggregatesFilter<"LeaderboardEntry"> | number
-    gameMode?: StringWithAggregatesFilter<"LeaderboardEntry"> | string
     songId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
     userId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
+    playerId?: StringNullableWithAggregatesFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LeaderboardEntry"> | Date | string
     v?: IntWithAggregatesFilter<"LeaderboardEntry"> | number
   }
@@ -6122,7 +6122,7 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
     song?: SongCreateNestedOneWithoutScoresInput
@@ -6134,9 +6134,9 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     songId?: string | null
     userId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -6145,7 +6145,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
     song?: SongUpdateOneWithoutScoresNestedInput
@@ -6156,9 +6156,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     songId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -6168,9 +6168,9 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     songId?: string | null
     userId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -6179,7 +6179,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -6188,9 +6188,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     songId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -6583,9 +6583,9 @@ export namespace Prisma {
     name?: SortOrder
     score?: SortOrder
     accuracy?: SortOrder
-    gameMode?: SortOrder
     songId?: SortOrder
     userId?: SortOrder
+    playerId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -6601,9 +6601,9 @@ export namespace Prisma {
     name?: SortOrder
     score?: SortOrder
     accuracy?: SortOrder
-    gameMode?: SortOrder
     songId?: SortOrder
     userId?: SortOrder
+    playerId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -6613,9 +6613,9 @@ export namespace Prisma {
     name?: SortOrder
     score?: SortOrder
     accuracy?: SortOrder
-    gameMode?: SortOrder
     songId?: SortOrder
     userId?: SortOrder
+    playerId?: SortOrder
     createdAt?: SortOrder
     v?: SortOrder
   }
@@ -7115,7 +7115,7 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
     user?: UserCreateNestedOneWithoutScoresInput
@@ -7126,8 +7126,8 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     userId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -7174,9 +7174,9 @@ export namespace Prisma {
     name?: StringFilter<"LeaderboardEntry"> | string
     score?: IntFilter<"LeaderboardEntry"> | number
     accuracy?: FloatFilter<"LeaderboardEntry"> | number
-    gameMode?: StringFilter<"LeaderboardEntry"> | string
     songId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     userId?: StringNullableFilter<"LeaderboardEntry"> | string | null
+    playerId?: StringNullableFilter<"LeaderboardEntry"> | string | null
     createdAt?: DateTimeFilter<"LeaderboardEntry"> | Date | string
     v?: IntFilter<"LeaderboardEntry"> | number
   }
@@ -7310,7 +7310,7 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
     song?: SongCreateNestedOneWithoutScoresInput
@@ -7321,8 +7321,8 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     songId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -7366,8 +7366,8 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     userId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -7381,7 +7381,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneWithoutScoresNestedInput
@@ -7391,8 +7391,8 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -7401,8 +7401,8 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -7412,8 +7412,8 @@ export namespace Prisma {
     name: string
     score: number
     accuracy?: number
-    gameMode?: string
     songId?: string | null
+    playerId?: string | null
     createdAt?: Date | string
     v?: number
   }
@@ -7422,7 +7422,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
     song?: SongUpdateOneWithoutScoresNestedInput
@@ -7432,8 +7432,8 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     songId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }
@@ -7442,8 +7442,8 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     accuracy?: FloatFieldUpdateOperationsInput | number
-    gameMode?: StringFieldUpdateOperationsInput | string
     songId?: NullableStringFieldUpdateOperationsInput | string | null
+    playerId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     v?: IntFieldUpdateOperationsInput | number
   }

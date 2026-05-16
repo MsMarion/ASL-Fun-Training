@@ -28,18 +28,34 @@ from app.frame_utils import extract_hand_features_mask, draw_hand_features
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ASL_API")
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan_handler(app: FastAPI):
+    global resources, batch_queue
+    try:
+        resources = DetectionResources()
+        batch_queue = asyncio.Queue()
+        asyncio.create_task(batch_processor())
+        logger.info("ASL Dynamic Micro-Batcher Resources Loaded Successfully")
+    except Exception as e:
+        logger.error(f"Failed to load resources: {e}")
+        raise e
+    yield
+
 app = FastAPI(
     title="ASL Real Inference API",
     description="Server for real-time ASL hand sign detection using PyTorch model with Dynamic Micro-Batcher on RTX 5090",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan_handler
 )
 
-# CORS
+# CORS - Secure configuration for allowed origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://localhost:4000", "http://127.0.0.1:3000", "http://127.0.0.1:4000"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -190,18 +206,6 @@ async def batch_processor():
                         "letter": "None", "confidence": 0.0, "timestamp": time.time(), "clientTimestamp": item["client_timestamp"], "handDetected": False
                     })
 
-@app.on_event("startup")
-async def startup_event():
-    global resources, batch_queue
-    try:
-        resources = DetectionResources()
-        batch_queue = asyncio.Queue()
-        asyncio.create_task(batch_processor())
-        logger.info("ASL Dynamic Micro-Batcher Resources Loaded Successfully")
-    except Exception as e:
-        logger.error(f"Failed to load resources: {e}")
-        raise e
-
 @app.get("/")
 async def root():
     return {"message": "ASL Dynamic Micro-Batcher Ready"}
@@ -237,7 +241,14 @@ async def websocket_endpoint(websocket: WebSocket):
             hand_detected = data.get("handDetected", False)
             landmarks_list = data.get("landmarks", [])
             
-            if not hand_detected or not landmarks_list:
+            # Security Sanitization: Ensure landmarks is exactly a list of 21 dictionaries with numeric x, y
+            valid_landmarks = (
+                isinstance(landmarks_list, list) and 
+                len(landmarks_list) == 21 and 
+                all(isinstance(pt, dict) and isinstance(pt.get('x'), (int, float)) and isinstance(pt.get('y'), (int, float)) for pt in landmarks_list)
+            )
+            
+            if not hand_detected or not valid_landmarks:
                 await websocket.send_json({
                     "letter": "None",
                     "confidence": 0.0,
@@ -246,6 +257,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     "handDetected": False
                 })
                 continue
+                
                 
             loop = asyncio.get_running_loop()
             future = loop.create_future()

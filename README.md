@@ -47,23 +47,23 @@ SignHero is a full-stack application that teaches ASL fingerspelling through int
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    User's Browser                        │
+│                    User's Browser                       │
 │  ┌─────────────────────────────────────────────────────┐│
 │  │ Next.js Game (asl/)                                 ││
-│  │  • GameCanvas • NoteHighway • WebcamFeed            ││
-│  │  • useGameLoop • useSignDetection • useWebcam       ││
+│  │  • MediaPipe JS (Local WebGL Landmark Extraction)   ││
+│  │  • One-in-Flight WebSocket Streaming Backpressure   ││
 │  └────────────────────────┬────────────────────────────┘│
 └───────────────────────────┼─────────────────────────────┘
-                            │ HTTP POST /predict_frame
-                            │ (JPEG + timestamp)
+                            │ Persistent WebSocket /ws/predict
+                            │ (JSON Coordinates ~250 bytes @ 30 FPS)
 ┌───────────────────────────▼─────────────────────────────┐
 │        FastAPI Server (api_server_http.py)              │
 │  ┌────────────────────────────────────────────────────┐ │
-│  │ ASLPredictor                                       │ │
-│  │  1. Decode JPEG (cv2)                              │ │
-│  │  2. Hand Detection (MediaPipe)                     │ │
-│  │  3. Feature Extraction (landmark mask)             │ │
-│  │  4. CNN Inference (PyTorch MobileNetV2)            │ │
+│  │ RTX 5090 Dynamic Micro-Batcher                     │ │
+│  │  1. In-Memory Holding Queue (asyncio.Queue)        │ │
+│  │  2. 10ms Sweep (Scoop up to 32 concurrent frames)  │ │
+│  │  3. OpenCV Landmark Skeleton Mask Extraction       │ │
+│  │  4. Batched Tensor Parallelism [N, 3, 224, 224]    │ │
 │  │  5. Return {letter, confidence, handDetected}      │ │
 │  └────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
@@ -131,11 +131,11 @@ python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install torch torchvision opencv-python mediapipe fastapi uvicorn python-multipart
+pip install torch torchvision torchaudio opencv-python mediapipe fastapi uvicorn websockets python-multipart
 
 # Start the API server
 python api_server_http.py
-# Server runs at http://localhost:8000
+# Server runs at http://localhost:4001 (WebSocket endpoint: ws://localhost:4001/ws/predict)
 ```
 
 ### 2. Start the Frontend

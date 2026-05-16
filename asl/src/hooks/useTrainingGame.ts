@@ -30,7 +30,7 @@ export function useTrainingGame(beatmap: Beatmap | null, isInstantMode: boolean 
   const { videoRef, canvasRef, isReady, error, captureFrame } = useWebcam();
 
   const { predictions, isConnected, handDetected, latency } = useSignDetection(
-    captureFrame,
+    videoRef,
     isReady,
     true
   );

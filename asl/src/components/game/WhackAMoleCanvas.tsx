@@ -69,7 +69,7 @@ export function WhackAMoleCanvas({ onStateChange }: WhackAMoleCanvasProps = {}) 
 
     const { videoRef, canvasRef, isReady, error, captureFrame } = useWebcam();
     const { predictions, isConnected, handDetected, latency } = useSignDetection(
-        captureFrame,
+        videoRef,
         isReady,
         gameState === "playing"
     );

@@ -52,9 +52,12 @@ export async function uploadFile(
     isPublic: boolean = true
 ): Promise<UploadResult> {
     try {
+        // Security Sanitization: Prevent directory traversal (../../) in storage keys
+        const sanitizedKey = key.replace(/\.{2,}\//g, "").replace(/^\/+/, "");
+
         const command = new PutObjectCommand({
             Bucket: BUCKET,
-            Key: key,
+            Key: sanitizedKey,
             Body: body,
             ContentType: contentType,
             ACL: isPublic ? "public-read" : "private",

@@ -52,12 +52,10 @@ export async function downloadAudioBuffer(videoId: string): Promise<Buffer> {
     }
 
     // Pick the best bitrate audio
-    const format = audioFormats.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0];
-    
-    const stream = await info.download({ format });
+    const stream = await info.download({ type: "audio", quality: "best" });
     
     const chunks: Uint8Array[] = [];
-    for await (const chunk of stream) {
+    for await (const chunk of stream as any) {
         chunks.push(chunk);
     }
     
@@ -71,7 +69,7 @@ export async function getAudioStream(videoId: string) {
     const buffer = await downloadAudioBuffer(videoId);
     const { Readable } = await import("stream");
     return {
-        process: { on: () => {}, stderr: { on: () => {} } }, 
+        process: { on: (...args: any[]) => {}, stderr: { on: (...args: any[]) => {} } }, 
         stream: Readable.from(buffer)
     };
 }

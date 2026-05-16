@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { bulletproofYoutubeImport } from "~/lib/youtube-bridge";
+import { getAudioStream } from "~/lib/youtube";
 
 // POST - Get video info, download audio, and upload to MinIO
 export async function POST(request: Request) {

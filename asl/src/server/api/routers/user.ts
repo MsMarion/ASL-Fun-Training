@@ -45,7 +45,7 @@ export const userRouter = createTRPCRouter({
     }),
 
   getMe: protectedProcedure.query(async ({ ctx }) => {
-    return db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { id: ctx.session.user.id },
       select: {
         id: true,
@@ -54,6 +54,14 @@ export const userRouter = createTRPCRouter({
         geminiApiKey: true,
       },
     });
+
+    if (!user) return null;
+
+    return {
+      ...user,
+      // Security Sanitization: Mask sensitive API key when returning profile data over the wire
+      geminiApiKey: user.geminiApiKey ? "••••••••••••" + user.geminiApiKey.slice(-4) : null,
+    };
   }),
 
   updateProfile: protectedProcedure
@@ -64,12 +72,18 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const updateData: { displayName?: string; geminiApiKey?: string } = {
+        displayName: input.heroName,
+      };
+
+      // Only update API key if a brand new unmasked key was provided
+      if (input.geminiApiKey && !input.geminiApiKey.startsWith("••••••••••••")) {
+        updateData.geminiApiKey = input.geminiApiKey;
+      }
+
       return db.user.update({
         where: { id: ctx.session.user.id },
-        data: {
-          displayName: input.heroName,
-          geminiApiKey: input.geminiApiKey,
-        },
+        data: updateData,
       });
     }),
 });

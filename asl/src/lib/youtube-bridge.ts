@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { resolve } from "path";
 import { readFileSync, unlinkSync } from "fs";
 import { extractVideoId } from "./youtube";
@@ -24,10 +24,10 @@ export async function bulletproofYoutubeImport(url: string): Promise<YouTubeImpo
         const tempAudioPath = resolve(process.cwd(), `temp_${videoId}`);
         const bridgePath = resolve(process.cwd(), "yt_bridge.py");
 
-        console.log(`[Bridge] Executing: ${PYTHON_PATH} ${bridgePath} ${url} ${tempAudioPath}`);
+        console.log(`[Bridge] Executing: ${PYTHON_PATH} ${bridgePath} [URL] [TEMP_PATH]`);
         
-        const cmd = `"${PYTHON_PATH}" "${bridgePath}" "${url}" "${tempAudioPath}"`;
-        const rawOutput = execSync(cmd).toString();
+        // Pass arguments directly as an array without shell execution
+        const rawOutput = execFileSync(PYTHON_PATH, [bridgePath, url, tempAudioPath], { encoding: "utf8" });
         
         let metadata;
         const jsonMatch = rawOutput.match(/\{"title".*\}/);

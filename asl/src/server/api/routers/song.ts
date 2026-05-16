@@ -139,7 +139,7 @@ export const songRouter = createTRPCRouter({
         const song = await db.song.create({
           data: {
             songName: input.songName,
-            isCommunity: input.isCommunity,
+            isCommunity: true, // Security Enforcement: All public uploads must be community songs
             albumName: input.albumName,
             thumbnailName: input.thumbnailName,
             thumbnailUrl: input.thumbnailUrl,
