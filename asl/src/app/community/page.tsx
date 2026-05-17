@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/app/_components/navbar";
 import { trpc } from "@/trpc/client";
 import { SongCarousel } from "@/app/_components/song-carousel";
 
@@ -8,57 +7,41 @@ export default function CommunityPage() {
   const { data: communitySongs, isLoading, error } = trpc.song.getCommunitySongs.useQuery();
 
   return (
-    <div className="min-h-full overflow-hidden relative">
-      <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-full">
-        <Navbar />
-
-        <div className="z-100 relative w-3/4 h-[800px] border-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 mb-8 rounded-3xl shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
+    <div className="w-full h-full flex flex-col">
+      <div className="text-center mb-8 shrink-0">
+        <h1 className="text-6xl font-[display-font] text-white mb-4 animate-pulse"
           style={{
-            background: "linear-gradient(to bottom, rgba(58,0,102,0.8), rgba(146,0,117,0.8), rgba(58,0,102,0.8))"
+            textShadow: "0 0 20px rgba(45,226,230,0.5), 0 0 40px rgba(146,0,117,0.3)",
+            animationDuration: '3s'
           }}>
-          <div className="text-center mb-8">
-            <h1 className="text-6xl font-[display-font] text-white mb-4 animate-pulse"
-              style={{
-                textShadow: "0 0 20px rgba(45,226,230,0.5), 0 0 40px rgba(146,0,117,0.3)",
-                animationDuration: '3s'
-              }}>
-              COMMUNITY SONGS
-            </h1>
-            <p className="text-purple-200 text-lg font-[subheading-font]">
-              From the community library, select a song to play
-            </p>
-          </div>
-
-          {isLoading && (
-            <div className="text-center text-white text-xl animate-bounce py-20">
-              Loading songs...
-            </div>
-          )}
-
-          {error && (
-            <div className="text-center text-red-300 text-xl py-20">
-              Error: {error.message}
-            </div>
-          )}
-
-          {communitySongs && communitySongs.length > 0 && (
-            <SongCarousel songs={communitySongs as any} />
-          )}
-
-          {!isLoading && (!communitySongs || communitySongs.length === 0) && (
-            <div className="text-center text-white text-xl py-20">
-              No community songs found in database
-            </div>
-          )}
-        </div>
+          COMMUNITY SONGS
+        </h1>
+        <p className="text-purple-200 text-lg font-[subheading-font]">
+          From the community library, select a song to play
+        </p>
       </div>
 
-      <style jsx>{`
-        @keyframes gridMove {
-          0% { background-position: 0 0; }
-          100% { background-position: 40px 40px; }
-        }
-      `}</style>
+      {isLoading && (
+        <div className="text-center text-white text-xl animate-bounce py-20">
+          Loading songs...
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center text-red-300 text-xl py-20">
+          Error: {error.message}
+        </div>
+      )}
+
+      {communitySongs && communitySongs.length > 0 && (
+        <SongCarousel songs={communitySongs as any} />
+      )}
+
+      {!isLoading && (!communitySongs || communitySongs.length === 0) && (
+        <div className="text-center text-white text-xl py-20">
+          No community songs found in database
+        </div>
+      )}
     </div>
   );
 }

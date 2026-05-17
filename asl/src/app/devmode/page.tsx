@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Navbar } from "@/app/_components/navbar";
 import { trpc } from "@/trpc/client";
 
 interface KeyPress {
@@ -267,14 +266,8 @@ export default function DevModePage() {
     };
 
     return (
-        <div className="min-h-full overflow-hidden relative">
-            <div className="relative z-10 flex flex-col items-center justify-start p-8 min-h-full">
-                <Navbar />
-
-                <div className="z-100 relative w-3/4 h-[800px] border-1 border-white z-20 px-12 py-16 -translate-y-20 mt-8 mb-8 rounded-3xl shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
-                    style={{ background: "linear-gradient(to bottom, rgba(58,0,102,0.8), rgba(146,0,117,0.8), rgba(58,0,102,0.8))" }}>
-                    
-                    <div className="text-center w-full mb-8">
+        <div className="w-full h-full flex flex-col">
+            <div className="text-center w-full mb-8">
                         <h1 className="text-6xl font-[display-font] text-white mb-4 animate-pulse"
                             style={{ textShadow: "0 0 20px rgba(45,226,230,0.5), 0 0 40px rgba(146,0,117,0.3)" }}>
                             DEV MODE
@@ -378,9 +371,6 @@ export default function DevModePage() {
                             {isSaving ? "SAVING..." : "SAVE TO COMMUNITY"}
                         </button>
                         {saveMessage && <p className="text-white text-center font-bold animate-bounce">{saveMessage}</p>}
-                    </div>
-                </div>
-
             </div>
         </div>
     );
