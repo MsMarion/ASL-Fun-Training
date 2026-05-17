@@ -30,6 +30,7 @@ const anta = Anta({
 });
 
 import { UnifiedBackground } from "./_components/UnifiedBackground";
+import { TopHUD } from "./_components/TopHUD";
 
 import { ScaledContainer } from "~/components/ScaledContainer";
 import { AuthProvider } from "./_components/auth-provider";
@@ -42,8 +43,9 @@ export default function RootLayout({
       <body className="font-[family-name:var(--font-anta)] bg-black w-screen h-screen overflow-hidden flex items-center justify-center">
         <ScaledContainer>
           <UnifiedBackground />
-          <BackgroundMusic />
           <AuthProvider>
+            <BackgroundMusic />
+            <TopHUD />
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </AuthProvider>
         </ScaledContainer>

@@ -604,3 +604,51 @@
   scrollbar-width: thin;  /* Firefox */
   scrollbar-color: var(--magenta) transparent;
 }
+
+/* Cyber-Glassmorphism Utility Classes */
+.glass-panel {
+  background: rgba(13, 2, 33, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 2px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+}
+
+.glass-panel-cyan {
+  background: rgba(13, 2, 33, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(45, 226, 230, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(45, 226, 230, 0.2), inset 0 1px 2px 0 rgba(45, 226, 230, 0.15);
+  border-radius: 1.25rem;
+}
+
+.glass-panel-magenta {
+  background: rgba(13, 2, 33, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(217, 70, 239, 0.2), inset 0 1px 2px 0 rgba(217, 70, 239, 0.15);
+  border-radius: 1.25rem;
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-button:hover {
+  background: rgba(45, 226, 230, 0.2);
+  border-color: rgba(45, 226, 230, 0.6);
+  box-shadow: 0 0 20px rgba(45, 226, 230, 0.4);
+  transform: translateY(-2px);
+}
+
+.glass-button:active {
+  transform: translateY(1px);
+}

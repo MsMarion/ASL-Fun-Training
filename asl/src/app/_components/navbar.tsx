@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { useSession, signOut } from "next-auth/react";
-import { User as UserIcon, LogIn, LogOut } from "lucide-react";
+import { useSoundFX } from "~/hooks/useSoundFX";
 
 type Route = {
   readonly title: string;
@@ -28,13 +27,11 @@ const getRoute = (index: number): Route => {
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { playBloop } = useSoundFX();
 
-  // derived state based on pathname is safer than local storage sync
   const initialIndex = routes.findIndex(r => r.href === pathname);
   const [activeIndex, setActiveIndex] = useState<number>(initialIndex !== -1 ? initialIndex : 0);
 
-  // Sync activeIndex if pathname changes externally (e.g. browser back button)
   useEffect(() => {
     const idx = routes.findIndex(r => r.href === pathname);
     if (idx !== -1) {
@@ -42,7 +39,6 @@ const Navbar: React.FC = () => {
     }
   }, [pathname]);
 
-  // Check if current route matches the active tab
   const isCurrentRoute = useMemo(() => {
     const currentRoute = getRoute(activeIndex);
     return pathname === currentRoute.href;
@@ -54,39 +50,8 @@ const Navbar: React.FC = () => {
     nextRoute: getRoute(activeIndex + 1),
   }), [activeIndex]);
 
-  // Audio Context for "Bubbly" Navigation Sound
-  const playBubbleSound = () => {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-
-      const ctx = new AudioContext();
-      const t = ctx.currentTime;
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "sine";
-      // rapid pitch drop from high to low simulates a bubble "bloop"
-      osc.frequency.setValueAtTime(800, t);
-      osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
-
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.5, t + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(t);
-      osc.stop(t + 0.1);
-    } catch (e) {
-      console.error("Audio generation failed", e);
-    }
-  };
-
   const handlePrevious = (): void => {
-    playBubbleSound();
+    playBloop();
     setActiveIndex((i) => {
       const newIndex = ((i - 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
@@ -97,7 +62,7 @@ const Navbar: React.FC = () => {
   };
 
   const handleNext = (): void => {
-    playBubbleSound();
+    playBloop();
     setActiveIndex((i) => {
       const newIndex = ((i + 1) % routes.length + routes.length) % routes.length;
       if (typeof window !== "undefined") {
@@ -160,7 +125,6 @@ const Navbar: React.FC = () => {
         whileHover={{ scale: 1.05 }}
         className={`relative -translate-y-2 z-1`}
       >
-        {/* Outer semicircle with white border */}
         <div
           className="border-1 border-white"
           style={{
@@ -179,7 +143,6 @@ const Navbar: React.FC = () => {
             transition: "box-shadow 0.3s ease-in-out",
           }}
         >
-          {/* Inner semicircle with grid pattern */}
           <div
             className="absolute bottom-5"
             style={{
@@ -242,44 +205,6 @@ const Navbar: React.FC = () => {
           </div>
         </button>
       </Link>
-
-      {/* User Profile Button */}
-      <div className="absolute right-12 top-1/2 -translate-y-1/2 flex items-center gap-4">
-        {session ? (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full pl-4 pr-1 py-1 backdrop-blur-md"
-          >
-            <Link href="/profile" className="flex items-center gap-2 group">
-              <span className="text-[10px] font-bold text-fuchsia-300 uppercase tracking-widest group-hover:text-cyan-400 transition-colors">
-                {session.user?.name}
-              </span>
-              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-fuchsia-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <UserIcon size={12} className="text-white" />
-              </div>
-            </Link>
-            <button 
-              onClick={() => signOut()}
-              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-full transition-all text-red-400"
-              title="Sign Out"
-            >
-              <LogOut size={16} />
-            </button>
-          </motion.div>
-        ) : (
-          <Link href="/auth/signin">
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(45,226,230,0.5)" }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 bg-cyan-400/10 border border-cyan-400/40 px-6 py-2 rounded-full text-cyan-100 font-bold tracking-widest text-xs hover:bg-cyan-400/20 transition-all"
-            >
-              <LogIn size={14} />
-              LOGIN
-            </motion.button>
-          </Link>
-        )}
-      </div>
     </div>
   );
 };
