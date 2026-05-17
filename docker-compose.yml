@@ -1,0 +1,66 @@
+# ============================================
+# ASL Fun Training — Local Development Stack
+# ============================================
+# Spin up MongoDB + MinIO with: docker compose up -d
+# Tear down with: docker compose down
+
+services:
+  # ── MongoDB ────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: asl-mongodb
+    restart: unless-stopped
+    ports:
+      - "4002:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      # No auth for local dev; production should use MONGO_INITDB_ROOT_USERNAME/PASSWORD
+      MONGO_INITDB_DATABASE: signhero
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── MinIO (S3-compatible Object Storage) ───
+  minio:
+    image: minio/minio:latest
+    container_name: asl-minio
+    restart: unless-stopped
+    ports:
+      - "4003:9000"   # S3 API
+      - "4004:9001"   # MinIO Web Console
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── MinIO Auto-Setup (creates default bucket) ──
+  minio-init:
+    image: minio/mc:latest
+    container_name: asl-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 admin password;
+        mc mb --ignore-existing local/signhero;
+        mc anonymous set download local/signhero;
+        echo '✅ MinIO bucket signhero is ready';
+      "
+    restart: "no"
+
+volumes:
+  mongodb_data:
+    driver: local
+  minio_data:
+    driver: local

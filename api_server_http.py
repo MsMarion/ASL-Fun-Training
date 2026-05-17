@@ -2,6 +2,8 @@ import sys
 import os
 import time
 import logging
+import logging.handlers
+import json
 import random
 import asyncio
 import torch
@@ -24,8 +26,26 @@ sys.path.insert(0, BASE_DIR)
 from utils import load_model, LabelMapper
 from app.frame_utils import extract_hand_features_mask, draw_hand_features
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# ─── Structured JSON Logging ───────────────────────────────────────────────────
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        log_entry = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "line": record.lineno,
+        }
+        if record.exc_info and record.exc_info[0]:
+            log_entry["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_entry)
+
+log_handler = logging.StreamHandler()
+log_handler.setFormatter(JSONFormatter())
+logging.root.handlers = []
+logging.root.addHandler(log_handler)
+logging.root.setLevel(logging.INFO)
 logger = logging.getLogger("ASL_API")
 
 from contextlib import asynccontextmanager
@@ -151,6 +171,8 @@ batch_stats = {
 
 MAX_BATCH_SIZE = 32
 BATCH_TIMEOUT = 0.01  # 10ms sweep
+MAX_WS_CONNECTIONS = 50  # Hard cap on concurrent WebSocket players
+active_ws_connections = 0
 
 async def batch_processor():
     logger.info("Starting RTX 5090 Dynamic Micro-Batcher Loop")
@@ -260,7 +282,17 @@ async def concurrency_status():
 
 @app.websocket("/ws/predict")
 async def websocket_endpoint(websocket: WebSocket):
+    global active_ws_connections
+    
+    # Connection cap enforcement
+    if active_ws_connections >= MAX_WS_CONNECTIONS:
+        await websocket.close(code=1013, reason="Server at capacity")
+        logger.warning(f"Rejected WebSocket connection: {active_ws_connections}/{MAX_WS_CONNECTIONS} slots full")
+        return
+    
     await websocket.accept()
+    active_ws_connections += 1
+    logger.info(f"WebSocket connected ({active_ws_connections}/{MAX_WS_CONNECTIONS} active)")
     await websocket.send_json({"type": "ready", "message": "Connected to RTX 5090 Micro-Batcher"})
     
     last_frame_time = 0
@@ -296,7 +328,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 })
                 continue
                 
-                
             loop = asyncio.get_running_loop()
             future = loop.create_future()
             
@@ -313,6 +344,9 @@ async def websocket_endpoint(websocket: WebSocket):
         pass
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
+    finally:
+        active_ws_connections -= 1
+        logger.info(f"WebSocket disconnected ({active_ws_connections}/{MAX_WS_CONNECTIONS} active)")
 
 # Fallback HTTP POST endpoint for legacy clients or test scripts
 @app.post("/predict_frame")

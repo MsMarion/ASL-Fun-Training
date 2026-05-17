@@ -5,11 +5,28 @@ import { getAudioStream } from "~/lib/youtube";
 // POST - Get video info, download audio, and upload to MinIO
 export async function POST(request: Request) {
     try {
+        // Request Body Size Limit: reject bodies over 1KB (only expects a short URL)
+        const contentLength = request.headers.get("content-length");
+        if (contentLength && parseInt(contentLength) > 1024) {
+            return NextResponse.json(
+                { success: false, error: "Request body too large" },
+                { status: 413 }
+            );
+        }
+
         const { url } = await request.json();
 
-        if (!url) {
+        if (!url || typeof url !== "string" || url.length > 200) {
             return NextResponse.json(
-                { success: false, error: "URL is required" },
+                { success: false, error: "A valid YouTube URL is required" },
+                { status: 400 }
+            );
+        }
+
+        // Validate URL pattern
+        if (!url.match(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//)) {
+            return NextResponse.json(
+                { success: false, error: "Only YouTube URLs are accepted" },
                 { status: 400 }
             );
         }

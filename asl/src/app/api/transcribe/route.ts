@@ -29,8 +29,17 @@ export async function POST(request: Request) {
 
         let audioBuffer: Buffer;
 
+        // Request Body Size Limit: 25MB max for uploaded audio files
+        const MAX_UPLOAD_SIZE = 25 * 1024 * 1024; // 25MB
+
         // 1. Get the audio buffer
         if (file) {
+            if (file.size > MAX_UPLOAD_SIZE) {
+                return NextResponse.json(
+                    { success: false, error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum is 25MB.` },
+                    { status: 413 }
+                );
+            }
             const arrayBuffer = await file.arrayBuffer();
             audioBuffer = Buffer.from(arrayBuffer);
         } else if (videoId) {
