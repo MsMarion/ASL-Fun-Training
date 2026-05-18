@@ -52,6 +52,12 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (pathname !== "/whack") {
+      setIsHidden(false);
+    }
+  }, [pathname]);
+
   const isCurrentRoute = useMemo(() => {
     const currentRoute = getRoute(activeIndex);
     return pathname === currentRoute.href;

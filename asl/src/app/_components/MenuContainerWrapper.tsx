@@ -20,6 +20,12 @@ export function MenuContainerWrapper({ children }: { children: React.ReactNode }
     };
   }, []);
 
+  useEffect(() => {
+    if (pathname !== "/whack") {
+      setIsWhackActive(false);
+    }
+  }, [pathname]);
+
   if (!isMenuRoute) {
     return <>{children}</>;
   }
@@ -37,7 +43,7 @@ export function MenuContainerWrapper({ children }: { children: React.ReactNode }
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className={
           isWhackActive
-            ? "absolute inset-0 w-full h-screen z-50 rounded-none border-none mt-0 p-0 overflow-hidden pointer-events-auto bg-black"
+            ? "absolute inset-0 w-full h-full z-50 rounded-none border-none mt-0 p-0 overflow-hidden pointer-events-auto bg-transparent"
             : `z-100 absolute top-[200px] w-3/4 h-[800px] border px-12 pt-20 pb-12 rounded-b-3xl rounded-t-xl glass-panel flex flex-col overflow-y-auto custom-scrollbar transition-all duration-500 pointer-events-auto shadow-2xl ${borderColor}`
         }
         style={!isWhackActive ? { background: "linear-gradient(to bottom, rgba(58,0,102,0.8), rgba(146,0,117,0.8), rgba(58,0,102,0.8))" } : {}}

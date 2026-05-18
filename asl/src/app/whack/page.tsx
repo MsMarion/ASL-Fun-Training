@@ -11,6 +11,11 @@ export default function WhackPage() {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("whack-game-state", { detail: !isIdle }));
     }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("whack-game-state", { detail: false }));
+      }
+    };
   }, [isIdle]);
 
   return <WhackAMoleCanvas onStateChange={setGameState} />;
