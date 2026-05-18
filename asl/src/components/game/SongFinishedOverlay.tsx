@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSoundEffects } from "~/hooks/useSoundEffects";
 
 interface SongFinishedOverlayProps {
@@ -9,8 +9,9 @@ interface SongFinishedOverlayProps {
     onRedirect?: () => void; // Optional override 
 }
 
-export function SongFinishedOverlay({ show, onRedirect }: SongFinishedOverlayProps) {
+function OverlayContent({ show, onRedirect }: SongFinishedOverlayProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { playGameFinishedSound } = useSoundEffects();
     const [visible, setVisible] = useState(false);
     
@@ -23,13 +24,20 @@ export function SongFinishedOverlay({ show, onRedirect }: SongFinishedOverlayPro
                 if (onRedirect) {
                     onRedirect();
                 } else {
-                    router.push("/songselection");
+                    const fromUrl = searchParams.get("from");
+                    const songId = searchParams.get("songId");
+                    if (fromUrl) {
+                        const targetUrl = songId ? `${fromUrl}?songId=${encodeURIComponent(songId)}` : fromUrl;
+                        router.push(targetUrl);
+                    } else {
+                        router.push("/songselection");
+                    }
                 }
             }, 3000); // 3 seconds delay
             
             return () => clearTimeout(timer);
         }
-    }, [show, onRedirect, playGameFinishedSound, router]);
+    }, [show, onRedirect, playGameFinishedSound, router, searchParams]);
 
     if (!visible && !show) return null;
 
@@ -57,5 +65,13 @@ export function SongFinishedOverlay({ show, onRedirect }: SongFinishedOverlayPro
                 }
             `}</style>
         </div>
+    );
+}
+
+export function SongFinishedOverlay(props: SongFinishedOverlayProps) {
+    return (
+        <Suspense fallback={null}>
+            <OverlayContent {...props} />
+        </Suspense>
     );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,16 +18,26 @@ interface SongCarouselProps {
   songs: Song[];
 }
 
-export function SongCarousel({ songs = [] }: SongCarouselProps) {
+function SongCarouselContent({ songs = [] }: SongCarouselProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const targetSongId = searchParams?.get("songId");
+
   const [index, setIndex] = useState(-7);
   const [isLoaded, setIsLoaded] = useState(false);
   const [flippedCard, setFlippedCard] = useState<string | null>(null);
 
   useEffect(() => {
+    let target = 0;
+    if (targetSongId && songs.length > 0) {
+      const foundIdx = songs.findIndex(s => s.id === targetSongId);
+      if (foundIdx !== -1) {
+        target = foundIdx;
+      }
+    }
+
     const startShuffle = () => {
-      let current = -7;
-      const target = 0;
+      let current = target - 7;
 
       const interval = setInterval(() => {
         if (current < target) {
@@ -36,6 +46,9 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
           playCardFlipSound();
         } else {
           clearInterval(interval);
+          if (targetSongId && songs.some(s => s.id === targetSongId)) {
+            setFlippedCard(targetSongId);
+          }
         }
       }, 80);
 
@@ -45,7 +58,7 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
     };
 
     startShuffle();
-  }, []);
+  }, [targetSongId, songs]);
 
   const playCardFlipSound = () => {
     try {
@@ -169,18 +182,15 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
   };
 
   const handleModeSelect = (songId: string, mode: string) => {
+    const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+    const fromParam = `?from=${encodeURIComponent(pathname)}&songId=${encodeURIComponent(songId)}`;
     if(mode == "aslrevolution") {
-      router.push(`/game/${songId}`);
-
+      router.push(`/game/${songId}${fromParam}`);
     } else if(mode == "signhero") {
-      router.push(`/game/testing/${songId}`);
-
+      router.push(`/game/testing/${songId}${fromParam}`);
     } else if(mode == "training") {
-      router.push(`/game/training/${songId}`);
-
-
+      router.push(`/game/training/${songId}${fromParam}`);
     }
-
   };
 
   const getVisibleSongs = () => {
@@ -444,5 +454,13 @@ export function SongCarousel({ songs = [] }: SongCarouselProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function SongCarousel(props: SongCarouselProps) {
+  return (
+    <Suspense fallback={<div className="text-cyan-400 py-10 animate-pulse text-center">Loading song library...</div>}>
+      <SongCarouselContent {...props} />
+    </Suspense>
   );
 }
