@@ -33,12 +33,13 @@ export function HitFeedback({
       {/* Hit feedback text */}
       {text && (
         <div
-          className="sign-feedback-text pointer-events-none absolute font-mono text-4xl font-black animate-feedback-pop"
+          className="sign-feedback-text pointer-events-none absolute font-mono text-4xl font-black animate-feedback-pop whitespace-nowrap text-center tracking-wider"
           style={{
             color,
             top: "35%",
             left: "50%",
             transform: "translate(-50%, -50%)",
+            textShadow: `0 0 20px ${color}, 0 2px 4px rgba(0,0,0,0.8)`,
           }}
         >
           {text}
@@ -48,7 +49,7 @@ export function HitFeedback({
       {/* Combo multiplier */}
       {showCombo && (
         <div
-          className="pointer-events-none absolute font-mono text-xl font-bold"
+          className="pointer-events-none absolute font-mono text-xl font-bold whitespace-nowrap text-center tracking-wider"
           style={{
             color: "#fbbf24",
             top: "42%",
@@ -65,7 +66,7 @@ export function HitFeedback({
       {/* Milestone banner */}
       {milestoneText && (
         <div
-          className="pointer-events-none absolute font-mono text-5xl font-black"
+          className="pointer-events-none absolute font-mono text-5xl font-black whitespace-nowrap text-center tracking-widest"
           style={{
             color: "#d946ef",
             top: "25%",

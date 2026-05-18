@@ -7,6 +7,7 @@ const createEntrySchema = z.object({
     name: z.string().min(1, "Name is required").max(20, "Name too long"),
     score: z.number().int().min(0, "Score must be non-negative"),
     playerId: z.string().optional(),
+    songId: z.string().optional(),
 });
 
 export const leaderboardRouter = createTRPCRouter({
@@ -54,23 +55,50 @@ export const leaderboardRouter = createTRPCRouter({
             }
         }),
 
+    getBySongId: publicProcedure
+        .input(z.object({ songId: z.string(), limit: z.number().int().min(1).max(50).default(10) }))
+        .query(async ({ input }) => {
+            try {
+                const entries = await db.leaderboardEntry.findMany({
+                    where: { songId: input.songId },
+                    orderBy: { score: "desc" },
+                    take: input.limit,
+                });
+
+                return entries.map((entry, index) => ({
+                    ...entry,
+                    rank: index + 1,
+                }));
+            } catch (error) {
+                console.error("Error fetching song leaderboard:", error);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to fetch song leaderboard",
+                });
+            }
+        }),
+
     create: publicProcedure
         .input(createEntrySchema)
         .mutation(async ({ input }) => {
             try {
-                const count = await db.leaderboardEntry.count();
+                const count = await db.leaderboardEntry.count({
+                    where: input.songId ? { songId: input.songId } : {},
+                });
 
                 const entry = await db.leaderboardEntry.create({
                     data: {
                         name: input.name.toUpperCase(),
                         score: input.score,
                         playerId: input.playerId,
+                        songId: input.songId,
                     },
                 });
 
                 const higherScores = await db.leaderboardEntry.count({
                     where: {
                         score: { gt: input.score },
+                        ...(input.songId ? { songId: input.songId } : {}),
                     },
                 });
 
@@ -93,14 +121,13 @@ export const leaderboardRouter = createTRPCRouter({
             try {
                 const normalizedName = input.name.toUpperCase();
 
-                // CRITICAL: Use playerId to find existing entry if provided
-                // This prevents duplicate entries for the same player
+                // CRITICAL: Use playerId or name, scoped strictly by songId
                 const existingEntry = input.playerId 
                     ? await db.leaderboardEntry.findFirst({
-                        where: { playerId: input.playerId },
+                        where: { playerId: input.playerId, songId: input.songId ?? null },
                       })
                     : await db.leaderboardEntry.findFirst({
-                        where: { name: normalizedName },
+                        where: { name: normalizedName, songId: input.songId ?? null },
                       });
 
                 let entry;
@@ -115,10 +142,10 @@ export const leaderboardRouter = createTRPCRouter({
                                 name: normalizedName,
                             },
                         });
-                        console.log(`✅ Updated ${normalizedName}: ${existingEntry.score} → ${input.score}`);
+                        console.log(`✅ Updated ${normalizedName} on song ${input.songId}: ${existingEntry.score} → ${input.score}`);
                     } else {
                         entry = existingEntry;
-                        console.log(`ℹ️  Kept high score for ${normalizedName}: ${existingEntry.score}`);
+                        console.log(`ℹ️ Kept high score for ${normalizedName} on song ${input.songId}: ${existingEntry.score}`);
                     }
                 } else {
                     // New entry
@@ -127,14 +154,16 @@ export const leaderboardRouter = createTRPCRouter({
                             name: normalizedName,
                             score: input.score,
                             playerId: input.playerId,
+                            songId: input.songId,
                         },
                     });
-                    console.log(`✅ Created new entry for ${normalizedName}: ${input.score}`);
+                    console.log(`✅ Created new entry for ${normalizedName} on song ${input.songId}: ${input.score}`);
                 }
 
                 const higherScores = await db.leaderboardEntry.count({
                     where: {
                         score: { gt: entry.score },
+                        ...(input.songId ? { songId: input.songId } : {}),
                     },
                 });
 

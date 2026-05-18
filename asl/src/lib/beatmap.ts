@@ -4,6 +4,7 @@ export interface BeatmapNote {
 }
 
 export interface Beatmap {
+  id?: string;
   title: string;
   notes: BeatmapNote[];
   totalDuration: number;

@@ -22,6 +22,7 @@ export function songToBeatmap(song: Song): Beatmap {
   const totalDuration = lastNoteTime + 3.0; // Add 3 seconds after last note
 
   return {
+    id: song.id,
     title: song.songName,
     notes,
     totalDuration,

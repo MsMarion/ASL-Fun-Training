@@ -13,6 +13,7 @@ import { NoteHighway } from "./NoteHighway";
 import { HitFeedback } from "./HitFeedback";
 import { LATE_GRACE, TRACKING_WINDOW } from "~/lib/gameScoring";
 import { LyricsBar } from "./LyricsBar";
+import { AnimatePresence, motion } from "framer-motion";
 import { ParticleOverlay, type ParticleOverlayRef } from "./ParticleOverlay";
 import { ScreenFlash } from "./ScreenFlash";
 import { EffectsToggle } from "./EffectsToggle";
@@ -25,7 +26,7 @@ interface GameCanvasProps {
 }
 
 export function GameCanvas({ beatmap }: GameCanvasProps) {
-  const { state, videoRef, canvasRef, webcamReady, webcamError, startGame, toggleAutoplay } = useGameLoop(beatmap);
+  const { state, videoRef, canvasRef, webcamReady, webcamError, startGame, toggleAutoplay, resetLoop } = useGameLoop(beatmap);
 
   // Get the word being spelled by the beatmap
   const word = getBeatmapWord(beatmap);
@@ -55,6 +56,30 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
   const adjustedIdx = Math.min(state.activeNoteIndex, word.length - 1);
   const shouldFlash = state.lastHitQuality === "PERFECT" && state.noteState === "success";
 
+  // Calculate approaching note for background SVG pop overlap
+  // CONFIG: Change the 0.25 value below to adjust how many seconds before arrival the SVG appears
+  const currentApproachingNote = state.notes[state.activeNoteIndex];
+  const timeDiff = currentApproachingNote ? currentApproachingNote.time - state.currentTime : 999;
+  const isApproaching = state.gameStatus === "playing" && currentApproachingNote && Math.abs(timeDiff) <= 0.25;
+
+  const [bgSvg, setBgSvg] = useState<{ pathData: string; viewBox: string; transform: string } | null>(null);
+
+  useEffect(() => {
+    if (isApproaching && currentApproachingNote?.letter) {
+      import("~/lib/svgLoader").then(async ({ loadSignSvg }) => {
+        try {
+          const data = await loadSignSvg(currentApproachingNote.letter);
+          setBgSvg(data);
+        } catch (e) {
+          console.error("Failed to load SVG", e);
+          setBgSvg(null);
+        }
+      });
+    } else {
+      setBgSvg(null);
+    }
+  }, [isApproaching, currentApproachingNote?.letter]);
+
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden bg-transparent pointer-events-auto">
       {/* Particle overlay */}
@@ -62,6 +87,29 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
 
       {/* Screen flash on PERFECT */}
       <ScreenFlash trigger={shouldFlash} />
+
+      {/* Background SVG Giant Pop Overlap */}
+      <AnimatePresence mode="wait">
+        {state.gameStatus === "playing" && bgSvg && isApproaching && currentApproachingNote && (
+          <motion.div
+            key={currentApproachingNote.letter + state.activeNoteIndex}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.15, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden"
+          >
+            <svg
+              viewBox={bgSvg.viewBox}
+              className="w-[80vh] h-[80vh] fill-white stroke-cyan-400 stroke-2"
+            >
+              <g transform={bgSvg.transform}>
+                <path d={bgSvg.pathData} />
+              </g>
+            </svg>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Top Center Marquee: Scoreboard */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40">
@@ -180,7 +228,13 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
       <DebugLogPanel entries={state.debugLog} currentTime={state.currentTime} />
 
       {/* Game Over Transition */}
-      <SongFinishedOverlay show={state.gameStatus === "finished"} />
+      <SongFinishedOverlay 
+        show={state.gameStatus === "finished"} 
+        score={state.score}
+        songId={beatmap.id}
+        songTitle={beatmap.title}
+        onRestart={resetLoop}
+      />
     </div>
   );
 }

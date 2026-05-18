@@ -33,6 +33,7 @@ export function useGameLoop(beatmap: Beatmap): {
   webcamError: string | null;
   startGame: () => void;
   toggleAutoplay: () => void;
+  resetLoop: () => void;
 } {
   // Webcam setup
   const { videoRef, canvasRef, isReady: webcamReady, error: webcamError, captureFrame } = useWebcam();
@@ -433,5 +434,6 @@ export function useGameLoop(beatmap: Beatmap): {
     webcamError,
     startGame,
     toggleAutoplay,
+    resetLoop,
   };
 }
