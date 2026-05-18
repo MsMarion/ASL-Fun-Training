@@ -24,11 +24,11 @@ export default function GamePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
-        <div className="text-center">
-          <div className="mb-4 text-4xl">🎵</div>
-          <div className="text-xl font-mono" style={{ color: "#e0e7ff" }}>
-            Loading song...
+      <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+        <div className="glass-panel p-8 rounded-3xl border border-cyan-500/30 text-center bg-black/50 backdrop-blur-md animate-pulse">
+          <div className="mb-4 text-4xl animate-spin">🎵</div>
+          <div className="text-xl font-mono text-cyan-300 font-bold tracking-wider">
+            LOADING SONG...
           </div>
         </div>
       </div>
@@ -37,13 +37,13 @@ export default function GamePage() {
 
   if (error) {
     return (
-      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
-        <div className="text-center">
+      <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+        <div className="glass-panel p-8 rounded-3xl border border-red-500/50 text-center bg-black/50 backdrop-blur-md">
           <div className="mb-4 text-4xl">⚠️</div>
-          <div className="text-xl font-mono text-red-400">
-            Failed to load song
+          <div className="text-xl font-mono text-red-400 font-bold tracking-wider">
+            FAILED TO LOAD SONG
           </div>
-          <div className="mt-2 text-sm" style={{ color: "#e0e7ff" }}>
+          <div className="mt-2 text-sm text-red-300/80 font-mono">
             {error.message}
           </div>
         </div>
@@ -53,11 +53,11 @@ export default function GamePage() {
 
   if (!isValid) {
     return (
-      <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d0820" }}>
-        <div className="text-center">
+      <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+        <div className="glass-panel p-8 rounded-3xl border border-red-500/50 text-center bg-black/50 backdrop-blur-md">
           <div className="mb-4 text-4xl">⚠️</div>
-          <div className="text-xl font-mono text-red-400">
-            Invalid beatmap data
+          <div className="text-xl font-mono text-red-400 font-bold tracking-wider">
+            INVALID BEATMAP DATA
           </div>
         </div>
       </div>

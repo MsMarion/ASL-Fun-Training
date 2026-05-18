@@ -7,10 +7,7 @@ interface LyricsBarProps {
 
 export function LyricsBar({ word, currentLetterIndex }: LyricsBarProps) {
   return (
-    <div
-      className="flex items-center justify-center gap-1 py-3"
-      style={{ background: "rgba(13,8,32,0.8)" }}
-    >
+    <div className="glass-panel flex items-center justify-center gap-3 py-3 px-8 rounded-2xl border border-fuchsia-500/20 shadow-[0_0_20px_rgba(217,70,239,0.1)] bg-black/50 backdrop-blur-md">
       {word.split("").map((char, i) => (
         <span
           key={i}

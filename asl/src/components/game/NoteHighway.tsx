@@ -43,10 +43,11 @@ export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighway
     <div className="relative w-full overflow-hidden" style={{ height: "100px" }}>
       {/* Highway track background */}
       <div
-        className="absolute inset-0 rounded-lg"
+        className="glass-panel absolute inset-0 rounded-2xl backdrop-blur-md"
         style={{
-          background: "linear-gradient(90deg, rgba(217,70,239,0.1) 0%, rgba(13,8,32,0.8) 30%, rgba(13,8,32,0.8) 100%)",
-          border: "1px solid rgba(217,70,239,0.2)",
+          background: "linear-gradient(90deg, rgba(217,70,239,0.15) 0%, rgba(13,8,32,0.75) 30%, rgba(13,8,32,0.75) 100%)",
+          border: "1px solid rgba(217,70,239,0.3)",
+          boxShadow: "0 0 30px rgba(217,70,239,0.15)",
         }}
       />
 
@@ -148,13 +149,13 @@ export function NoteHighway({ notes, currentTime, activeNoteIndex }: NoteHighway
         // Determine note color/glow based on zone
         let glowColor = "rgba(217,70,239,1)"; // Purple (default/approaching)
         
-        if (timeUntil > NOTE_TRACKING_WINDOW - NOTE_LATE_GRACE) {
+        if (timeUntil > NOTE_TRACKING_WINDOW) {
            // Approaching (Window -> Tracking)
            glowColor = "rgba(56,189,248,0.8)"; // Cyan
         } else if (timeUntil > 0) {
            // Tracking (Tracking -> Target)
            glowColor = "rgba(74,222,128,0.9)"; // Green (Active/Good to hit)
-        } else if (timeUntil > -NOTE_LATE_GRACE) {
+        } else if (timeUntil >= -NOTE_LATE_GRACE) {
            // Late Grace (Target -> Miss)
            glowColor = "rgba(250,204,21,0.9)"; // Yellow/Gold
         } else {

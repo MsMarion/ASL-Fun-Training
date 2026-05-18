@@ -31,6 +31,8 @@ export function useGameLoop(beatmap: Beatmap): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   webcamReady: boolean;
   webcamError: string | null;
+  startGame: () => void;
+  toggleAutoplay: () => void;
 } {
   // Webcam setup
   const { videoRef, canvasRef, isReady: webcamReady, error: webcamError, captureFrame } = useWebcam();
@@ -38,9 +40,11 @@ export function useGameLoop(beatmap: Beatmap): {
   // Sign detection via WebSocket
   const {
     predictions,
+    predictionsSyncRef,
     isConnected,
     handDetected,
     latency,
+    injectPrediction,
   } = useSignDetection(videoRef, webcamReady, true);
 
   // Audio Reference
@@ -66,8 +70,15 @@ export function useGameLoop(beatmap: Beatmap): {
     latestPrediction: null,
     latency: 0,
     debugLog: [],
-    gameStatus: "idle", // 'idle' | 'playing' | 'finished'
+    countdownNumber: null,
+    autoplayEnabled: false,
+    gameStatus: "lobby", // starts in lobby
   });
+
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const animFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0); // Fallback timer start (perf.now)
@@ -75,6 +86,7 @@ export function useGameLoop(beatmap: Beatmap): {
   const wasPausedRef = useRef<boolean>(false);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const processedPredictionsRef = useRef<Set<number>>(new Set());
+  const injectedIndexRef = useRef<Set<number>>(new Set());
 
   // Initialize Audio
   useEffect(() => {
@@ -82,9 +94,6 @@ export function useGameLoop(beatmap: Beatmap): {
       // Create audio object
       const audio = new Audio(beatmap.audioUrl);
       audio.volume = 0.6; // Default volume
-      
-      // Attempt to play immediately (might be blocked by browser policy until interaction)
-      // We rely on the game loop to manage play/pause state based on connection
       audioRef.current = audio;
 
       return () => {
@@ -97,16 +106,48 @@ export function useGameLoop(beatmap: Beatmap): {
     }
   }, [beatmap.audioUrl]);
 
+  const startGame = useCallback(() => {
+    if (audioRef.current) {
+      // Force immediate unlock and buffer inside click event handler!
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+        if (audioRef.current) audioRef.current.currentTime = 0;
+      }).catch(e => console.warn("Initial audio unlock warn:", e));
+    }
+
+    setState((prev) => ({ ...prev, gameStatus: "countdown", countdownNumber: 3 }));
+    let count = 3;
+    const interval = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        setState((prev) => ({ ...prev, countdownNumber: count }));
+      } else {
+        clearInterval(interval);
+        startTimeRef.current = performance.now();
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(e => console.warn("Audio play failed at countdown end:", e));
+        }
+        setState((prev) => ({ ...prev, gameStatus: "playing", countdownNumber: null }));
+      }
+    }, 1000);
+  }, []);
+
+  const toggleAutoplay = useCallback(() => {
+    setState((prev) => ({ ...prev, autoplayEnabled: !prev.autoplayEnabled }));
+  }, []);
+
   const resetLoop = useCallback(() => {
     startTimeRef.current = performance.now();
     pausedTimeRef.current = 0;
     wasPausedRef.current = false;
     processedPredictionsRef.current.clear();
+    injectedIndexRef.current.clear();
 
     // Reset Audio
     if (audioRef.current) {
+      audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(e => console.warn("Audio play failed (autoplay policy?):", e));
     }
 
     setState((prev) => ({
@@ -124,7 +165,8 @@ export function useGameLoop(beatmap: Beatmap): {
       comboMultiplier: 1,
       latestPrediction: null,
       latency: 0,
-      gameStatus: "idle",
+      countdownNumber: null,
+      gameStatus: "lobby",
     }));
   }, []);
 
@@ -138,23 +180,19 @@ export function useGameLoop(beatmap: Beatmap): {
     }));
   }, [handDetected, isConnected, latency]);
 
-  // Sync predictions to ref for game loop use without triggering re-renders/resets
-  const latestPredictionsRef = useRef(predictions);
+  const injectPredictionRef = useRef(injectPrediction);
   useEffect(() => {
-    latestPredictionsRef.current = predictions;
-  }, [predictions]);
+    injectPredictionRef.current = injectPrediction;
+  }, [injectPrediction]);
 
   // Main game loop
   useEffect(() => {
-    // Initialize fallback timer
-    startTimeRef.current = performance.now();
-    
-    // Initial Audio Start
-    if (audioRef.current && isConnected) {
-       audioRef.current.play().catch(e => console.warn("Audio autoplay blocked:", e));
-    }
-
     const tick = (now: number) => {
+      if (stateRef.current.gameStatus === "lobby" || stateRef.current.gameStatus === "countdown") {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       // Pause game clock during disconnection
       if (!isConnected) {
         if (!wasPausedRef.current) {
@@ -174,7 +212,7 @@ export function useGameLoop(beatmap: Beatmap): {
         wasPausedRef.current = false;
         
         // Resume Audio
-        if (audioRef.current) {
+        if (audioRef.current && stateRef.current.gameStatus === "playing") {
             audioRef.current.play().catch(e => console.error("Audio resume failed:", e));
         }
       }
@@ -183,20 +221,36 @@ export function useGameLoop(beatmap: Beatmap): {
       let elapsed: number;
       let effectiveStartTimeSec: number;
 
-      if (audioRef.current) {
+      if (audioRef.current && !audioRef.current.paused && audioRef.current.currentTime > 0) {
         // Source of Truth: Audio Time
         elapsed = audioRef.current.currentTime;
-        
-        // Calculate effective start time (in Seconds) for syncing predictions
-        // prediction.clientTimestamp (Sec) - effectiveStartTime (Sec) = relativeTime (Sec)
-        // relativeTime should match elapsed.
-        // Therefore: prediction.clientTimestamp - effectiveStart = elapsed
-        // effectiveStart = prediction.clientTimestamp(NOW) - elapsed
         effectiveStartTimeSec = (now / 1000) - elapsed;
       } else {
-        // Source of Truth: Performance Timer
-        elapsed = (now - startTimeRef.current) / 1000;
+        // Fallback or Initial Play Buffer Source of Truth: Performance Timer
+        elapsed = Math.max((now - startTimeRef.current) / 1000, 0);
         effectiveStartTimeSec = startTimeRef.current / 1000;
+      }
+
+      // AUTOPLAY BOT LOGIC
+      if (stateRef.current.autoplayEnabled && stateRef.current.gameStatus === "playing") {
+        const activeNote = beatmap.notes[stateRef.current.activeNoteIndex];
+        if (activeNote) {
+          const timeUntil = activeNote.time - elapsed;
+          // Trigger perfectly right as note reaches target line
+          if (timeUntil <= 0.05 && timeUntil >= -0.1) {
+            if (!injectedIndexRef.current.has(stateRef.current.activeNoteIndex)) {
+              injectedIndexRef.current.add(stateRef.current.activeNoteIndex);
+              const predSec = (now / 1000);
+              injectPredictionRef.current({
+                letter: activeNote.letter.toLowerCase(),
+                confidence: 1.0,
+                clientTimestamp: predSec,
+                handDetected: true,
+                isKeyboard: true,
+              });
+            }
+          }
+        }
       }
 
       // Game Finished
@@ -204,163 +258,156 @@ export function useGameLoop(beatmap: Beatmap): {
       if (elapsed > beatmap.totalDuration || isAudioFinished) {
         setState(prev => ({ ...prev, gameStatus: "finished" }));
         if (audioRef.current) audioRef.current.pause();
-        // Do not reset loop, let it sit in finished state
         cancelAnimationFrame(animFrameRef.current);
         return;
       }
 
-      setState((prev) => {
-        const activeIndex = prev.activeNoteIndex;
+      const activeIndex = stateRef.current.activeNoteIndex;
 
-        // Check if all notes processed
-        if (activeIndex >= beatmap.notes.length) {
-          return { ...prev, currentTime: elapsed };
+      // Check if all notes processed
+      if (activeIndex >= beatmap.notes.length) {
+        setState(prev => ({ ...prev, currentTime: elapsed }));
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      const activeNote = beatmap.notes[activeIndex]!;
+      const earlyStart = activeNote.time - TRACKING_WINDOW;
+      const deadline = activeNote.time + LATE_GRACE;
+
+      // 1. Search for a VALID HIT synchronously in raw memory
+      const bestMatch = findBestPrediction(
+        predictionsSyncRef.current,
+        activeNote,
+        earlyStart,
+        deadline,
+        effectiveStartTimeSec, 
+        processedPredictionsRef.current
+      );
+
+      // 2. Also get the absolute latest unconsumed prediction for fallback feedback
+      const latestUnconsumed = predictionsSyncRef.current
+        .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
+        .at(-1) || null;
+
+      // Evaluate note synchronously
+      const judgement = evaluateNote(activeNote, bestMatch ?? latestUnconsumed, elapsed, stateRef.current.streak);
+
+      const latestPred = predictionsSyncRef.current.length > 0
+        ? predictionsSyncRef.current[predictionsSyncRef.current.length - 1] ?? null
+        : null;
+
+      if (judgement.type === "hit") {
+        const consumedTimestamp = (bestMatch ?? latestUnconsumed)?.clientTimestamp;
+        if (consumedTimestamp) {
+          processedPredictionsRef.current.add(consumedTimestamp);
         }
 
-        const activeNote = beatmap.notes[activeIndex]!;
-        const earlyStart = activeNote.time - TRACKING_WINDOW;
-        const deadline = activeNote.time + LATE_GRACE;
+        const newStreak = stateRef.current.streak + 1;
+        const newScore = stateRef.current.score + judgement.points;
+        const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
+        const feedbackText = "HIT!" + ` (${judgement.sawLetter})`;
 
-        // 1. Search for a VALID HIT in the history
-        // Note: effectiveStartTimeSec MUST be in SECONDS
-        const bestMatch = findBestPrediction(
-          latestPredictionsRef.current,
-          activeNote,
-          earlyStart,
-          deadline,
-          effectiveStartTimeSec, 
-          processedPredictionsRef.current
-        );
-
-        // 2. Also get the absolute latest unconsumed prediction for fallback feedback
-        const latestUnconsumed = latestPredictionsRef.current
-          .filter(p => !processedPredictionsRef.current.has(p.clientTimestamp))
-          .at(-1) || null;
-
-        // Evaluate note
-        const judgement = evaluateNote(activeNote, bestMatch ?? latestUnconsumed, elapsed, prev.streak);
-
-        // Debug: Get latest prediction
-        const latestPred = latestPredictionsRef.current.length > 0
-          ? latestPredictionsRef.current[latestPredictionsRef.current.length - 1] ?? null
-          : null;
-
-        if (judgement.type === "hit") {
-          // HIT Logic
-          if (latestUnconsumed) {
-            processedPredictionsRef.current.add(latestUnconsumed.clientTimestamp);
-          }
-
-          const newStreak = prev.streak + 1;
-          const newScore = prev.score + judgement.points;
-          const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
-          let feedbackText = "HIT!" + ` (${judgement.sawLetter})`;
-
-          // Streak Milestone
-          let streakMilestone: number | null = null;
-          if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
-            streakMilestone = newStreak;
-            setTimeout(() => setState((s) => ({ ...s, streakMilestone: null })), 1000);
-          }
-
-          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-          feedbackTimeoutRef.current = setTimeout(() => {
-            setState((s) => ({
-              ...s,
-              noteState: "idle",
-              feedbackText: null,
-              feedbackLetter: null,
-            }));
-          }, FEEDBACK_DURATION_MS);
-
-          const hitLogEntry: DebugLogEntry = {
-            timestamp: Date.now(),
-            type: "HIT",
-            letter: activeNote.letter,
-            delta: activeNote.time - elapsed,
-            quality: "HIT",
-            confidence: latestUnconsumed?.confidence,
-          };
-
-          // Seamless transition to next note
-          const nextIndex = activeIndex + 1;
-          const nextNote = beatmap.notes[nextIndex];
-          const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
-          const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
-
-          return {
-            ...prev,
-            currentTime: elapsed,
-            currentNote: nextNoteVisible ? nextNote : null,
-            noteState: "idle",
-            feedbackText,
-            feedbackLetter: activeNote.letter,
-            score: newScore,
-            streak: newStreak,
-            activeNoteIndex: nextIndex,
-            lastHitQuality: "HIT",
-            streakMilestone,
-            comboMultiplier: newMultiplier,
-            latestPrediction: latestPred,
-            debugLog: [...prev.debugLog.slice(-20), hitLogEntry],
-          };
-        } else if (judgement.type === "miss") {
-          // MISS Logic
-          const newLives = Math.max(prev.lives - 1, 0);
-          let missedFeedback = "MISS!";
-          if (judgement.reason === "WRONG SIGN") missedFeedback = `MISS (Wrong: ${judgement.sawLetter})`;
-          else if (judgement.reason === "LOW CONFIDENCE") missedFeedback = `MISS (Low Confidence)`;
-          else if (judgement.reason === "TOO LATE") missedFeedback = `MISS (Too Late)`;
-
-          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-          feedbackTimeoutRef.current = setTimeout(() => {
-            setState((s) => ({
-              ...s,
-              noteState: "idle",
-              feedbackText: null,
-              feedbackLetter: null,
-            }));
-          }, FEEDBACK_DURATION_MS);
-
-          const missLogEntry: DebugLogEntry = {
-            timestamp: Date.now(),
-            type: "MISS",
-            letter: activeNote.letter,
-            delta: activeNote.time - elapsed,
-            confidence: latestUnconsumed?.confidence,
-          };
-
-          const nextIndex = activeIndex + 1;
-          const nextNote = beatmap.notes[nextIndex];
-          const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
-          const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
-
-          return {
-            ...prev,
-            currentTime: elapsed,
-            currentNote: nextNoteVisible ? nextNote : null,
-            noteState: "idle",
-            feedbackText: missedFeedback,
-            feedbackLetter: activeNote.letter,
-            lives: newLives,
-            streak: 0,
-            activeNoteIndex: nextIndex,
-            lastHitQuality: null,
-            comboMultiplier: 1,
-            latestPrediction: latestPred,
-            debugLog: [...prev.debugLog.slice(-20), missLogEntry],
-          };
+        let streakMilestone: number | null = null;
+        if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
+          streakMilestone = newStreak;
+          setTimeout(() => setState((s) => ({ ...s, streakMilestone: null })), 1000);
         }
 
-        // PENDING Logic
+        if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+        feedbackTimeoutRef.current = setTimeout(() => {
+          setState((s) => ({
+            ...s,
+            noteState: "idle",
+            feedbackText: null,
+            feedbackLetter: null,
+          }));
+        }, FEEDBACK_DURATION_MS);
+
+        const hitLogEntry: DebugLogEntry = {
+          timestamp: Date.now(),
+          type: "HIT",
+          letter: activeNote.letter,
+          delta: activeNote.time - elapsed,
+          quality: "HIT",
+          confidence: latestUnconsumed?.confidence,
+        };
+
+        const nextIndex = activeIndex + 1;
+        const nextNote = beatmap.notes[nextIndex];
+        const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
+        const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
+
+        setState((prev) => ({
+          ...prev,
+          currentTime: elapsed,
+          currentNote: nextNoteVisible ? nextNote : null,
+          noteState: "idle",
+          feedbackText,
+          feedbackLetter: activeNote.letter,
+          score: newScore,
+          streak: newStreak,
+          activeNoteIndex: nextIndex,
+          lastHitQuality: "HIT",
+          streakMilestone,
+          comboMultiplier: newMultiplier,
+          latestPrediction: latestPred,
+          debugLog: [...prev.debugLog.slice(-20), hitLogEntry],
+        }));
+      } else if (judgement.type === "miss") {
+        const newLives = Math.max(stateRef.current.lives - 1, 0);
+        let missedFeedback = "MISS!";
+        if (judgement.reason === "WRONG SIGN") missedFeedback = `MISS (Wrong: ${judgement.sawLetter})`;
+        else if (judgement.reason === "LOW CONFIDENCE") missedFeedback = `MISS (Low Confidence)`;
+        else if (judgement.reason === "TOO LATE") missedFeedback = `MISS (Too Late)`;
+
+        if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+        feedbackTimeoutRef.current = setTimeout(() => {
+          setState((s) => ({
+            ...s,
+            noteState: "idle",
+            feedbackText: null,
+            feedbackLetter: null,
+          }));
+        }, FEEDBACK_DURATION_MS);
+
+        const missLogEntry: DebugLogEntry = {
+          timestamp: Date.now(),
+          type: "MISS",
+          letter: activeNote.letter,
+          delta: activeNote.time - elapsed,
+          confidence: latestUnconsumed?.confidence,
+        };
+
+        const nextIndex = activeIndex + 1;
+        const nextNote = beatmap.notes[nextIndex];
+        const trackingStartNext = nextNote ? nextNote.time - TRACKING_WINDOW : Infinity;
+        const nextNoteVisible = nextNote && elapsed >= trackingStartNext;
+
+        setState((prev) => ({
+          ...prev,
+          currentTime: elapsed,
+          currentNote: nextNoteVisible ? nextNote : null,
+          noteState: "idle",
+          feedbackText: missedFeedback,
+          feedbackLetter: activeNote.letter,
+          lives: newLives,
+          streak: 0,
+          activeNoteIndex: nextIndex,
+          lastHitQuality: null,
+          comboMultiplier: 1,
+          latestPrediction: latestPred,
+          debugLog: [...prev.debugLog.slice(-20), missLogEntry],
+        }));
+      } else {
         const trackingStart = activeNote.time - TRACKING_WINDOW;
-        return {
+        setState((prev) => ({
           ...prev,
           currentTime: elapsed,
           currentNote: elapsed >= trackingStart ? activeNote : null,
           latestPrediction: latestPred,
-        };
-      });
+        }));
+      }
 
       animFrameRef.current = requestAnimationFrame(tick);
     };
@@ -372,12 +419,11 @@ export function useGameLoop(beatmap: Beatmap): {
       if (feedbackTimeoutRef.current) {
         clearTimeout(feedbackTimeoutRef.current);
       }
-      // Pause audio on unmount/effect cleanup
       if (audioRef.current) {
           audioRef.current.pause();
       }
     };
-  }, [beatmap, isConnected, resetLoop]); // Removed predictions from deps
+  }, [beatmap, isConnected]);
 
   return {
     state,
@@ -385,5 +431,7 @@ export function useGameLoop(beatmap: Beatmap): {
     canvasRef,
     webcamReady,
     webcamError,
+    startGame,
+    toggleAutoplay,
   };
 }

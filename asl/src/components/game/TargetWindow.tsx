@@ -44,7 +44,7 @@ export function TargetWindow({ letter, state, streak = 0, isMatching = false }: 
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-2xl border-2 transition-all duration-150 ${isMatchingIdle ? "animate-pulse" : ""}`}
+      className={`glass-panel relative flex items-center justify-center rounded-3xl border-2 backdrop-blur-md transition-all duration-150 ${isMatchingIdle ? "animate-pulse" : ""}`}
       style={{
         width: "220px",
         height: "260px",
@@ -53,7 +53,7 @@ export function TargetWindow({ letter, state, streak = 0, isMatching = false }: 
         borderWidth: isMatchingIdle ? "3px" : "2px",
         boxShadow: enhancedShadow,
         background: isMatchingIdle
-          ? "rgba(250,204,21,0.08)"
+          ? "rgba(250,204,21,0.15)"
           : "rgba(13,8,32,0.6)",
       }}
     >

@@ -10,9 +10,9 @@ export const EARLY_WINDOW = NOTE_WINDOW_DURATION; // Notes become hittable when 
 export const LATE_GRACE = NOTE_LATE_GRACE; // Deadline after target time
 export const TRACKING_WINDOW = NOTE_TRACKING_WINDOW; // When to start tracking for hits
 export const PERFECT_THRESHOLD = 1.0; // ±1.0s for PERFECT (very generous)
-export const CONFIDENCE_THRESHOLD = 0.50; // Minimum confidence (lowered further)
+export const CONFIDENCE_THRESHOLD = 0.45; // Minimum confidence for rhythm hits
 export const VISUAL_TRIGGER_WINDOW = NOTE_WINDOW_DURATION; // Hits register when notes appear
-export const INPUT_OFFSET = 0.15; // Global offset to compensate for system latency (seconds)
+export const INPUT_OFFSET = 0.05; // Tightened offset for low-latency WebSocket sync
 
 // Scoring constants
 export const HIT_POINTS = 100;

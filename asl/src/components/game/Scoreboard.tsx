@@ -59,52 +59,62 @@ export function Scoreboard({ score, streak, lives }: ScoreboardProps) {
   const hasFireEffect = multiplier >= 3;
 
   return (
-    <div className="flex flex-col items-end gap-2">
-      {/* Score */}
-      <div
-        className="font-mono text-3xl font-bold tabular-nums"
-        style={{
-          color: "#e0e7ff",
-          animation: scoreBump ? "score-bump 0.2s ease-out" : "none",
-        }}
-      >
-        {displayScore.toLocaleString()}
-      </div>
-
-      {/* Streak multiplier */}
-      {streak > 0 && (
-        <div
-          className="font-mono text-sm font-semibold"
-          style={{
-            color: "#d946ef",
-            animation: hasFireEffect ? "streak-fire 0.8s ease-in-out infinite" : "none",
-          }}
-        >
-          {streak} streak &times;{multiplier}
+    <div className="glass-panel flex items-center gap-8 px-8 py-3 rounded-full border border-cyan-500/30 shadow-[0_0_30px_rgba(34,211,238,0.2)] bg-black/50 backdrop-blur-md transition-all">
+      {/* Lives */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-mono text-cyan-400 mr-1 font-bold tracking-wider">LIVES</span>
+        <div className="flex gap-1">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const isAlive = i < lives;
+            const isDamaged = i === damagedLife;
+            return (
+              <span
+                key={i}
+                className="text-lg transition-colors"
+                style={{
+                  color: isAlive ? "#22d3ee" : "rgba(34,211,238,0.2)",
+                  textShadow: isAlive ? "0 0 10px rgba(34,211,238,0.8)" : "none",
+                  animation: isDamaged ? "life-damage 0.6s ease-out" : "none",
+                }}
+              >
+                &#9670;
+              </span>
+            );
+          })}
         </div>
-      )}
-
-      {/* Lives as diamonds */}
-      <div className="flex gap-1">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const isAlive = i < lives;
-          const isDamaged = i === damagedLife;
-
-          return (
-            <span
-              key={i}
-              className="text-lg"
-              style={{
-                color: isAlive ? "#22d3ee" : "rgba(34,211,238,0.2)",
-                textShadow: isAlive ? "0 0 8px rgba(34,211,238,0.6)" : "none",
-                animation: isDamaged ? "life-damage 0.6s ease-out" : "none",
-              }}
-            >
-              &#9670;
-            </span>
-          );
-        })}
       </div>
+
+      {/* Divider */}
+      <div className="w-px h-6 bg-cyan-500/20" />
+
+      {/* Score */}
+      <div className="flex items-center gap-3">
+        <span className="text-xs font-mono text-fuchsia-400 font-bold tracking-wider">SCORE</span>
+        <div
+          className="font-mono text-3xl font-black text-white tabular-nums drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]"
+          style={{ animation: scoreBump ? "score-bump 0.2s ease-out" : "none" }}
+        >
+          {displayScore.toLocaleString()}
+        </div>
+      </div>
+
+      {/* Streak Multiplier Banner */}
+      {streak > 0 && (
+        <>
+          <div className="w-px h-6 bg-cyan-500/20" />
+          <div
+            className="flex items-center gap-2 px-3 py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500/40"
+            style={{ animation: hasFireEffect ? "streak-fire 0.8s ease-in-out infinite" : "none" }}
+          >
+            <span className="text-xs font-mono font-bold text-fuchsia-300 tracking-wider">
+              {streak} STREAK
+            </span>
+            <span className="text-sm font-mono font-black text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]">
+              &times;{multiplier}
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

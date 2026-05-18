@@ -11,9 +11,9 @@ export interface Beatmap {
 }
 
 // Shared timing constants - single source of truth
-export const NOTE_WINDOW_DURATION = 6.0; // How long notes are visible before target (seconds)
-export const NOTE_LATE_GRACE = 3.0;      // Grace period after target time for late hits
-export const NOTE_TRACKING_WINDOW = 2.0; // When to start tracking for hits (seconds before target)
+export const NOTE_WINDOW_DURATION = 4.0; // How long notes are visible before target (seconds)
+export const NOTE_LATE_GRACE = 0.4;      // Grace period after target time for late hits (400ms)
+export const NOTE_TRACKING_WINDOW = 0.8; // When to start tracking for hits (800ms before target)
 
 /**
  * Generate a beatmap from a sequence of letters with fixed spacing

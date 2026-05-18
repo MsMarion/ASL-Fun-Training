@@ -1,27 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type SignPrediction } from "~/lib/gameScoring";
 
 export interface UseSignDetectionReturn {
   predictions: SignPrediction[];
+  predictionsSyncRef: React.MutableRefObject<SignPrediction[]>;
   isConnected: boolean;
   handDetected: boolean;
   latency: number;
+  injectPrediction: (p: SignPrediction) => void;
 }
 
 const MAX_PREDICTIONS = 30; // Ring buffer size
 
-/**
- * Hook for WebSocket-based sign detection with Client-Side MediaPipe.
- * Manages local landmark extraction and streaming to Python micro-batcher.
- */
 export function useSignDetection(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   isWebcamReady: boolean,
   enabled = true,
 ): UseSignDetectionReturn {
   const [predictions, setPredictions] = useState<SignPrediction[]>([]);
+  const predictionsSyncRef = useRef<SignPrediction[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
   const [latency, setLatency] = useState(0);
@@ -30,6 +29,15 @@ export function useSignDetection(
   const handsRef = useRef<any | null>(null);
   const animFrameRef = useRef<number>(0);
   const isSendingRef = useRef<boolean>(false);
+
+  const addPrediction = useCallback((pred: SignPrediction) => {
+    predictionsSyncRef.current.push(pred);
+    if (predictionsSyncRef.current.length > MAX_PREDICTIONS) {
+      predictionsSyncRef.current.shift();
+    }
+    setPredictions([...predictionsSyncRef.current]);
+    setHandDetected(true);
+  }, []);
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -75,13 +83,7 @@ export function useSignDetection(
 
           const now = performance.now() / 1000;
           setLatency((now - prediction.clientTimestamp) * 1000);
-
-          setPredictions((prev) => {
-            const updated = [...prev, prediction];
-            if (updated.length > MAX_PREDICTIONS) updated.shift();
-            return updated;
-          });
-          setHandDetected(prediction.handDetected);
+          addPrediction(prediction);
         }
       } catch (e) {
         console.error("Error parsing WS message:", e);
@@ -93,7 +95,7 @@ export function useSignDetection(
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [enabled]);
+  }, [enabled, addPrediction]);
 
   // Initialize MediaPipe Hands in browser
   useEffect(() => {
@@ -156,7 +158,7 @@ export function useSignDetection(
 
         animFrameRef.current = requestAnimationFrame(detectFrame);
 
-      } catch (err) {
+       } catch (err) {
         console.error("Failed to load MediaPipe Hands:", err);
       }
     }
@@ -189,25 +191,25 @@ export function useSignDetection(
           handDetected: true,
           isKeyboard: true,
         };
-
-        setPredictions((prev) => {
-          const updated = [...prev, keyPrediction];
-          if (updated.length > MAX_PREDICTIONS) updated.shift();
-          return updated;
-        });
-        setHandDetected(true);
+        addPrediction(keyPrediction);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [enabled]);
+  }, [enabled, addPrediction]);
+
+  const injectPrediction = useCallback((pred: SignPrediction) => {
+    addPrediction(pred);
+  }, [addPrediction]);
 
   return {
     predictions,
+    predictionsSyncRef,
     isConnected,
     handDetected,
     latency,
+    injectPrediction,
   };
 }
 
