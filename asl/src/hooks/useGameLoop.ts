@@ -89,15 +89,49 @@ export function useGameLoop(beatmap: Beatmap): {
   const processedPredictionsRef = useRef<Set<number>>(new Set());
   const injectedIndexRef = useRef<Set<number>>(new Set());
 
-  // Initialize Audio
+  // Initialize Audio & Intercept Media Controls
   useEffect(() => {
     if (beatmap.audioUrl) {
-      // Create audio object
       const audio = new Audio(beatmap.audioUrl);
       audio.volume = 0.6; // Default volume
       audioRef.current = audio;
 
+      // Intercept and disable MediaSession controls so OS / browser media toolbar cannot pause or scrub the audio!
+      if (typeof navigator !== "undefined" && "mediaSession" in navigator) {
+        try {
+          navigator.mediaSession.setActionHandler("play", () => { /* disabled */ });
+          navigator.mediaSession.setActionHandler("pause", () => { /* disabled */ });
+          navigator.mediaSession.setActionHandler("seekto", () => { /* disabled */ });
+          navigator.mediaSession.setActionHandler("seekbackward", () => { /* disabled */ });
+          navigator.mediaSession.setActionHandler("seekforward", () => { /* disabled */ });
+        } catch (e) {
+          console.warn("MediaSession action handler setting failed:", e);
+        }
+      }
+
+      const handleExternalPause = () => {
+        // If the game is playing and audio is paused externally (e.g. keyboard keys), force resume!
+        if (stateRef.current.gameStatus === "playing" && audioRef.current?.paused) {
+          audioRef.current.play().catch(e => console.warn("Enforce play failed:", e));
+        }
+      };
+      
+      const handleExternalSeek = () => {
+        // If the game is playing and audio is scrubbed externally, enforce internal game clock!
+        if (stateRef.current.gameStatus === "playing" && audioRef.current) {
+          const expectedTime = Math.max((performance.now() - startTimeRef.current) / 1000, 0);
+          if (Math.abs(audioRef.current.currentTime - expectedTime) > 0.5) {
+            audioRef.current.currentTime = expectedTime;
+          }
+        }
+      };
+
+      audio.addEventListener("pause", handleExternalPause);
+      audio.addEventListener("seeking", handleExternalSeek);
+
       return () => {
+        audio.removeEventListener("pause", handleExternalPause);
+        audio.removeEventListener("seeking", handleExternalSeek);
         audio.pause();
         audio.src = "";
         audioRef.current = null;
@@ -145,10 +179,12 @@ export function useGameLoop(beatmap: Beatmap): {
     processedPredictionsRef.current.clear();
     injectedIndexRef.current.clear();
 
-    // Reset Audio
+    // Unlock Audio for Replay
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+        if (audioRef.current) audioRef.current.currentTime = 0;
+      }).catch(e => console.warn("Replay audio unlock warn:", e));
     }
 
     setState((prev) => ({
@@ -166,9 +202,25 @@ export function useGameLoop(beatmap: Beatmap): {
       comboMultiplier: 1,
       latestPrediction: null,
       latency: 0,
-      countdownNumber: null,
-      gameStatus: "lobby",
+      countdownNumber: 3,
+      gameStatus: "countdown",
     }));
+
+    let count = 3;
+    const interval = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        setState((prev) => ({ ...prev, countdownNumber: count }));
+      } else {
+        clearInterval(interval);
+        startTimeRef.current = performance.now();
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(e => console.warn("Audio replay play failed at countdown end:", e));
+        }
+        setState((prev) => ({ ...prev, gameStatus: "playing", countdownNumber: null }));
+      }
+    }, 1000);
   }, []);
 
   // Update connection/hand status from sign detection
@@ -189,7 +241,11 @@ export function useGameLoop(beatmap: Beatmap): {
   // Main game loop
   useEffect(() => {
     const tick = (now: number) => {
-      if (stateRef.current.gameStatus === "lobby" || stateRef.current.gameStatus === "countdown") {
+      if (
+        stateRef.current.gameStatus === "lobby" || 
+        stateRef.current.gameStatus === "countdown" || 
+        stateRef.current.gameStatus === "finished"
+      ) {
         animFrameRef.current = requestAnimationFrame(tick);
         return;
       }
@@ -259,7 +315,7 @@ export function useGameLoop(beatmap: Beatmap): {
       if (elapsed > beatmap.totalDuration || isAudioFinished) {
         setState(prev => ({ ...prev, gameStatus: "finished" }));
         if (audioRef.current) audioRef.current.pause();
-        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = requestAnimationFrame(tick);
         return;
       }
 
