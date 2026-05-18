@@ -33,6 +33,7 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
 
   const particleOverlayRef = useRef<ParticleOverlayRef>(null);
   const [effectsEnabled, setEffectsEnabled] = useState(true);
+  const [showDevTools, setShowDevTools] = useState(false);
   const [targetWindowCenter, setTargetWindowCenter] = useState({ x: 0, y: 0 });
 
   // Calculate target window center position
@@ -133,17 +134,26 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
         <EffectsToggle enabled={effectsEnabled} onToggle={() => setEffectsEnabled(!effectsEnabled)} />
       </div>
 
+      {/* Secret DevTools Trigger Button (Tiny subtle pi symbol in upper-left) */}
+      <button
+        onClick={() => setShowDevTools(!showDevTools)}
+        className="absolute top-2 left-2 z-50 w-6 h-6 rounded-full bg-white/5 hover:bg-white/20 text-[10px] text-white/20 hover:text-white/80 flex items-center justify-center transition-all cursor-pointer font-mono"
+        title="Secret Developer Tools"
+      >
+        π
+      </button>
+
       {/* Lobby Modal */}
       {state.gameStatus === "lobby" && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-          <div className="glass-panel max-w-lg w-full p-8 rounded-3xl border border-fuchsia-500/50 shadow-[0_0_50px_rgba(217,70,239,0.3)] text-center animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 tracking-wider mb-2">
+          <div className="glass-panel p-12 rounded-3xl border border-cyan-500/40 shadow-[0_0_50px_rgba(34,211,238,0.3)] max-w-lg w-full text-center flex flex-col items-center">
+            <h1 className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-yellow-400 font-mono tracking-wider">
               {beatmap.title}
             </h1>
             <p className="text-fuchsia-300 font-mono text-sm mb-8 tracking-widest uppercase">
-              {beatmap.notes.length} NOTES • {(beatmap.totalDuration).toFixed(0)}s TRACK
+              {beatmap.notes.length} NOTES • {beatmap.totalDuration.toFixed(0)}s TRACK
             </p>
-            <div className="relative inline-block">
+            <div className="flex flex-col gap-4 w-full px-8">
               <button
                 onClick={startGame}
                 className="relative z-10 px-12 py-5 rounded-2xl bg-gradient-to-r from-cyan-500 via-fuchsia-500 to-purple-600 text-white font-mono font-black text-2xl tracking-widest shadow-[0_0_30px_rgba(45,226,230,0.6)] hover:shadow-[0_0_50px_rgba(217,70,239,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
@@ -171,11 +181,8 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
           state={state.noteState}
           streak={state.streak}
           isMatching={
-            state.noteState === "idle" &&
-            state.currentNote !== null &&
-            state.latestPrediction !== null &&
-            state.latestPrediction.letter === state.currentNote.letter &&
-            state.latestPrediction.confidence >= 0.45
+            state.latestPrediction?.letter.toLowerCase() ===
+            (state.feedbackLetter ?? state.currentNote?.letter)?.toLowerCase()
           }
         />
         <div className="mt-4 relative h-16 w-full flex items-center justify-center">
@@ -196,36 +203,41 @@ export function GameCanvas({ beatmap }: GameCanvasProps) {
           activeNoteIndex={state.activeNoteIndex}
         />
       </div>
-      <div className="absolute bottom-12 left-0 w-full z-20 px-8">
+
+      {/* Bottom Center Marquee: Lyrics / Current Letter */}
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30">
         <LyricsBar word={word} currentLetterIndex={adjustedIdx} />
       </div>
 
-      {/* Bottom Left Controls: Autoplay Bot Toggle & AI Stats */}
-      <div className="absolute bottom-6 left-8 z-30 flex items-center gap-3">
-        <button
-          onClick={toggleAutoplay}
-          className={`px-4 py-2 rounded-2xl font-mono text-xs font-black tracking-widest border transition-all cursor-pointer shadow-lg flex items-center gap-2 ${
-            state.autoplayEnabled
-              ? "bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white border-white/80 shadow-[0_0_20px_rgba(217,70,239,0.8)] animate-pulse"
-              : "bg-black/60 backdrop-blur-md text-gray-400 border-white/10 hover:border-white/30"
-          }`}
-        >
-          <span>🤖</span>
-          <span>AUTOPLAY BOT: {state.autoplayEnabled ? "PERFECT ON" : "OFF"}</span>
-        </button>
+      {/* Secret DevTools: Autoplay Bot Toggle, AI Stats, & Debug Log */}
+      {showDevTools && (
+        <>
+          <div className="absolute bottom-6 left-8 z-30 flex items-center gap-3 animate-fade-in">
+            <button
+              onClick={toggleAutoplay}
+              className={`px-4 py-2 rounded-2xl font-mono text-xs font-black tracking-widest border transition-all cursor-pointer shadow-lg flex items-center gap-2 ${
+                state.autoplayEnabled
+                  ? "bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white border-white/80 shadow-[0_0_20px_rgba(217,70,239,0.8)] animate-pulse"
+                  : "bg-black/60 backdrop-blur-md text-gray-400 border-white/10 hover:border-white/30"
+              }`}
+            >
+              <span>🤖</span>
+              <span>AUTOPLAY BOT: {state.autoplayEnabled ? "PERFECT ON" : "OFF"}</span>
+            </button>
 
-        {state.latestPrediction && (
-          <div className="bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-2xl border border-white/10 shadow-sm flex items-center gap-2 font-mono text-xs">
-            <span className="text-gray-400">AI:</span>
-            <span className="text-base font-bold text-cyan-400">{state.latestPrediction.letter}</span>
-            <span className="text-green-400">{(state.latestPrediction.confidence * 100).toFixed(0)}%</span>
-            <span className="text-fuchsia-400">{state.latency}ms</span>
+            {state.latestPrediction && (
+              <div className="bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-2xl border border-white/10 shadow-sm flex items-center gap-2 font-mono text-xs">
+                <span className="text-gray-400">AI:</span>
+                <span className="text-base font-bold text-cyan-400">{state.latestPrediction.letter}</span>
+                <span className="text-green-400">{(state.latestPrediction.confidence * 100).toFixed(0)}%</span>
+                <span className="text-fuchsia-400">{state.latency}ms</span>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Debug Log Panel */}
-      <DebugLogPanel entries={state.debugLog} currentTime={state.currentTime} />
+          <DebugLogPanel entries={state.debugLog} currentTime={state.currentTime} />
+        </>
+      )}
 
       {/* Game Over Transition */}
       <SongFinishedOverlay 

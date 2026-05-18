@@ -60,32 +60,6 @@ export function Scoreboard({ score, streak, lives }: ScoreboardProps) {
 
   return (
     <div className="glass-panel flex items-center gap-8 px-8 py-3 rounded-full border border-cyan-500/30 shadow-[0_0_30px_rgba(34,211,238,0.2)] bg-black/50 backdrop-blur-md transition-all">
-      {/* Lives */}
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs font-mono text-cyan-400 mr-1 font-bold tracking-wider">LIVES</span>
-        <div className="flex gap-1">
-          {Array.from({ length: 5 }).map((_, i) => {
-            const isAlive = i < lives;
-            const isDamaged = i === damagedLife;
-            return (
-              <span
-                key={i}
-                className="text-lg transition-colors"
-                style={{
-                  color: isAlive ? "#22d3ee" : "rgba(34,211,238,0.2)",
-                  textShadow: isAlive ? "0 0 10px rgba(34,211,238,0.8)" : "none",
-                  animation: isDamaged ? "life-damage 0.6s ease-out" : "none",
-                }}
-              >
-                &#9670;
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="w-px h-6 bg-cyan-500/20" />
 
       {/* Score */}
       <div className="flex items-center gap-3">

@@ -279,13 +279,13 @@ function TrainingCanvasContent({ beatmap }: TrainingCanvasProps) {
                             onClick={restartGame}
                             className="px-10 py-4 glass-button text-white font-bold text-xl rounded-full transition-all hover:scale-105 cursor-pointer tracking-wider"
                         >
-                            RETRY
+                            PLAY AGAIN
                         </button>
                         <button
                             onClick={() => router.push(exitUrl)}
                             className="px-10 py-4 glass-button text-white font-bold text-xl rounded-full transition-all hover:scale-105 cursor-pointer tracking-wider"
                         >
-                            EXIT
+                            SONG SELECTION
                         </button>
                     </div>
                 </div>
