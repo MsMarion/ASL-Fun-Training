@@ -21,9 +21,9 @@ export default function TrainingPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-950">
-        <div className="text-center animate-pulse">
-           <div className="text-xl font-mono text-cyan-400">
+      <div className="flex h-full w-full items-center justify-center bg-transparent">
+        <div className="text-center animate-pulse bg-black/40 backdrop-blur-md border border-cyan-500/30 p-8 rounded-2xl shadow-[0_0_30px_rgba(45,226,230,0.2)]">
+           <div className="text-xl font-mono text-cyan-400 font-bold">
             Loading Training Module...
           </div>
         </div>
@@ -33,12 +33,12 @@ export default function TrainingPage() {
 
   if (error || !song) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-950">
-        <div className="text-center">
-           <div className="text-xl font-mono text-red-400">
+      <div className="flex h-full w-full items-center justify-center bg-transparent">
+        <div className="text-center bg-black/40 backdrop-blur-md border border-red-500/30 p-8 rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+           <div className="text-xl font-mono text-red-400 font-bold">
             Error loading song data
           </div>
-          <p className="text-slate-500 mt-2">{error?.message ?? "Song not found"}</p>
+          <p className="text-slate-300 mt-2">{error?.message ?? "Song not found"}</p>
         </div>
       </div>
     );
@@ -46,9 +46,9 @@ export default function TrainingPage() {
 
   if (!isValid || !beatmap) {
       return (
-      <div className="flex h-full w-full items-center justify-center bg-slate-950">
-        <div className="text-center">
-           <div className="text-xl font-mono text-red-400">
+      <div className="flex h-full w-full items-center justify-center bg-transparent">
+        <div className="text-center bg-black/40 backdrop-blur-md border border-red-500/30 p-8 rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+           <div className="text-xl font-mono text-red-400 font-bold">
             Invalid beatmap
           </div>
         </div>

@@ -1,23 +1,27 @@
 "use client";
 
 import { useTrainingGame } from "~/hooks/useTrainingGame";
-import { SynthwaveBackground } from "./SynthwaveBackground";
 import { WebcamFeed } from "./WebcamFeed";
 import { type Beatmap } from "~/lib/beatmap";
-import { useEffect, useState, useRef } from "react";
-import { AVAILABLE_LETTERS } from "~/lib/svgLoader";
+import { useEffect, useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScreenFlash } from "./ScreenFlash";
 import { SuccessBurst } from "./SuccessBurst";
 import { FloatingSuccessText } from "./FloatingSuccessText";
-import { SongFinishedOverlay } from "./SongFinishedOverlay";
 import { useSoundEffects } from "~/hooks/useSoundEffects";
 
 interface TrainingCanvasProps {
     beatmap: Beatmap;
 }
 
-export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
+function TrainingCanvasContent({ beatmap }: TrainingCanvasProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const fromUrl = searchParams?.get("from");
+    const songId = searchParams?.get("songId");
+    const exitUrl = fromUrl ? (songId ? `${fromUrl}?songId=${encodeURIComponent(songId)}` : fromUrl) : "/songselection";
+
     // TOGGLE: Set to true to enable "Instant Mode" (no hold required)
     const IS_INSTANT_MODE = true;
 
@@ -39,8 +43,6 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
         latestPrediction,
         latency
     } = useTrainingGame(beatmap, IS_INSTANT_MODE);
-
-    // ... rest of hook usage ...
 
     // For visual countdown/progress bar on the current note
     const [visualProgress, setVisualProgress] = useState(0);
@@ -107,7 +109,6 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
         // Skipped Event
         if (skippedCount > lastSkippedCountRef.current) {
             playMissSound();
-            // Optional: Negative visual feedback for skipping?
             setSuccessTextTrigger({ text: "SKIPPED", timestamp: Date.now() });
         }
         
@@ -117,8 +118,6 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
 
     return (
         <div className="relative min-h-full w-full overflow-hidden text-white font-sans">
-            <SynthwaveBackground />
-
             {/* Visual Effects */}
             <ScreenFlash trigger={showFlash} />
             <SuccessBurst trigger={hitTrigger} />
@@ -147,8 +146,8 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                 )}
             </AnimatePresence>
 
-            {/* Top Bar: Webcam & Stats & Filters */}
-            <div className="relative z-10 flex items-start justify-between p-4">
+            {/* Top Bar: Webcam & Stats */}
+            <div className="absolute top-28 left-8 z-40">
                 <WebcamFeed
                     videoRef={videoRef}
                     canvasRef={canvasRef}
@@ -157,19 +156,17 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                     isConnected={isConnected}
                     handDetected={handDetected}
                 />
+            </div>
 
-                {/* Settings Toggle Removed (Code-only now) */}
-
-                <div className="flex flex-col items-end gap-2 bg-black/40 p-4 rounded-xl border border-white/10 backdrop-blur-md">
-                    <div className="text-xl font-bold text-white">
-                        TRAINING MODE
-                    </div>
-                    <div className="text-fuchsia-400 font-mono text-lg">
-                        {beatmap.title}
-                    </div>
-                    <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                        {currentIndex} / {totalNotes}
-                    </div>
+            <div className="absolute top-28 right-8 z-40 flex flex-col items-end gap-2 bg-black/40 p-4 rounded-2xl border border-fuchsia-500/30 backdrop-blur-md shadow-[0_0_30px_rgba(192,38,211,0.2)] min-w-[200px]">
+                <div className="text-xl font-bold text-white">
+                    TRAINING MODE
+                </div>
+                <div className="text-fuchsia-400 font-mono text-lg">
+                    {beatmap.title}
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                    {currentIndex} / {totalNotes}
                 </div>
             </div>
 
@@ -182,12 +179,12 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 1.5, opacity: 0 }}
-                            className="relative flex flex-col items-center"
+                            className="relative flex flex-col items-center top-24"
                         >
                             <div className="text-2xl text-cyan-400 font-bold mb-4 tracking-widest">SIGN THIS:</div>
 
                             {/* Main Card */}
-                            <div className="relative w-64 h-64 bg-black/50 border-4 border-fuchsia-500 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(192,38,211,0.4)] overflow-hidden">
+                            <div className="relative w-64 h-64 glass-panel border-4 border-fuchsia-500 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(192,38,211,0.4)] overflow-hidden">
 
                                 {/* Green Background Fill (Rising from bottom) */}
                                 {holdProgress > 0 && (
@@ -232,7 +229,7 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
 
                 {/* Start Screen */}
                 {gameState === "idle" && (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center top-24 relative">
                         <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-8">
                             {beatmap.title}
                         </h1>
@@ -245,7 +242,7 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                         </p>
                         <button
                             onClick={startGame}
-                            className="px-12 py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(192,38,211,0.5)]"
+                            className="px-12 py-4 glass-button text-white font-bold text-xl rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(192,38,211,0.5)] cursor-pointer tracking-wider"
                         >
                             START TRAINING
                         </button>
@@ -255,21 +252,21 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
 
             {/* Results Screen */}
             {gameState === "finished" && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto py-20">
-                    <h2 className="text-2xl font-bold text-white mb-2">TRAINING COMPLETE</h2>
-                    <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 mb-8">
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto py-20 animate-fade-in">
+                    <h2 className="text-2xl font-bold text-cyan-400 tracking-widest mb-2">TRAINING COMPLETE</h2>
+                    <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-cyan-400 to-emerald-500 mb-8 drop-shadow-[0_0_30px_rgba(45,226,230,0.4)]">
                         {(metrics.totalTime / 1000).toFixed(1)}s
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full px-8 mb-12">
                         {metrics.noteMetrics.map((m, i) => (
-                            <div key={i} className={`p-4 rounded-lg border ${m.status === 'skipped' ? 'bg-red-900/20 border-red-500/30' : 'bg-green-900/20 border-green-500/30'} flex items-center justify-between`}>
-                                <span className="text-2xl font-bold text-white">{m.letter}</span>
+                            <div key={i} className={`p-4 rounded-2xl backdrop-blur-md border ${m.status === 'skipped' ? 'bg-red-950/40 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-green-950/40 border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.2)]'} flex items-center justify-between transition-all hover:scale-[1.02]`}>
+                                <span className="text-3xl font-bold text-white">{m.letter}</span>
                                 <div className="flex flex-col items-end">
-                                    <span className={`font-mono text-lg ${m.status === 'skipped' ? 'text-red-400' : 'text-green-400'}`}>
+                                    <span className={`font-mono text-xl font-bold ${m.status === 'skipped' ? 'text-red-400' : 'text-green-400'}`}>
                                         {(m.timeSpent / 1000).toFixed(1)}s
                                     </span>
-                                    <span className="text-[10px] uppercase text-white/50">
+                                    <span className="text-[10px] uppercase font-mono tracking-wider text-white/70">
                                         {m.status}
                                     </span>
                                 </div>
@@ -277,37 +274,37 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                         ))}
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-6">
                         <button
                             onClick={restartGame}
-                            className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-lg rounded-full transition-all hover:scale-105"
+                            className="px-10 py-4 glass-button text-white font-bold text-xl rounded-full transition-all hover:scale-105 cursor-pointer tracking-wider"
                         >
                             RETRY
                         </button>
-                        <a
-                            href="/game/songselection"
-                            className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-full transition-all hover:scale-105"
+                        <button
+                            onClick={() => router.push(exitUrl)}
+                            className="px-10 py-4 glass-button text-white font-bold text-xl rounded-full transition-all hover:scale-105 cursor-pointer tracking-wider"
                         >
                             EXIT
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
 
             {/* Debug Info: Detected Sign */}
             {latestPrediction && (
-                <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
-                    <div className="bg-black/80 backdrop-blur text-white px-4 py-3 rounded-xl border border-white/10 shadow-lg flex items-center gap-4">
+                <div className="absolute bottom-8 left-8 z-20 pointer-events-none">
+                    <div className="glass-panel text-white px-5 py-3 rounded-2xl border border-white/20 shadow-lg flex items-center gap-4">
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">Detected</span>
-                            <span className="text-4xl font-bold text-cyan-400">
+                            <span className="text-[10px] text-cyan-400 font-mono uppercase tracking-widest font-bold">Detected</span>
+                            <span className="text-4xl font-bold text-white">
                                 {latestPrediction.letter}
                             </span>
                         </div>
                         <div className="h-10 w-px bg-white/20"></div>
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-gray-500 font-mono">CONF:</span>
+                                <span className="text-[10px] text-gray-400 font-mono">CONF:</span>
                                 <span className={`text-sm font-bold font-mono ${latestPrediction.confidence > 0.8 ? "text-green-400" : latestPrediction.confidence > 0.5 ? "text-yellow-400" : "text-red-400"}`}>
                                     {(latestPrediction.confidence * 100).toFixed(0)}%
                                 </span>
@@ -316,9 +313,14 @@ export function TrainingCanvas({ beatmap }: TrainingCanvasProps) {
                     </div>
                 </div>
             )}
-
-            {/* Transition Overlay */}
-            <SongFinishedOverlay show={gameState === "finished"} />
         </div>
+    );
+}
+
+export function TrainingCanvas(props: TrainingCanvasProps) {
+    return (
+        <Suspense fallback={<div className="text-cyan-400 py-10 animate-pulse text-center">Loading training simulator...</div>}>
+            <TrainingCanvasContent {...props} />
+        </Suspense>
     );
 }
