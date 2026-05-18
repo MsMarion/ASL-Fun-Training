@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * ============================================================================
+ * [ARCHIVED GAMEMODE]: Sign Hero (Testing Canvas)
+ * ============================================================================
+ * Notice: This component is currently archived from public user access to streamline
+ * the arcade experience around ASL Revolution and Training Mode.
+ * 
+ * Purpose: Renders the vertical scrolling highway and active sign tile assessment.
+ * Future Roadmap: See `documentation/RHYTHM_ENGINE_UNIFICATION.md` for plans to
+ * refactor this vertical note highway layout as a selectable UI skin inside the
+ * unified `useGameLoop.ts` engine.
+ * ============================================================================
+ */
+
 import { useTestingGame } from "~/hooks/useTestingGame";
 import { WebcamFeed } from "./WebcamFeed";
 import { type Beatmap } from "~/lib/beatmap";

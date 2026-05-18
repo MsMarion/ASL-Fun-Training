@@ -379,7 +379,9 @@ function SongCarouselContent({ songs = [] }: SongCarouselProps) {
                       </h2>
 
                       <div className="flex-1 flex flex-col gap-4 justify-center">
-                        {/* Guitar Hero Mode */}
+                        {/* [ARCHIVED]: Sign Hero Mode (Testing Mode)
+                         * Archived to streamline gameplay around ASL Revolution.
+                         * Future Roadmap: See documentation/RHYTHM_ENGINE_UNIFICATION.md
                         <motion.button
                           whileHover={{ scale: 1.05, x: 5 }}
                           whileTap={{ scale: 0.95 }}
@@ -397,6 +399,7 @@ function SongCarouselContent({ songs = [] }: SongCarouselProps) {
                             <span className="text-white text-xl font-bold">SIGN HERO</span>
                           </div>
                         </motion.button>
+                        */}
 
                         {/* Just Dance Mode */}
                         <motion.button

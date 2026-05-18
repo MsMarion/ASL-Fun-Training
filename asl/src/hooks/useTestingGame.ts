@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * ============================================================================
+ * [ARCHIVED GAMEMODE]: Sign Hero (useTestingGame Hook)
+ * ============================================================================
+ * Notice: This hook is currently archived from public user access to streamline
+ * the arcade experience around ASL Revolution and Training Mode.
+ * 
+ * Purpose: Manages the vertical scrolling reaction assessment game loop.
+ * Future Roadmap: See `documentation/RHYTHM_ENGINE_UNIFICATION.md` for plans to
+ * refactor this vertical note highway layout as a selectable UI skin inside the
+ * unified `useGameLoop.ts` engine.
+ * ============================================================================
+ */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type Beatmap, type BeatmapNote } from "~/lib/beatmap";
 import { useWebcam } from "./useWebcam";

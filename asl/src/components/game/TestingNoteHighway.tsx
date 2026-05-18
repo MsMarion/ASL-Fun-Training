@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * ============================================================================
+ * [ARCHIVED GAMEMODE]: Sign Hero (Testing Note Highway)
+ * ============================================================================
+ * Notice: This component is currently archived from public user access to streamline
+ * the arcade experience around ASL Revolution and Training Mode.
+ * 
+ * Purpose: Renders the vertical scrolling note highway track.
+ * Future Roadmap: See `documentation/RHYTHM_ENGINE_UNIFICATION.md` for plans to
+ * refactor this vertical note highway layout as a selectable UI skin inside the
+ * unified `useGameLoop.ts` engine.
+ * ============================================================================
+ */
+
 import { type BeatmapNote } from "~/lib/beatmap";
 import { SignSymbolHighway } from "~/components/SignSymbolHighway";
 import { useMemo } from "react";

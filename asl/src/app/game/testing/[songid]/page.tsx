@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * ============================================================================
+ * [ARCHIVED GAMEMODE]: Sign Hero (Testing Mode • /game/testing/[id])
+ * ============================================================================
+ * Notice: This gamemode is currently archived from public user access to streamline
+ * the arcade experience around ASL Revolution and Training Mode.
+ * 
+ * Purpose: This route was designed as a vertical scrolling reaction assessment mode.
+ * Future Roadmap: See `documentation/RHYTHM_ENGINE_UNIFICATION.md` for plans to
+ * refactor this vertical note highway layout as a selectable UI skin inside the
+ * unified `useGameLoop.ts` engine.
+ * ============================================================================
+ */
+
 import { useParams } from "next/navigation";
 import { TestingCanvas } from "~/components/game/TestingCanvas";
 import { api } from "~/trpc/react";
