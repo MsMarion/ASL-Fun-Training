@@ -124,95 +124,13 @@ const LeaderboardPage = () => {
     : 0;
 
   return (
-    <div ref={containerRef} className="h-full w-full relative overflow-hidden bg-[#0d0221]">
-      {/* Stars Background */}
-      <div className="absolute inset-0 z-0" style={{ transform: `translate(${smoothPos.x * -0.5}px, ${smoothPos.y * -0.5}px)` }}>
-        {stars.map((star) => (
-          <div
-            key={star.id}
-            className="absolute rounded-full bg-white animate-twinkle"
-            style={{
-              width: star.width + 'px',
-              height: star.width + 'px',
-              left: star.left + '%',
-              top: star.top + '%',
-              animationDelay: star.delay + 's',
-              opacity: star.opacity,
-            }}
-          />
-        ))}
-        <div className="absolute top-[15%] left-[10%] text-2xl text-fuchsia-400 animate-pulse">✦</div>
-        <div className="absolute top-[25%] right-[15%] text-xl text-fuchsia-500 animate-pulse" style={{ animationDelay: '0.5s' }}>✦</div>
-        <div className="absolute bottom-[30%] right-[10%] text-3xl text-cyan-400 animate-pulse" style={{ animationDelay: '1s' }}>✦</div>
-        <div className="absolute top-[60%] left-[5%] text-xl text-pink-400 animate-pulse" style={{ animationDelay: '1.5s' }}>✦</div>
-      </div>
-
-      {/* Sun */}
-      <div
-        className="absolute left-1/2 z-10"
-        style={{
-          top: '45%',
-          transform: `translate(calc(-50% + ${smoothPos.x * -40}px), calc(-50% + ${smoothPos.y * -40}px))`,
-        }}
-      >
-        <div className="relative">
-          <div className="absolute inset-0 w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-b from-yellow-400 via-orange-500 to-fuchsia-600 blur-3xl opacity-60" />
-          <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-b from-yellow-300 via-orange-400 to-fuchsia-500 overflow-hidden">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="absolute w-full bg-[#0d0221]" style={{ height: '4px', bottom: `${(i + 1) * 6}%`, opacity: 0.8 - i * 0.05 }} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Wireframe Mountains */}
-      <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: '40%', transform: `translate(${smoothPos.x * -60}px, ${smoothPos.y * -30}px)` }}>
-        <svg viewBox="0 0 1200 300" className="w-full h-auto" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#2de2e6" stopOpacity="1" />
-              <stop offset="100%" stopColor="#2de2e6" stopOpacity="0.3" />
-            </linearGradient>
-          </defs>
-          <g stroke="url(#mountainGradient)" strokeWidth="1.5" fill="none" opacity="0.8">
-            <polyline points="0,300 150,180 250,220 400,120 500,200 600,100 700,180 850,140 950,200 1100,160 1200,300" />
-            <polyline points="0,300 100,200 200,240 350,160 450,220 550,140 650,200 750,160 900,180 1000,140 1150,200 1200,300" opacity="0.5" />
-            {[...Array(8)].map((_, i) => (
-              <line key={i} x1="0" y1={180 + i * 15} x2="1200" y2={180 + i * 15} opacity={0.3 - i * 0.03} />
-            ))}
-          </g>
-        </svg>
-      </div>
-
-      {/* Grid Floor */}
-      <div
-        className="absolute bottom-0 z-15 h-[60vh] overflow-hidden"
-        style={{
-          left: '-50%',
-          right: '-50%',
-          width: '200%',
-          transform: `translate(${smoothPos.x * -80}px, ${smoothPos.y * -40}px)`,
-          perspective: '500px',
-        }}
-      >
-        <div
-          className="absolute inset-0 origin-bottom"
-          style={{
-            transform: 'rotateX(60deg)',
-            background: `repeating-linear-gradient(to right, transparent, transparent 49px, #2de2e6 49px, #2de2e6 51px, transparent 51px), repeating-linear-gradient(to bottom, transparent, transparent 49px, #2de2e6 49px, #2de2e6 51px, transparent 51px)`,
-            backgroundSize: '100px 100px',
-            animation: 'gridMove 2s linear infinite',
-          }}
-        />
-      </div>
-
-
+    <div ref={containerRef} className="h-full w-full relative overflow-hidden bg-transparent pointer-events-auto">
       {/* Main Content Container */}
       <div className="absolute inset-0 z-30 flex justify-center items-center p-4" style={{ transform: `translate(${smoothPos.x * -25}px, ${smoothPos.y * -25}px)` }}>
         <div className="relative max-w-4xl w-full">
           <div className="relative rounded-3xl p-2 bg-gradient-to-b from-purple-900 via-fuchsia-900 to-purple-950 shadow-2xl shadow-fuchsia-500/30">
             <div className="rounded-2xl p-1 bg-gradient-to-b from-cyan-500/30 via-fuchsia-500/20 to-purple-500/30">
-              <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-[#1a0a2e] to-[#0d0221]">
+              <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-[#1a0a2e] to-[#0d0221] glass-panel">
                 
                 {/* Scanlines */}
                 <div className="absolute inset-0 z-50 pointer-events-none opacity-30" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)' }} />
@@ -224,9 +142,9 @@ const LeaderboardPage = () => {
                 <div className="relative p-6 md:p-8 max-h-[80vh] overflow-y-auto">
                   {/* Home Button */}
                   <Link 
-                    href="/songselection" 
+                    href={playerId ? "/whack" : "/"} 
                     className="absolute top-6 right-6 z-50 text-fuchsia-300 hover:text-cyan-400 transition-colors p-2 rounded-full hover:bg-white/5 border border-transparent hover:border-cyan-400/30 font-bold"
-                    aria-label="Back to Song Selection"
+                    aria-label={playerId ? "Back to Whack-a-Sign" : "Back to Home"}
                   >
                     <span className="text-xl">🏠</span>
                   </Link>
