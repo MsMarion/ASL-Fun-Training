@@ -119,9 +119,8 @@ const LeaderboardPage = () => {
     };
   }, [animate]);
 
-  const accuracy = playerData 
-    ? ((playerData.correctHits / (playerData.correctHits + playerData.mistakesMade)) * 100).toFixed(1)
-    : 0;
+  const totalAttempts = playerData ? (playerData.correctHits + playerData.mistakesMade) : 0;
+  const accuracy = totalAttempts > 0 ? ((playerData.correctHits / totalAttempts) * 100).toFixed(1) : "0.0";
 
   return (
     <div ref={containerRef} className="h-full w-full relative overflow-hidden bg-transparent pointer-events-auto">
@@ -212,7 +211,7 @@ const LeaderboardPage = () => {
                       <div className="mb-6">
                         <h2 className="text-xl font-bold text-fuchsia-400 mb-4 text-center font-mono" style={{ textShadow: '0 0 10px #d946ef' }}>COMMON MISTAKES</h2>
                         <div className="space-y-3">
-                          {playerData.commonMistakes.map((mistake, index) => (
+                          {(playerData.commonMistakes || []).map((mistake, index) => (
                             <div key={index} className="bg-black/40 border border-fuchsia-500/20 rounded-lg p-4 hover:bg-fuchsia-500/10 transition-colors" style={{ animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both` }}>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-6">
@@ -240,8 +239,14 @@ const LeaderboardPage = () => {
                             </div>
                           ))}
                         </div>
-                        {playerData.commonMistakes.length === 0 && (
-                          <div className="text-center text-green-400 font-mono py-8">NO MISTAKES - PERFECT GAME! 🎉</div>
+                        {(playerData.commonMistakes || []).length === 0 && (
+                          <div className="text-center font-mono py-8">
+                            {totalAttempts === 0 ? (
+                              <span className="text-yellow-400 tracking-wider font-bold">NO ATTEMPTS RECORDED - TRY SIGNING NEXT TIME! 🖐️</span>
+                            ) : (
+                              <span className="text-green-400 tracking-wider font-bold">NO MISTAKES - FLAWLESS GAME! 🏆🎉</span>
+                            )}
+                          </div>
                         )}
                       </div>
 
@@ -276,7 +281,21 @@ const LeaderboardPage = () => {
                       </div>
                     </>
                   ) : (
-                    <div className="text-center text-fuchsia-300 font-mono py-20">LOADING...</div>
+                    <div className="text-center py-20 font-mono">
+                      {playerLoading ? (
+                        <div className="text-cyan-400 animate-pulse tracking-widest font-bold">ANALYZING REPORT DATA...</div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="text-red-400 font-bold tracking-widest">REPORT DATA NOT FOUND</div>
+                          <button
+                            onClick={() => setView('leaderboard')}
+                            className="glass-button px-6 py-2 rounded-xl text-cyan-300 text-xs font-bold tracking-widest uppercase hover:text-white"
+                          >
+                            VIEW GLOBAL LEADERBOARD
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -287,14 +306,6 @@ const LeaderboardPage = () => {
       </div>
 
       <style jsx>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 1; }
-        }
-        @keyframes gridMove {
-          0% { background-position: 0 0; }
-          100% { background-position: 0 100px; }
-        }
         @keyframes fadeSlideIn {
           from {
             opacity: 0;
@@ -304,9 +315,6 @@ const LeaderboardPage = () => {
             opacity: 1;
             transform: translateX(0);
           }
-        }
-        .animate-twinkle {
-          animation: twinkle 3s ease-in-out infinite;
         }
         .overflow-y-auto::-webkit-scrollbar {
           width: 8px;
@@ -329,7 +337,7 @@ const LeaderboardPage = () => {
 
 export default function LeaderboardPageWrapper() {
   return (
-    <Suspense fallback={<div className="h-full w-full relative overflow-hidden bg-[#0d0221]"></div>}>
+    <Suspense fallback={<div className="h-full w-full relative overflow-hidden bg-transparent"></div>}>
       <LeaderboardPage />
     </Suspense>
   );
