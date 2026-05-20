@@ -363,7 +363,7 @@ export function useGameLoop(beatmap: Beatmap): {
         const newStreak = stateRef.current.streak + 1;
         const newScore = stateRef.current.score + judgement.points;
         const newMultiplier = Math.min(Math.floor(newStreak / 3) + 1, 4);
-        const feedbackText = "HIT!" + ` (${judgement.sawLetter})`;
+        const feedbackText = `${judgement.quality}! (${judgement.sawLetter})`;
 
         let streakMilestone: number | null = null;
         if (newStreak === 5 || newStreak === 10 || newStreak === 25) {
@@ -386,7 +386,7 @@ export function useGameLoop(beatmap: Beatmap): {
           type: "HIT",
           letter: activeNote.letter,
           delta: activeNote.time - elapsed,
-          quality: "HIT",
+          quality: judgement.quality,
           confidence: latestUnconsumed?.confidence,
         };
 
@@ -405,7 +405,7 @@ export function useGameLoop(beatmap: Beatmap): {
           score: newScore,
           streak: newStreak,
           activeNoteIndex: nextIndex,
-          lastHitQuality: "HIT",
+          lastHitQuality: judgement.quality,
           streakMilestone,
           comboMultiplier: newMultiplier,
           latestPrediction: latestPred,

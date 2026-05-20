@@ -16,9 +16,13 @@ export function HitFeedback({
   const color =
     text?.includes("MISS")
       ? "#f87171" // Red
-      : text?.includes("HIT")
-        ? "#4ade80" // Green
-        : "#fbbf24"; // Default Yellow
+      : text?.includes("PERFECT")
+        ? "#22d3ee" // Cyan
+        : text?.includes("GREAT")
+          ? "#4ade80" // Green
+          : text?.includes("GOOD")
+            ? "#a3e635" // Lime
+            : "#fbbf24"; // Default Yellow/OK
 
   const showCombo = text && text !== "MISS!" && comboMultiplier > 1;
 

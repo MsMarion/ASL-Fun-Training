@@ -5,11 +5,11 @@ export interface DebugLogEntry {
   type: "TRACKING" | "AI" | "HIT" | "MISS";
   letter: string;
   delta: number;
-  quality?: "PERFECT" | "GREAT" | "OK" | "HIT";
+  quality?: "PERFECT" | "GREAT" | "GOOD" | "OK";
   confidence?: number;
 }
 
-export type HitQuality = "PERFECT" | "GREAT" | "OK" | "HIT";
+export type HitQuality = "PERFECT" | "GREAT" | "GOOD" | "OK";
 
 export interface GameState {
   currentTime: number;

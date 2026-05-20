@@ -19,7 +19,7 @@ export const HIT_POINTS = 100;
 export const STREAK_DIVISOR = 3; // Multiplier increases every 3 hits
 export const MAX_MULTIPLIER = 4;
 
-export type HitQuality = "HIT";
+export type HitQuality = "PERFECT" | "GREAT" | "GOOD" | "OK";
 
 export interface SignPrediction {
   letter: string;
@@ -77,13 +77,33 @@ export function evaluateNote(
       prediction.confidence >= CONFIDENCE_THRESHOLD &&
       prediction.handDetected) {
     
-    // Valid HIT - simple binary state
+    // Calculate dynamic timing accuracy
+    const timeDiff = Math.abs(timeUntilTarget);
+    
+    // Continuous linear accuracy fraction from 0.0 (edge of window) to 1.0 (dead center)
+    const maxDiff = TRACKING_WINDOW; // 0.8s
+    const accuracyFraction = Math.max(0, 1 - (timeDiff / maxDiff));
+    
+    // Linearize base points smoothly from 100 up to 1,000
+    const minBasePoints = 100;
+    const maxBasePoints = 1000;
+    const basePoints = Math.round(minBasePoints + accuracyFraction * (maxBasePoints - minBasePoints));
+
+    let quality: HitQuality = "OK";
+    if (timeDiff <= 0.15) {
+      quality = "PERFECT";
+    } else if (timeDiff <= 0.35) {
+      quality = "GREAT";
+    } else if (timeDiff <= 0.55) {
+      quality = "GOOD";
+    }
+    
     const multiplier = calculateMultiplier(streak);
     
     return {
       type: "hit",
-      quality: "HIT",
-      points: HIT_POINTS * multiplier,
+      quality,
+      points: basePoints * multiplier,
       sawLetter: prediction.letter,
     };
   }
