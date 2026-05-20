@@ -142,6 +142,7 @@ export function useGameLoop(beatmap: Beatmap): {
   }, [beatmap.audioUrl]);
 
   const startGame = useCallback(() => {
+    predictionsSyncRef.current = [];
     if (audioRef.current) {
       // Force immediate unlock and buffer inside click event handler!
       audioRef.current.play().then(() => {
@@ -173,6 +174,7 @@ export function useGameLoop(beatmap: Beatmap): {
   }, []);
 
   const resetLoop = useCallback(() => {
+    predictionsSyncRef.current = [];
     startTimeRef.current = performance.now();
     pausedTimeRef.current = 0;
     wasPausedRef.current = false;
@@ -287,6 +289,17 @@ export function useGameLoop(beatmap: Beatmap): {
         elapsed = Math.max((now - startTimeRef.current) / 1000, 0);
         effectiveStartTimeSec = startTimeRef.current / 1000;
       }
+
+      // Clear out old keyboard predictions so they don't linger
+      predictionsSyncRef.current.forEach(p => {
+        if (p.isKeyboard) {
+          const INPUT_OFFSET = 0.05; // Matches gameScoring.ts
+          const relativeTime = (p.clientTimestamp - effectiveStartTimeSec) - INPUT_OFFSET;
+          if (relativeTime < elapsed - 0.15) { // 150ms grace period
+            processedPredictionsRef.current.add(p.clientTimestamp);
+          }
+        }
+      });
 
       // AUTOPLAY BOT LOGIC
       if (stateRef.current.autoplayEnabled && stateRef.current.gameStatus === "playing") {

@@ -14,6 +14,10 @@ export interface UseSignDetectionReturn {
 
 const MAX_PREDICTIONS = 30; // Ring buffer size
 
+/**
+ * Hook for WebSocket-based sign detection with Client-Side MediaPipe.
+ * Manages local landmark extraction and streaming to Python micro-batcher.
+ */
 export function useSignDetection(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   isWebcamReady: boolean,
@@ -180,6 +184,7 @@ export function useSignDetection(
     if (!enabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return; // Ignore keyboard auto-repeat!
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
